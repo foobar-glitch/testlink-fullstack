@@ -1,0 +1,49 @@
+<div class="project-list-container">
+  <header class="header">
+    <h2>Projects</h2>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </header>
+
+  <div *ngIf="loading" class="loading-state">
+    <app-spinner label="Loading projects..."></app-spinner>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-state">
+    <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
+  </div>
+
+  <div *ngIf="!loading && !errorMessage" class="projects-grid">
+    <div
+      *ngFor="let project of projects"
+      class="project-card"
+      (click)="selectProject(project)"
+    >
+      <div class="project-header">
+        <span class="prefix">{{ project.prefix }}</span>
+        <h3>{{ project.name }}</h3>
+      </div>
+      <p class="description">{{ project.description }}</p>
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">Suites</span>
+          <span class="stat-value">{{ project.stats.suiteCount }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Test Cases</span>
+          <span class="stat-value">{{ project.stats.testCaseCount }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Runs</span>
+          <span class="stat-value">{{ project.stats.testRunCount }}</span>
+        </div>
+      </div>
+      <div class="created">
+        Created {{ project.createdAt | date:'mediumDate' }}
+      </div>
+    </div>
+
+    <div *ngIf="projects.length === 0" class="empty-state">
+      <p>No projects available.</p>
+    </div>
+  </div>
+</div>

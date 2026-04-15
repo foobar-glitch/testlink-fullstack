@@ -1,0 +1,137 @@
+// Import shared variables if available (adjust path as needed)
+@use '../../../shared/styles/variables' as vars;
+
+.login-container {
+  max-width: 420px;
+  width: 90%;          // Add responsiveness
+  padding: 40px 32px;
+  background: rgba(20, 25, 36, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(79, 142, 247, 0.1) inset;
+  // Remove margin-top and margin-bottom
+  margin: 0;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(79, 142, 247, 0.2) inset;
+  }
+
+  h2 {
+    margin: 0 0 28px;
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    color: #e2e8f0;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #e2e8f0 0%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.input-group {
+  margin-bottom: 20px;
+  position: relative;
+
+  input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(10, 15, 25, 0.6);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    font-size: 15px;
+    color: #e2e8f0;
+    transition: all 0.2s ease;
+    outline: none;
+    box-sizing: border-box;
+
+    &::placeholder {
+      color: rgba(136, 146, 176, 0.6);
+      font-weight: 400;
+      transition: opacity 0.2s;
+    }
+
+    &:hover {
+      border-color: rgba(79, 142, 247, 0.3);
+      background: rgba(15, 20, 30, 0.8);
+    }
+
+    &:focus {
+      border-color: #4f8ef7;
+      background: rgba(20, 30, 45, 0.9);
+      box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.15);
+
+      &::placeholder {
+        opacity: 0.5;
+      }
+    }
+
+    // Remove browser autofill background color
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+      -webkit-text-fill-color: #e2e8f0;
+      -webkit-box-shadow: 0 0 0px 1000px #1a2332 inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+  }
+}
+
+button {
+  width: 100%;
+  padding: 14px 20px;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #4f8ef7 0%, #3a6fd1 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(79, 142, 247, 0.25);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5f9cff 0%, #4a7fe0 100%);
+    box-shadow: 0 6px 16px rgba(79, 142, 247, 0.4);
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 2px 8px rgba(79, 142, 247, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    background: #2d3a5e;
+    box-shadow: none;
+  }
+
+  app-spinner {
+    display: inline-flex;
+  }
+}
+
+// Error banner custom styling (optional, if you want to override)
+::ng-deep app-error-banner .banner {
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+// Responsive adjustments
+@media (max-width: 480px) {
+  .login-container {
+    margin: 80px 20px 0;
+    padding: 32px 24px;
+  }
+}
