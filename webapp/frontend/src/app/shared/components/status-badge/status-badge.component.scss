@@ -1,0 +1,55 @@
+@use '../../styles/variables' as vars;
+@use '../../styles/mixins' as mix;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: vars.$radius-pill;
+  font-size: 11px;
+  font-weight: 500;
+
+  .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  // Execution status variants
+  &.pass {
+    @include mix.status-badge(0.15, #2dd4a0);
+  }
+  &.fail {
+    @include mix.status-badge(0.15, #f76f6f);
+  }
+  &.blocked {
+    @include mix.status-badge(0.15, #f5c542);
+  }
+  &.not_run {
+    @include mix.status-badge(0.06, #4a5270);
+  }
+
+  // Test case status variants
+  &.active {
+    @include mix.status-badge(0.15, #4f8ef7);
+  }
+  &.draft {
+    @include mix.status-badge(0.15, #a78bfa);
+  }
+  &.deprecated {
+    @include mix.status-badge(0.06, #4a5270);
+  }
+
+  // Priority variants
+  &.high {
+    @include mix.status-badge(0.15, #f76f6f);
+  }
+  &.medium {
+    @include mix.status-badge(0.15, #f5c542);
+  }
+  &.low {
+    @include mix.status-badge(0.15, #4f8ef7);
+  }
+}

@@ -1,0 +1,12 @@
+// _mixins.scss
+@mixin flex-center($gap: 10px) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $gap;
+}
+
+@mixin status-badge($bg-opacity, $color) {
+  background: rgba($color, $bg-opacity);
+  color: $color;
+}

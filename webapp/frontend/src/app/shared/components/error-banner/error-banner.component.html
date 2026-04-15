@@ -1,0 +1,5 @@
+<div class="banner" *ngIf="message">
+  <span class="icon">⚠</span>
+  <span class="msg">{{ message }}</span>
+  <button class="close" (click)="dismissed.emit()">✕</button>
+</div>

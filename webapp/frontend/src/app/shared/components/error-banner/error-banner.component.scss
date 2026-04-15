@@ -1,0 +1,36 @@
+@use '../../styles/variables' as vars;
+@use '../../styles/mixins' as mix;
+
+.banner {
+  @include mix.flex-center(10px);
+  background: rgba(247, 111, 111, 0.12);
+  border: 1px solid #f76f6f;
+  border-radius: vars.$radius-sm;
+  padding: 10px vars.$spacing-md;
+  margin-bottom: vars.$spacing-md;
+
+  .icon {
+    color: #f76f6f;
+    font-size: 14px;
+  }
+
+  .msg {
+    flex: 1;
+    font-size: 13px;
+    color: #f76f6f;
+  }
+
+  .close {
+    background: none;
+    border: none;
+    color: #f76f6f;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 4px;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
