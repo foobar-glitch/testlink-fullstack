@@ -24,3 +24,6 @@ CREATE INDEX idx_reset_user
 
 CREATE INDEX idx_authorities_user
     ON authorities(user_id);
+
+
+CREATE INDEX idx_users_email ON users(email);

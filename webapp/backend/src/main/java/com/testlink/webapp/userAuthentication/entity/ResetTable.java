@@ -1,5 +1,6 @@
 package com.testlink.webapp.userAuthentication.entity;
 
+import com.testlink.webapp.config.entitiy.TimeStampedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

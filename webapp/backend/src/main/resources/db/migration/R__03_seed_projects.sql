@@ -4,7 +4,7 @@
 -- Assumes the projects table already exists (from V5 migration).
 -- ======================================================================
 
-INSERT INTO projects (project_id, key, display_name, description, status, created_by)
+INSERT INTO projects (project_id, project_key, display_name, description, status, created_by)
 VALUES
     (1, 'ECP', 'E-Commerce Platform', 'Frontend & backend testing for the main shopping platform.', 'ACTIVE', 1),
     (2, 'IOS', 'Mobile App iOS', 'iOS native app test suite covering all user journeys.', 'ACTIVE', 1),

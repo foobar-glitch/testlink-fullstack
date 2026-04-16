@@ -1,4 +1,4 @@
-package com.testlink.webapp.userAuthentication.entity;
+package com.testlink.webapp.config.entitiy;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;

@@ -9,7 +9,7 @@
 -- =========================
 CREATE TABLE projects (
                           project_id BIGSERIAL PRIMARY KEY,
-                          key VARCHAR(20) NOT NULL UNIQUE,
+                          project_key VARCHAR(20) NOT NULL UNIQUE,
                           display_name VARCHAR(255) NOT NULL,
                           description TEXT,
                           status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
@@ -24,7 +24,7 @@ CREATE TABLE projects (
 );
 
 COMMENT ON TABLE projects IS 'Top-level projects (e.g., "ECU", "AUTH")';
-COMMENT ON COLUMN projects.key IS 'Short unique project code (e.g., "ECU")';
+COMMENT ON COLUMN projects.project_key IS 'Short unique project code (e.g., "ECU")';
 COMMENT ON COLUMN projects.status IS 'ACTIVE, ARCHIVED, DELETED';
 
 
