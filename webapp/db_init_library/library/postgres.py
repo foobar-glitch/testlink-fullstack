@@ -1,201 +1,220 @@
 import psycopg2
-from psycopg2 import pool
-from typing import Any
+from psycopg2 import pool, sql
 from dataclasses import dataclass
-from psycopg2 import sql
 
 
+# -------------------------
+# CONFIG
+# -------------------------
 @dataclass
 class PostgresConfig:
     host: str
     port: int
-    rootPassword: str
-    userName: str
-    userPassword: str
-    dbName: str
-    usersTable: str
-    authorityTable: str
-    resetTable: str
-    registerTable: str
+    root_password: str
+    user_name: str
+    user_password: str
+    db_name: str
+    users_table: str
+    authority_table: str
+    reset_table: str
+    register_table: str
 
+
+# -------------------------
+# CONNECTION POOL
+# -------------------------
 class PostgresConnection:
     def __init__(self, host: str, port: int, user: str, password: str, database: str):
-        self.dbPool: pool.SimpleConnectionPool = pool.SimpleConnectionPool(
-        1, 20,
-        host=host,
-        port=port,
-        user=user,
-        password=password,
-        database=database
+        self.pool = pool.SimpleConnectionPool(
+            1, 20,
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            database=database
         )
-    
-    def getConn(self):
-        return self.dbPool.getconn()
-    
-    def releaseConn(self, conn) -> None:
-        self.dbPool.putconn(conn)
-        
-def init_db(config: PostgresConfig) -> PostgresConnection:
-    USERS_TABLE = config.usersTable
-    AUTHORITY_TABLE = config.authorityTable
-    RESET_TABLE = config.resetTable
-    REGISTER_TABLE = config.registerTable
 
-    # -------------------------
-    # Connect as admin (postgres)
-    # -------------------------
-    root_connection = psycopg2.connect(
+    def get_conn(self):
+        return self.pool.getconn()
+
+    def release_conn(self, conn):
+        self.pool.putconn(conn)
+    
+    def close(self):
+        """
+        Closes all connections in the pool.
+        This is the REAL 'shutdown' of the DB layer.
+        """
+        if self.pool:
+            self.pool.closeall()
+
+
+# -------------------------
+# ADMIN: CREATE DB + USER
+# -------------------------
+def init_admin_db(config: PostgresConfig):
+    conn = psycopg2.connect(
         host=config.host,
         port=config.port,
         user="postgres",
-        password=config.rootPassword,
+        password=config.root_password,
         database="postgres"
     )
-    root_connection.autocommit = True
-    cursor = root_connection.cursor()
+    conn.autocommit = True
 
-    # -------------------------
-    # Create DB + user
-    # -------------------------
-    cursor.execute(f"CREATE DATABASE {config.dbName};")
-    cursor.execute(f"CREATE USER {config.userName} WITH PASSWORD %s;", (config.userPassword,))
-    cursor.execute(f"GRANT ALL PRIVILEGES ON DATABASE {config.dbName} TO {config.userName};")
+    try:
+        cur = conn.cursor()
 
-    cursor.close()
-    root_connection.close()
+        cur.execute(
+            "CREATE DATABASE {};".format(config.db_name)
+        )
 
-    postgresConnection = PostgresConnection(config.host, config.port, config.userName, config.userPassword, config.dbName)
+        cur.execute(
+            "CREATE USER {} WITH PASSWORD %s;".format(config.user_name),
+            (config.user_password,)
+        )
 
-    # -------------------------
-    # Connect as app user
-    # -------------------------
+        cur.execute(
+            "GRANT ALL PRIVILEGES ON DATABASE {} TO {};".format(
+                config.db_name, config.user_name
+            )
+        )
 
-    userConnection = postgresConnection.getConn()
+        cur.close()
+    finally:
+        conn.close()
 
 
-    cursor = userConnection.cursor()
+# -------------------------
+# CREATE TABLES (SAFE SQL)
+# -------------------------
+def create_tables(conn, config: PostgresConfig):
+    cur = conn.cursor()
 
-    # -------------------------
-    # TABLES
-    # -------------------------
+    users_table = sql.Identifier(config.users_table)
+    authority_table = sql.Identifier(config.authority_table)
+    reset_table = sql.Identifier(config.reset_table)
+    register_table = sql.Identifier(config.register_table)
 
-    create_user_table = f"""
-    CREATE TABLE IF NOT EXISTS {USERS_TABLE} (
-        user_id BIGSERIAL PRIMARY KEY,
-        username VARCHAR(50) NOT NULL UNIQUE,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        password_hash VARCHAR(255) NOT NULL,
-        enabled BOOLEAN NOT NULL DEFAULT TRUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """
+    cur.execute(
+        sql.SQL("""
+        CREATE TABLE IF NOT EXISTS {} (
+            user_id BIGSERIAL PRIMARY KEY,
+            username VARCHAR(50) NOT NULL UNIQUE,
+            email VARCHAR(255) NOT NULL UNIQUE,
+            password_hash VARCHAR(255) NOT NULL,
+            enabled BOOLEAN NOT NULL DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """).format(users_table)
+    )
 
-    create_table_authorities = f"""
-    CREATE TABLE IF NOT EXISTS {AUTHORITY_TABLE} (
-        authority_id BIGSERIAL PRIMARY KEY,
-        user_id BIGINT NOT NULL,
-        authority VARCHAR(50) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT fk_authorities_user
-            FOREIGN KEY (user_id)
-            REFERENCES {USERS_TABLE}(user_id)
-            ON DELETE CASCADE
-    );
-    """
+    cur.execute(
+        sql.SQL("""
+        CREATE TABLE IF NOT EXISTS {} (
+            authority_id BIGSERIAL PRIMARY KEY,
+            user_id BIGINT NOT NULL,
+            authority VARCHAR(50) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES {}(user_id) ON DELETE CASCADE
+        );
+        """).format(authority_table, users_table)
+    )
 
-    create_reset_table = f"""
-    CREATE TABLE IF NOT EXISTS {RESET_TABLE} (
-        reset_id BIGSERIAL PRIMARY KEY,
-        user_id BIGINT NOT NULL,
-        reset_token VARCHAR(255) NOT NULL UNIQUE,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        expired_at TIMESTAMP NOT NULL,
-        CONSTRAINT fk_reset_user
-            FOREIGN KEY (user_id)
-            REFERENCES {USERS_TABLE}(user_id)
-            ON DELETE CASCADE
-    );
-    """
+    cur.execute(
+        sql.SQL("""
+        CREATE TABLE IF NOT EXISTS {} (
+            reset_id BIGSERIAL PRIMARY KEY,
+            user_id BIGINT NOT NULL,
+            reset_token VARCHAR(255) NOT NULL UNIQUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expired_at TIMESTAMP NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES {}(user_id) ON DELETE CASCADE
+        );
+        """).format(reset_table, users_table)
+    )
 
-    create_session_table = """
-    CREATE TABLE IF NOT EXISTS SPRING_SESSION (
-        primary_id UUID PRIMARY KEY,
-        session_id UUID NOT NULL,
-        creation_time BIGINT NOT NULL,
-        last_access_time BIGINT NOT NULL,
-        max_inactive_interval BIGINT NOT NULL,
-        expiry_time BIGINT NOT NULL,
-        principal_name VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS SPRING_SESSION (
+            primary_id UUID PRIMARY KEY,
+            session_id UUID NOT NULL,
+            creation_time BIGINT NOT NULL,
+            last_access_time BIGINT NOT NULL,
+            max_inactive_interval BIGINT NOT NULL,
+            expiry_time BIGINT NOT NULL,
+            principal_name VARCHAR(100),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    """)
 
-    create_session_attributes = """
-    CREATE TABLE IF NOT EXISTS SPRING_SESSION_ATTRIBUTES (
-        session_primary_id UUID NOT NULL,
-        attribute_name VARCHAR(200) NOT NULL,
-        attribute_bytes BYTEA NOT NULL,
-        PRIMARY KEY (session_primary_id, attribute_name),
-        CONSTRAINT fk_session
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS SPRING_SESSION_ATTRIBUTES (
+            session_primary_id UUID NOT NULL,
+            attribute_name VARCHAR(200) NOT NULL,
+            attribute_bytes BYTEA NOT NULL,
+            PRIMARY KEY (session_primary_id, attribute_name),
             FOREIGN KEY (session_primary_id)
-            REFERENCES SPRING_SESSION(primary_id)
-            ON DELETE CASCADE
-    );
-    """
+                REFERENCES SPRING_SESSION(primary_id)
+                ON DELETE CASCADE
+        );
+    """)
 
-    idx1 = """
-    CREATE INDEX IF NOT EXISTS idx_spring_session_expiry
-    ON SPRING_SESSION (expiry_time);
-    """
+    cur.execute(
+        sql.SQL("""
+        CREATE TABLE IF NOT EXISTS {} (
+            temp_user_id BIGSERIAL PRIMARY KEY,
+            username VARCHAR(255) NOT NULL UNIQUE,
+            email VARCHAR(255) NOT NULL UNIQUE,
+            password VARCHAR(255) NOT NULL,
+            role VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """).format(sql.Identifier("temp_users"))
+    )
 
-    idx2 = """
-    CREATE INDEX IF NOT EXISTS idx_spring_session_principal
-    ON SPRING_SESSION (principal_name);
-    """
-
-    create_temp_user_table = """
-    CREATE TABLE IF NOT EXISTS temp_users (
-        temp_user_id BIGSERIAL PRIMARY KEY,
-        username VARCHAR(255) NOT NULL UNIQUE,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        password VARCHAR(255) NOT NULL,
-        role VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """
-
-    create_register_table = f"""
-    CREATE TABLE IF NOT EXISTS {REGISTER_TABLE} (
-        register_id BIGSERIAL PRIMARY KEY,
-        temp_user_id BIGINT NOT NULL,
-        register_token VARCHAR(255) NOT NULL UNIQUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        expired_at TIMESTAMP NOT NULL,
-        CONSTRAINT fk_register_temp_user
+    cur.execute(
+        sql.SQL("""
+        CREATE TABLE IF NOT EXISTS {} (
+            register_id BIGSERIAL PRIMARY KEY,
+            temp_user_id BIGINT NOT NULL,
+            register_token VARCHAR(255) NOT NULL UNIQUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expired_at TIMESTAMP NOT NULL,
             FOREIGN KEY (temp_user_id)
-            REFERENCES temp_users(temp_user_id)
-            ON DELETE CASCADE
-    );
-    """
+                REFERENCES temp_users(temp_user_id)
+                ON DELETE CASCADE
+        );
+        """).format(register_table)
+    )
 
-    # -------------------------
-    # EXECUTE
-    # -------------------------
-    cursor.execute(create_user_table)
-    cursor.execute(create_table_authorities)
-    cursor.execute(create_session_table)
-    cursor.execute(create_session_attributes)
-    cursor.execute(idx1)
-    cursor.execute(idx2)
-    cursor.execute(create_reset_table)
-    cursor.execute(create_temp_user_table)
-    cursor.execute(create_register_table)
+    cur.close()
 
-    userConnection.commit()
-    cursor.close()
-    postgresConnection.releaseConn(userConnection)
-    return postgresConnection
+
+# -------------------------
+# MAIN INIT FUNCTION
+# -------------------------
+def init_db(config: PostgresConfig) -> PostgresConnection:
+    # 1. create DB + user
+    init_admin_db(config)
+
+    # 2. create connection pool for app user
+    db = PostgresConnection(
+        host=config.host,
+        port=config.port,
+        user=config.user_name,
+        password=config.user_password,
+        database=config.db_name
+    )
+
+    # 3. initialize schema
+    conn = db.get_conn()
+    try:
+        create_tables(conn, config)
+        conn.commit()
+    finally:
+        db.release_conn(conn)
+
+    return db

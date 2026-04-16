@@ -34,5 +34,7 @@ def give_postgres_env() -> PostgresConfig:
 if __name__=="__main__":
     config = give_postgres_env()
     postgresConnection = init_db(config)
+
+    postgresConnection.close()
     
     
