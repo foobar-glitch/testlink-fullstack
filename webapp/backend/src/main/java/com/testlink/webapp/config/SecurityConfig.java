@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 1. PUBLIC: Allow the base path AND sub-paths
                         .requestMatchers(
-                                "/login", "/register/**", "/authenticate","/forgot","/validate-token","/reset-password"
+                                "/auth/**", "/users/**"
                         ).permitAll()
 
                         //.requestMatchers("/cart/**").authenticated()

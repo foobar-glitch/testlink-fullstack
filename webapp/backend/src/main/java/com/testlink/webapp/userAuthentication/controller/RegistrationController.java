@@ -14,20 +14,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth/register")
 @RequiredArgsConstructor
 public class RegistrationController {
 
     private final RegistrationService registrationService;
 
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<ApiResponse<Void>> register(@RequestBody RegisterUserDTO dto) {
         String token = registrationService.register(dto);
         return ResponseEntity.ok(
                 new ApiResponse<>("Check your email for activation token: " + token, true, null));
     }
 
-    @PostMapping("/register/validate")
+    @PostMapping("/validate")
     public ResponseEntity<ApiResponse<Void>> validateToken(@RequestBody RegisterTokenDTO dto) {
         String result = registrationService.validateToken(dto.registerToken());
         return ResponseEntity.ok(new ApiResponse<>(result, true, null));

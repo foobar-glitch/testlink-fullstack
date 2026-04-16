@@ -9,22 +9,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth/forgot")
 @RequiredArgsConstructor
 public class PasswordResetController {
 
     private final PasswordResetService passwordResetService;
 
-    @PostMapping("/forgot")
+    @PostMapping("/send-to-mail")
     public ResponseEntity<ApiResponse<Void>> forgot(@RequestBody ForgotRequestDTO dto) {
         passwordResetService.createResetToken(dto.email());
         return ResponseEntity.ok(new ApiResponse<>("Reset email sent", true, null));
     }
 
-    @GetMapping("/reset-password")
-    public ResponseEntity<Void> validateToken(@RequestParam String resetToken) {
+    @GetMapping("/validate-token")
+    public ResponseEntity<ApiResponse<Void>> validateToken(@RequestParam String resetToken) {
         passwordResetService.validateToken(resetToken);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new ApiResponse<>("Token valid", true, null));
     }
 
     @PostMapping("/reset-password")
