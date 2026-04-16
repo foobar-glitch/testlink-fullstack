@@ -1,7 +1,6 @@
 package com.testlink.webapp.userAuthentication.mapper;
 
 import com.testlink.webapp.userAuthentication.dto.UserTableDTO;
-import com.testlink.webapp.userAuthentication.dto.UserTablesAdminDTO;
 import com.testlink.webapp.userAuthentication.entity.AuthorityTable;
 import com.testlink.webapp.userAuthentication.entity.UserTable;
 import org.mapstruct.Mapper;
@@ -16,8 +15,6 @@ public interface UserMapper {
     @Mapping(target = "roles", source = "authorities")
     UserTableDTO toDto(UserTable user);
 
-    @Mapping(target = "roles", source = "authorities")
-    UserTablesAdminDTO toAdminDto(UserTable user);
 
     default String mapAuthority(AuthorityTable authority) {
         return authority.getAuthority();

@@ -1,6 +1,6 @@
 package com.testlink.webapp.userAuthentication.controller;
 
-import com.testlink.webapp.userAuthentication.dto.UserTablesAdminDTO;
+import com.testlink.webapp.userAuthentication.dto.UserTableDTO;
 import com.testlink.webapp.userAuthentication.mapper.UserMapper;
 import com.testlink.webapp.userAuthentication.service.UserTableService;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +21,9 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/username/{userId}")
-    public ResponseEntity<UserTablesAdminDTO> getUsername(@PathVariable Long userId) {
+    public ResponseEntity<UserTableDTO> getUsername(@PathVariable Long userId) {
         return userTableService.getUserById(userId)
-                .map(user -> ResponseEntity.ok(userMapper.toAdminDto(user)))
+                .map(user -> ResponseEntity.ok(userMapper.toDto(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 }

@@ -4,11 +4,13 @@ import {
 } from '../models';
 
 // ─── Users ──────────────────────────────────────────────────────────────────
+/*
 export const MOCK_USERS: User[] = [
   { id: 1, username: 'admin', email: 'admin@testflow.dev', role: 'admin' },
   { id: 2, username: 'tester1', email: 'tester1@testflow.dev', role: 'tester' },
   { id: 3, username: 'tester2', email: 'tester2@testflow.dev', role: 'tester' },
 ];
+*/
 
 // ─── Projects ────────────────────────────────────────────────────────────────
 export const MOCK_PROJECTS: Project[] = [

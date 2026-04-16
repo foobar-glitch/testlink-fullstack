@@ -3,8 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { delay, map, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { User, LoginRequest } from '../models';
-import { MOCK_USERS } from '../mock/mock-data';
+import { User, LoginRequest, ApiResponse, AuthResponse } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -24,24 +23,9 @@ export class AuthService {
     return this._currentUser$.value !== null;
   }
 
-  login(credentials: LoginRequest): Observable<User> {
+  login(credentials: LoginRequest): Observable<AuthResponse> {
     // Mock API call – in production replace with:
-    // return this.http.post<ApiResponse<User>>('/api/auth/login', credentials, { withCredentials: true })
-    const found = MOCK_USERS.find(
-      u => u.username === credentials.username && credentials.password === credentials.username
-    );
-
-    if (!found) {
-      return throwError(() => new Error('Invalid username or password')).pipe(delay(400));
-    }
-
-    return of(found).pipe(
-      delay(500),
-      tap(user => {
-        this._currentUser$.next(user);
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(user));
-      })
-    );
+    return this.http.post<AuthResponse>('/api/auth/login', credentials, { withCredentials: true });
   }
 
   logout(): void {
@@ -55,7 +39,7 @@ export class AuthService {
   private loadFromStorage(): User | null {
     try {
       const raw = localStorage.getItem(this.STORAGE_KEY);
-      return raw ? JSON.parse(raw) as User : null;
+      return raw ? (JSON.parse(raw) as User) : null;
     } catch {
       return null;
     }

@@ -4,6 +4,7 @@ import com.testlink.webapp.userAuthentication.dto.AuthResponse;
 import com.testlink.webapp.userAuthentication.dto.LoginRequestDTO;
 import com.testlink.webapp.userAuthentication.dto.UserTableDTO;
 import com.testlink.webapp.userAuthentication.entity.CustomUserDetails;
+import com.testlink.webapp.userAuthentication.entity.UserTable;
 import com.testlink.webapp.userAuthentication.mapper.AuthResponseMapper;
 import com.testlink.webapp.userAuthentication.mapper.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,11 +26,9 @@ import java.util.Set;
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final AuthResponseMapper authMapper;
     private final UserMapper userMapper;
 
     public AuthResponse login(LoginRequestDTO dto) {
-
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         dto.username(),
@@ -39,10 +38,16 @@ public class AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String username = authentication.getName();
-        Set<String> roles = authMapper.mapRoles(authentication.getAuthorities());
+        CustomUserDetails principal =
+                (CustomUserDetails) authentication.getPrincipal();
 
-        return authMapper.toResponse(username, roles);
+        UserTable user = principal.getUser();
+        UserTableDTO userDto = userMapper.toDto(user);
+
+        return new AuthResponse(
+                "Login successful",
+                userDto
+        );
     }
 
     public AuthResponse logout(HttpServletRequest request,
@@ -57,7 +62,6 @@ public class AuthService {
 
         return new AuthResponse(
                 "Logout successful",
-                null,
                 null
         );
     }

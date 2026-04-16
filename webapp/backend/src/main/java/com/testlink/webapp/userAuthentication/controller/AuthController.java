@@ -40,13 +40,8 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<AuthResponse> logout(HttpServletRequest request,
-                                         HttpServletResponse response,
-                                         Authentication authentication) {
-
-        if (authentication != null) {
-            new SecurityContextLogoutHandler().logout(request, response, authentication);
-        }
-
+                                               HttpServletResponse response,
+                                               Authentication authentication) {
         return ResponseEntity.ok(authService.logout(request, response, authentication));
     }
 
