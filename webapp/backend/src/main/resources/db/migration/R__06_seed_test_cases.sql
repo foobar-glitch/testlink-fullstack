@@ -41,4 +41,4 @@ ON CONFLICT (test_case_id) DO NOTHING;
 -- Additional test cases for Project 2 & 3 can be added here as needed
 
 -- Reset sequence to avoid future conflicts
-SELECT setval('test_cases_test_case_id_seq', (SELECT MAX(test_case_id) FROM test_cases));
+SELECT setval(pg_get_serial_sequence('test_cases', 'test_case_id'), (SELECT MAX(test_case_id) FROM test_cases));

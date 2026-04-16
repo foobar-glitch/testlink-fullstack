@@ -34,4 +34,4 @@ VALUES
 ON CONFLICT (test_suite_id) DO NOTHING;
 
 -- Update sequences to avoid primary key collisions on future inserts
-SELECT setval('test_suites_test_suite_id_seq', (SELECT MAX(test_suite_id) FROM test_suites));
+SELECT setval(pg_get_serial_sequence('test_suites', 'test_suite_id'), (SELECT MAX(test_suite_id) FROM test_suites));
