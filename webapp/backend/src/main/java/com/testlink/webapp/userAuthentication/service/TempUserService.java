@@ -60,8 +60,6 @@ public class TempUserService {
                 .email(email)
                 .passwordHash(passwordEncoder.encode(password))
                 .role(role)
-                .createdAt(now)
-                .updatedAt(now)
                 .build();
 
         tempUserRepository.save(user);
@@ -72,7 +70,6 @@ public class TempUserService {
         RegisterTable registerTable = RegisterTable.builder()
                 .tempUser(user)
                 .registerToken(hashedToken)
-                .createdAt(now)
                 .expiredAt(now.plusHours(24))
                 .build();
 

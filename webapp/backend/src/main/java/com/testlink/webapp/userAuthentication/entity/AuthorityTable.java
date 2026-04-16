@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthorityTable implements GrantedAuthority {
+public class AuthorityTable extends TimeStampedEntity implements GrantedAuthority {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "authority_id")
@@ -29,23 +30,21 @@ public class AuthorityTable implements GrantedAuthority {
     @Column(name = "authority", nullable = false, length = 50)
     private String authority;
 
-    @Builder.Default
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Builder.Default
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    // =========================
+    // SPRING SECURITY
+    // =========================
 
     @Override
     public String getAuthority() {
         return this.authority;
     }
 
-    // Komfort-Konstruktor
+    // =========================
+    // CONVENIENCE CONSTRUCTOR
+    // =========================
+
     public AuthorityTable(UserTable user, String authority) {
         this.user = user;
         this.authority = authority;
     }
-
 }

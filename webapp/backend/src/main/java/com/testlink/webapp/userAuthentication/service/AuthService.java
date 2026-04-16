@@ -2,16 +2,21 @@ package com.testlink.webapp.userAuthentication.service;
 
 import com.testlink.webapp.userAuthentication.dto.AuthResponse;
 import com.testlink.webapp.userAuthentication.dto.LoginRequestDTO;
+import com.testlink.webapp.userAuthentication.dto.UserTableDTO;
+import com.testlink.webapp.userAuthentication.entity.CustomUserDetails;
 import com.testlink.webapp.userAuthentication.mapper.AuthResponseMapper;
+import com.testlink.webapp.userAuthentication.mapper.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Set;
 
@@ -21,6 +26,7 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final AuthResponseMapper authMapper;
+    private final UserMapper userMapper;
 
     public AuthResponse login(LoginRequestDTO dto) {
 
@@ -54,5 +60,13 @@ public class AuthService {
                 null,
                 null
         );
+    }
+
+    public UserTableDTO getCurrentUser(CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
+        }
+
+        return userMapper.toDto(userDetails.getUser());
     }
 }

@@ -14,7 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserTable {
+public class UserTable extends TimeStampedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,14 +30,6 @@ public class UserTable {
     private String passwordHash;
 
     @Builder.Default
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Builder.Default
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
-    @Builder.Default
     @OneToMany(
             mappedBy = "user",
             cascade = CascadeType.ALL,
@@ -46,7 +38,7 @@ public class UserTable {
     )
     private Set<AuthorityTable> authorities = new HashSet<>();
 
-    // ---- business methods (keep these manually) ----
+    // business methods
 
     public void addAuthority(String roleName) {
         this.authorities.add(new AuthorityTable(this, roleName));

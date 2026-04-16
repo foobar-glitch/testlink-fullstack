@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final UserMapper userMapper;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequestDTO dto,
@@ -53,6 +52,6 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserTableDTO> me(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(userMapper.toDto(userDetails.getUser()));
+        return ResponseEntity.ok(authService.getCurrentUser(userDetails));
     }
 }
