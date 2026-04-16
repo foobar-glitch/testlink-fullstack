@@ -39,31 +39,50 @@ class PostgresConnection:
 
     def release_conn(self, conn):
         self.pool.putconn(conn)
-    
-    def close(self):
-        """
-        Closes all connections in the pool.
-        This is the REAL 'shutdown' of the DB layer.
-        """
-        if self.pool:
-            self.pool.closeall()
 
+    def with_conn(self, fn):
+        """
+        Helper: auto commit + auto release
+        """
+        conn = self.get_conn()
+        try:
+            result = fn(conn)
+            conn.commit()
+            return result
+        finally:
+            self.release_conn(conn)
+
+    def close(self):
+        self.pool.closeall()
 
 # -------------------------
 # ADMIN: CREATE DB + USER
 # -------------------------
 def init_admin_db(config: PostgresConfig):
-    conn = psycopg2.connect(
-        host=config.host,
-        port=config.port,
-        user="postgres",
-        password=config.root_password,
-        database="postgres"
-    )
-    conn.autocommit = True
-
     try:
+        conn = psycopg2.connect(
+            host=config.host,
+            port=config.port,
+            user="postgres",
+            password="secret",
+            database="postgres"
+        )
+        conn.autocommit = True
         cur = conn.cursor()
+        cur.execute("ALTER USER postgres WITH PASSWORD %s;", (config.root_password,))
+    except psycopg2.OperationalError:
+        conn = psycopg2.connect(
+            host=config.host,
+            port=config.port,
+            user="postgres",
+            password=config.root_password,
+            database="postgres"
+        )
+        conn.autocommit = True
+        cur = conn.cursor()
+
+   
+    try:
 
         cur.execute(
             "CREATE DATABASE {};".format(config.db_name)
@@ -80,13 +99,21 @@ def init_admin_db(config: PostgresConfig):
             )
         )
 
+        cur.execute(
+            "GRANT ALL ON SCHEMA public TO {};".format(config.user_name)
+        )
+
+        cur.execute(
+            "ALTER SCHEMA public OWNER TO {};".format(config.user_name)
+        )
+
         cur.close()
     finally:
         conn.close()
 
 
 # -------------------------
-# CREATE TABLES (SAFE SQL)
+# SCHEMA CREATION (RUN ONCE)
 # -------------------------
 def create_tables(conn, config: PostgresConfig):
     cur = conn.cursor()
@@ -96,8 +123,7 @@ def create_tables(conn, config: PostgresConfig):
     reset_table = sql.Identifier(config.reset_table)
     register_table = sql.Identifier(config.register_table)
 
-    cur.execute(
-        sql.SQL("""
+    cur.execute(sql.SQL("""
         CREATE TABLE IF NOT EXISTS {} (
             user_id BIGSERIAL PRIMARY KEY,
             username VARCHAR(50) NOT NULL UNIQUE,
@@ -107,11 +133,9 @@ def create_tables(conn, config: PostgresConfig):
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-        """).format(users_table)
-    )
+    """).format(users_table))
 
-    cur.execute(
-        sql.SQL("""
+    cur.execute(sql.SQL("""
         CREATE TABLE IF NOT EXISTS {} (
             authority_id BIGSERIAL PRIMARY KEY,
             user_id BIGINT NOT NULL,
@@ -120,11 +144,9 @@ def create_tables(conn, config: PostgresConfig):
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES {}(user_id) ON DELETE CASCADE
         );
-        """).format(authority_table, users_table)
-    )
+    """).format(authority_table, users_table))
 
-    cur.execute(
-        sql.SQL("""
+    cur.execute(sql.SQL("""
         CREATE TABLE IF NOT EXISTS {} (
             reset_id BIGSERIAL PRIMARY KEY,
             user_id BIGINT NOT NULL,
@@ -133,8 +155,7 @@ def create_tables(conn, config: PostgresConfig):
             expired_at TIMESTAMP NOT NULL,
             FOREIGN KEY (user_id) REFERENCES {}(user_id) ON DELETE CASCADE
         );
-        """).format(reset_table, users_table)
-    )
+    """).format(reset_table, users_table))
 
     cur.execute("""
         CREATE TABLE IF NOT EXISTS SPRING_SESSION (
@@ -161,9 +182,8 @@ def create_tables(conn, config: PostgresConfig):
         );
     """)
 
-    cur.execute(
-        sql.SQL("""
-        CREATE TABLE IF NOT EXISTS {} (
+    cur.execute(sql.SQL("""
+        CREATE TABLE IF NOT EXISTS temp_users (
             temp_user_id BIGSERIAL PRIMARY KEY,
             username VARCHAR(255) NOT NULL UNIQUE,
             email VARCHAR(255) NOT NULL UNIQUE,
@@ -172,11 +192,9 @@ def create_tables(conn, config: PostgresConfig):
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-        """).format(sql.Identifier("temp_users"))
-    )
+    """))
 
-    cur.execute(
-        sql.SQL("""
+    cur.execute(sql.SQL("""
         CREATE TABLE IF NOT EXISTS {} (
             register_id BIGSERIAL PRIMARY KEY,
             temp_user_id BIGINT NOT NULL,
@@ -187,20 +205,34 @@ def create_tables(conn, config: PostgresConfig):
                 REFERENCES temp_users(temp_user_id)
                 ON DELETE CASCADE
         );
-        """).format(register_table)
-    )
+    """).format(register_table))
 
     cur.close()
 
 
 # -------------------------
-# MAIN INIT FUNCTION
+# MAIN INIT (CLEAN ORDER)
 # -------------------------
 def init_db(config: PostgresConfig) -> PostgresConnection:
-    # 1. create DB + user
+    # 1. admin setup (root user)
     init_admin_db(config)
 
-    # 2. create connection pool for app user
+    # 2. create schema BEFORE pool usage
+    bootstrap_conn = psycopg2.connect(
+        host=config.host,
+        port=config.port,
+        user="postgres",
+        password=config.root_password,
+        database=config.db_name
+    )
+    try:
+        bootstrap_conn.autocommit = True
+        create_tables(bootstrap_conn, config)
+        bootstrap_conn.commit()
+    finally:
+        bootstrap_conn.close()
+
+    # 3. create runtime pool (app user)
     db = PostgresConnection(
         host=config.host,
         port=config.port,
@@ -208,13 +240,5 @@ def init_db(config: PostgresConfig) -> PostgresConnection:
         password=config.user_password,
         database=config.db_name
     )
-
-    # 3. initialize schema
-    conn = db.get_conn()
-    try:
-        create_tables(conn, config)
-        conn.commit()
-    finally:
-        db.release_conn(conn)
 
     return db
