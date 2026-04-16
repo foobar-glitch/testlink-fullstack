@@ -5,6 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: rootsecret
+      POSTGRES_DB: testlink_db
     ports:
       - "5432:5432"
     networks:
