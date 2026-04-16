@@ -1,6 +1,7 @@
 import psycopg2
 from psycopg2 import pool, sql
 from dataclasses import dataclass
+from passlib.hash import bcrypt
 
 
 # -------------------------
@@ -59,31 +60,18 @@ class PostgresConnection:
 # ADMIN: CREATE DB + USER
 # -------------------------
 def init_admin_db(config: PostgresConfig):
+    
+    conn = psycopg2.connect(
+        host=config.host,
+        port=config.port,
+        user="postgres",
+        password=config.root_password,
+        database="postgres"
+    )
+    conn.autocommit = True
+    
     try:
-        conn = psycopg2.connect(
-            host=config.host,
-            port=config.port,
-            user="postgres",
-            password="secret",
-            database="postgres"
-        )
-        conn.autocommit = True
         cur = conn.cursor()
-        cur.execute("ALTER USER postgres WITH PASSWORD %s;", (config.root_password,))
-    except psycopg2.OperationalError:
-        conn = psycopg2.connect(
-            host=config.host,
-            port=config.port,
-            user="postgres",
-            password=config.root_password,
-            database="postgres"
-        )
-        conn.autocommit = True
-        cur = conn.cursor()
-
-   
-    try:
-
         cur.execute(
             "CREATE DATABASE {};".format(config.db_name)
         )
@@ -209,6 +197,41 @@ def create_tables(conn, config: PostgresConfig):
 
     cur.close()
 
+def insert_user(cur, USERS_TABLE, username, email, password_hash):
+    cur.execute(f"""
+        INSERT INTO {USERS_TABLE}
+        (username, email, password_hash, enabled)
+        VALUES (%s, %s, %s, %s)
+        RETURNING user_id;
+    """, (username, email, password_hash, True))
+    return cur.fetchone()[0]
+
+def populate_users(conn, USERS_TABLE: str, AUTHORITY_TABLE: str):
+    cur = conn.cursor()
+
+    test_users = [
+        ('admin', 'admin@mail.com', 'admin_pass', ['ROLE_ADMIN']),
+        ('tester', 'tester@mail.com', 'tester_pass', ['ROLE_TESTER']),
+        ('newuser', 'newuser@mail.com', 'newuser', ['ROLE_TESTER'])
+    ]
+
+    for username, email, raw_password, roles in test_users:
+
+        # hash password per user
+        hashed_pw = bcrypt.hash(raw_password)
+        user_id = insert_user(cur, USERS_TABLE, username, email, hashed_pw)
+
+        # INSERT ROLES
+        for role in roles:
+            cur.execute(f"""
+                INSERT INTO {AUTHORITY_TABLE}
+                (user_id, authority)
+                VALUES (%s, %s);
+            """, (user_id, role))
+
+    print("Test users and authorities created successfully.")
+    cur.close()
+    
 
 # -------------------------
 # MAIN INIT (CLEAN ORDER)
@@ -228,7 +251,9 @@ def init_db(config: PostgresConfig) -> PostgresConnection:
     try:
         bootstrap_conn.autocommit = True
         create_tables(bootstrap_conn, config)
+        populate_users(bootstrap_conn, config.users_table, config.authority_table)
         bootstrap_conn.commit()
+        bootstrap_conn.close()
     finally:
         bootstrap_conn.close()
 
