@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Project } from '../../../core/models';
+import { ApiResponse, Project, ProjectMembership } from '../../../core/models';
 // 👇 Add these two imports
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../shared/components/error-banner/error-banner.component';
@@ -24,11 +24,13 @@ export class ProjectListComponent implements OnInit {
   loading = true;
   errorMessage = '';
 
+
   ngOnInit(): void {
     const user = this.auth.currentUser;
     if (user) {
-      this.projectService.getProjects(user.id).subscribe({
-        next: (projects) => {
+      this.projectService.getProjectMemberships().subscribe({
+        next: (projectsMember: ApiResponse<ProjectMembership[]>) => {
+
           this.projects = projects;
           this.loading = false;
         },

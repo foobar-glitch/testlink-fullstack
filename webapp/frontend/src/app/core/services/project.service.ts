@@ -1,12 +1,16 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
-import { Project, PagedResponse, PageRequest } from '../models';
+import { Project, PagedResponse, PageRequest, ApiResponse, ProjectMembership } from '../models';
 import { MOCK_PROJECTS } from '../mock/mock-data';
+import { environment } from '../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
   private readonly STORAGE_KEY = 'tf_project';
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
 
   private _activeProject$ = new BehaviorSubject<Project | null>(this.loadFromStorage());
   readonly activeProject$ = this._activeProject$.asObservable();
@@ -15,9 +19,10 @@ export class ProjectService {
     return this._activeProject$.value;
   }
 
-  getProjects(userId: number): Observable<Project[]> {
-    // Mock: return all projects. In prod: GET /api/projects?userId=X withCredentials
-    return of(MOCK_PROJECTS).pipe(delay(300));
+  getProjectMemberships(): Observable<ApiResponse<ProjectMembership[]>> {
+    return this.http.get<ApiResponse<ProjectMembership[]>>(`${this.apiUrl}projects/assigned`, {
+      withCredentials: true
+    });
   }
 
   selectProject(project: Project): void {

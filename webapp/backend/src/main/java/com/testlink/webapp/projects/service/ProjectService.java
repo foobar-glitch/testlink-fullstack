@@ -5,6 +5,7 @@ import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.projects.repository.ProjectMembershipRepository;
 import com.testlink.webapp.projects.repository.ProjectRepository;
 import com.testlink.webapp.shared.exception.ResourceNotFoundException;
+import com.testlink.webapp.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,5 +29,9 @@ public class ProjectService {
 
     public List<ProjectMembership> getMemberships(Long projectId) {
         return membershipRepository.findByProject_ProjectId(projectId);
+    }
+
+    public List<ProjectMembership> getUserProjects(User user){
+        return membershipRepository.findByUser(user);
     }
 }

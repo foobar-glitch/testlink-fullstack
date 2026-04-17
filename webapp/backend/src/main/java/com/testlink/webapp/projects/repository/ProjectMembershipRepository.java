@@ -12,9 +12,15 @@ import java.util.Optional;
 @Repository
 public interface ProjectMembershipRepository extends JpaRepository<ProjectMembership, Long> {
     List<ProjectMembership> findByProject(Project project);
-    List<ProjectMembership> findByProject_ProjectId(Long projectId);
-
     List<ProjectMembership> findByUser(User user);
     Optional<ProjectMembership> findByProjectAndUser(Project project, User user);
     boolean existsByProjectAndUser(Project project, User user);
+
+    List<ProjectMembership> findByProject_ProjectId(Long projectId);
+    List<ProjectMembership> findByUser_UserId(Long userId);
+    Optional<ProjectMembership> findByProject_ProjectIdAndUser_UserId(Long projectId, Long userId);
+    boolean existsByProject_ProjectIdAndUser_UserId(Long projectId, Long userId);
+
+    // Optional: Delete all memberships for a project
+    void deleteByProject_ProjectId(Long projectId);
 }

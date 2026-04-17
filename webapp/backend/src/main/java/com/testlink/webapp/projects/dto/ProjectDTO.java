@@ -1,14 +1,13 @@
 package com.testlink.webapp.projects.dto;
 
 import com.testlink.webapp.projects.entity.ProjectStatus;
-import java.time.LocalDateTime;
 
 import com.testlink.webapp.shared.dto.UserCreatedTimeStampDTO;
 import lombok.Builder;
 
 
 @Builder
-public record ProjectResponseDTO(
+public record ProjectDTO(
         Long projectId,
         String projectKey,
         String displayName,

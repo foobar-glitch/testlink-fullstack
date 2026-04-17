@@ -60,7 +60,7 @@ describe('ProjectListComponent', () => {
   });
 
   it('should load projects on init', () => {
-    projectServiceMock.getProjects.and.returnValue(of(mockProjects));
+    projectServiceMock.getProjectMemberships.and.returnValue(of(mockProjects));
     fixture.detectChanges(); // triggers ngOnInit
 
     expect(component.loading).toBeFalse();
@@ -70,7 +70,7 @@ describe('ProjectListComponent', () => {
 
   it('should handle error when loading projects fails', () => {
     const error = new Error('Failed to load projects');
-    projectServiceMock.getProjects.and.returnValue(throwError(() => error));
+    projectServiceMock.getProjectMemberships.and.returnValue(throwError(() => error));
     fixture.detectChanges();
 
     expect(component.loading).toBeFalse();
@@ -79,7 +79,7 @@ describe('ProjectListComponent', () => {
   });
 
   it('should call projectService.selectProject when a project is selected', () => {
-    projectServiceMock.getProjects.and.returnValue(of(mockProjects));
+    projectServiceMock.getProjectMemberships.and.returnValue(of(mockProjects));
     fixture.detectChanges();
 
     const project = mockProjects[0];
@@ -94,7 +94,7 @@ describe('ProjectListComponent', () => {
   });
 
   it('should display projects in the template', () => {
-    projectServiceMock.getProjects.and.returnValue(of(mockProjects));
+    projectServiceMock.getProjectMemberships.and.returnValue(of(mockProjects));
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;

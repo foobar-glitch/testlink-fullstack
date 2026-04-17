@@ -15,14 +15,32 @@ export interface AuthResponse {
   message: string;
   user: User;
 }
+
+export interface TimeStamp {
+  createdAt: string;
+  updatedAt: string;
+}
+export interface UserCreatedTimeStamp{
+  user: User;
+  timeStamp: TimeStamp;
+}
+
 // ─── Project ─────────────────────────────────────────────────────────────────
 export interface Project {
-  id: number;
-  name: string;
+  projectId: number;
+  projectKey: string;
+  displayName: string;
   description: string;
-  prefix: string;
-  createdAt: string;
-  stats: ProjectStats;
+  status: string;
+  stamp: UserCreatedTimeStamp;
+  //TODO
+  //stats: ProjectStats;
+}
+
+export interface ProjectMembership{
+  user: User;
+  project: Project;
+  role: string;
 }
 
 export interface ProjectStats {
