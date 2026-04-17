@@ -6,6 +6,7 @@ import com.testlink.webapp.projects.entity.ProjectTable;
 import com.testlink.webapp.shared.dto.TimeStampDTO;
 import com.testlink.webapp.shared.dto.UserCreatedTimeStampDTO;
 import com.testlink.webapp.user.dto.UserTableDTO;
+import com.testlink.webapp.user.entity.UserTable;
 import com.testlink.webapp.user.mapper.UserMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -27,7 +28,7 @@ public interface ProjectMapper {
         if (project == null) {
             return null;
         }
-        UserTableDTO userDto = mapCreatedBy(project);
+        UserTableDTO userDto = mapCreatedBy(project.getCreatedBy());
         TimeStampDTO timeStamp = TimeStampDTO.builder()
                 .createdAt(project.getCreatedAt())
                 .updatedAt(project.getUpdatedAt())
@@ -38,6 +39,6 @@ public interface ProjectMapper {
                 .build();
     }
 
-    // This method will be implemented by MapStruct via delegation to UserMapper
-    UserTableDTO mapCreatedBy(ProjectTable project);
+    // Correct: maps UserTable → UserTableDTO
+    UserTableDTO mapCreatedBy(UserTable user);
 }
