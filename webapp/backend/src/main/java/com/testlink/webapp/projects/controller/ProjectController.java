@@ -7,7 +7,6 @@ import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.projects.mapper.ProjectMapper;
 import com.testlink.webapp.projects.service.ProjectService;
-import com.testlink.webapp.shared.dto.ApiResponse;
 import com.testlink.webapp.user.entity.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -30,26 +28,16 @@ public class ProjectController {
     private final ProjectMapper projectMapper;
 
     @GetMapping("/assigned")
-    public ResponseEntity<ApiResponse<List<ProjectMembershipDTO>>> getProjectOfUser(
+    public ResponseEntity<List<ProjectMembershipDTO>> getProjectOfUser(
             @AuthenticationPrincipal CustomUserDetails userDetails){
         List<ProjectMembership> projectMembership = projectService.getUserProjects(userDetails.getUser());
-        ApiResponse<List<ProjectMembershipDTO>> response = ApiResponse.<List<ProjectMembershipDTO>>builder()
-                .success(true)
-                .data(projectMapper.toMembershipDtoList(projectMembership))
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(projectMapper.toMembershipDtoList(projectMembership));
     }
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProjectDTO>> getProject(@PathVariable Long id) {
+    public ResponseEntity<ProjectDTO> getProject(@PathVariable Long id) {
         Project project = projectService.getProjectById(id);
-        ApiResponse<ProjectDTO> response = ApiResponse.<ProjectDTO>builder()
-                .success(true)
-                .data(projectMapper.toDto(project))
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(projectMapper.toDto(project));
     }
 }

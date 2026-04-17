@@ -32,7 +32,6 @@ export class ProjectListComponent {
       // Once we have a user, switch to the HTTP call
       switchMap(() =>
         this.projectService.getProjectMemberships().pipe(
-          map(response => response.data),
           catchError(err => {
             this.errorMessage = err.message || 'Failed to load projects';
             return of([]);
