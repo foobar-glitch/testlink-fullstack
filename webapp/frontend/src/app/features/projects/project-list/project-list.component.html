@@ -8,20 +8,24 @@
     <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
   </div>
 
-  <ng-container *ngIf="projects$ | async as projects; else loading">
-    <div *ngIf="projects.length > 0; else empty" class="projects-grid">
+  <ng-container *ngIf="memberships$ | async as memberships; else loading">
+    <div *ngIf="memberships.length > 0; else empty" class="projects-grid">
       <div
-        *ngFor="let project of projects"
+        *ngFor="let membership of memberships"
         class="project-card"
-        (click)="selectProject(project)"
+        (click)="selectProject(membership.project)"
       >
-        <!-- project card content unchanged -->
         <div class="project-header">
-          <span class="prefix">{{ project.projectKey }}</span>
-          <h3>{{ project.displayName }}</h3>
+          <span class="prefix">{{ membership.project.projectKey }}</span>
+          <h3>{{ membership.project.displayName }}</h3>
         </div>
-        <p class="description">{{ project.description }}</p>
 
+        <!-- Role badge -->
+        <div class="role-badge">
+          <app-role-badge [role]="membership.role"></app-role-badge>
+        </div>
+
+        <p class="description">{{ membership.project.description }}</p>
         <!--
         <div class="stats">
           <div class="stat">
@@ -38,9 +42,8 @@
           </div>
         </div>
         -->
-
         <div class="created">
-          Created {{ project.stamp?.timeStamp?.createdAt | date:'mediumDate' }}
+          Created {{ membership.project.stamp?.timeStamp?.createdAt | date:'mediumDate' }}
         </div>
       </div>
     </div>

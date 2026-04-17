@@ -37,10 +37,12 @@ export interface Project {
   //stats: ProjectStats;
 }
 
+export type ProjectRole = 'admin' | 'tester' | 'viewer';
+
 export interface ProjectMembership{
   user: User;
   project: Project;
-  role: string;
+  role: ProjectRole;
 }
 
 export interface ProjectStats {

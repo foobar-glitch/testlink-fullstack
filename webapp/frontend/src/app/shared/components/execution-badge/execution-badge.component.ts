@@ -7,10 +7,10 @@ import { ExecutionStatus } from '../../../core/models'; // adjust import path
   selector: 'app-status-badge',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './status-badge.component.html',
-  styleUrls: ['./status-badge.component.scss']
+  templateUrl: './execution-badge.component.html',
+  styleUrls: ['./execution-badge.component.scss']
 })
-export class StatusBadgeComponent {
+export class ExecutionBadgeComponent {
   @Input() status: ExecutionStatus = 'not_run';
 
   get badgeClass(): string { return this.status; }
