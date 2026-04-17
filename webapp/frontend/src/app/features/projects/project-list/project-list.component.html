@@ -11,9 +11,9 @@
   <ng-container *ngIf="memberships$ | async as memberships; else loading">
     <div *ngIf="memberships.length > 0; else empty" class="projects-grid">
       <div
-        *ngFor="let membership of memberships"
+        *ngFor="let membership of memberships$ | async"
         class="project-card"
-        (click)="selectProject(membership.project)"
+        (click)="selectProject(membership.project.projectId)"
       >
         <div class="project-header">
           <span class="prefix">{{ membership.project.projectKey }}</span>
