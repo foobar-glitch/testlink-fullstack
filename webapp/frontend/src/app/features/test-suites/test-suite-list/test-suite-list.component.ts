@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { TestSuiteService } from '../../../core/services/test-suite.service';
 import { TestSuite } from '../../../core/models';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
@@ -16,12 +16,12 @@ import { ErrorBannerComponent } from '../../../shared/components/error-banner/er
   styleUrls: ['./test-suite-list.component.scss']
 })
 export class TestSuiteListComponent {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private testSuiteService = inject(TestSuiteService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly testSuiteService = inject(TestSuiteService);
 
-  projectId: number;
-  suites$: Observable<TestSuite[]>;
+  readonly projectId: number;
+  readonly suites$: Observable<TestSuite[]>;
   errorMessage = '';
 
   constructor() {
@@ -37,18 +37,19 @@ export class TestSuiteListComponent {
 
   toggleSuite(suite: TestSuite, event: Event): void {
     event.stopPropagation();
-    suite.expanded = !suite.expanded;   // simple toggle, no HTTP call
+    suite.expanded = !suite.expanded;
   }
 
   selectSuite(suite: TestSuite): void {
     this.router.navigate(['/projects', this.projectId, 'suites', suite.testSuiteId, 'cases']);
   }
 
-  isExpanded(suite: TestSuite): boolean {
-    return suite.expanded || false;
+  // No ?. or ?? needed — children and expanded are always set by the service
+  hasChildren(suite: TestSuite): boolean {
+    return suite.children.length > 0;
   }
 
-  hasChildren(suite: TestSuite): boolean {
-    return (suite.children?.length ?? 0) > 0;
+  isExpanded(suite: TestSuite): boolean {
+    return suite.expanded;
   }
 }

@@ -20,7 +20,8 @@ export interface TimeStamp {
   createdAt: string;
   updatedAt: string;
 }
-export interface UserCreatedTimeStamp{
+
+export interface UserCreatedTimeStamp {
   user: User;
   timeStamp: TimeStamp;
 }
@@ -33,13 +34,11 @@ export interface Project {
   description: string;
   status: string;
   stamp: UserCreatedTimeStamp;
-  //TODO
-  //stats: ProjectStats;
 }
 
 export type ProjectRole = 'admin' | 'tester' | 'viewer';
 
-export interface ProjectMembership{
+export interface ProjectMembership {
   user: User;
   project: Project;
   role: ProjectRole;
@@ -52,21 +51,51 @@ export interface ProjectStats {
 }
 
 // ─── Test Suite ──────────────────────────────────────────────────────────────
-export interface TestSuite {
+
+/**
+ * TestSuiteItem mirrors the backend's TestSuiteItemDTO exactly.
+ * It intentionally has NO `children` or `expanded` field —
+ * those are assembled client-side into a TestSuite tree node.
+ */
+export interface TestSuiteItem {
   testSuiteId: number;
   name: string;
   description: string;
   project: Project;
   stamp: UserCreatedTimeStamp;
-  children?: TestSuite[];          // now always populated from backend
-  expanded?: boolean;              // UI state only
 }
 
+/**
+ * TestSuiteHierarchyDTO shape returned by the backend.
+ * `parent` is null for root suites.
+ * `children` is a flat list of direct children (TestSuiteItem, not yet tree nodes).
+ */
+export interface TestSuiteHierarchyDTO {
+  current: TestSuiteItem;
+  parent: TestSuiteItem | null;
+  children: TestSuiteItem[];
+}
+
+/**
+ * TestSuite is the client-side tree node, built from TestSuiteHierarchyDTO.
+ * `children` is always present after buildTree (never undefined).
+ * `expanded` is UI-only state.
+ */
+export interface TestSuite extends TestSuiteItem {
+  children: TestSuite[];   // always populated, never undefined
+  expanded: boolean;       // UI state only
+}
+
+/**
+ * TestSuiteHierarchy is the enriched client-side version used by detail views.
+ * All three fields use the full TestSuite tree node type.
+ */
 export interface TestSuiteHierarchy {
   current: TestSuite;
   parent: TestSuite | null;
   children: TestSuite[];
 }
+
 // ─── Test Case ───────────────────────────────────────────────────────────────
 export interface TestCase {
   id: number;
@@ -160,6 +189,6 @@ export interface PageRequest {
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
-  message?: string;      // optional, backend may omit
-  timestamp?: string;    // add this if you want to use it
+  message?: string;
+  timestamp?: string;
 }

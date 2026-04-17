@@ -4,22 +4,34 @@
     <button class="back-btn" [routerLink]="['/projects']">← Back to Projects</button>
   </header>
 
+  <!-- Error -->
   <div *ngIf="errorMessage" class="error-state">
-    <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
+    <app-error-banner
+      [message]="errorMessage"
+      (dismissed)="errorMessage = ''">
+    </app-error-banner>
   </div>
 
+  <!-- Data -->
   <ng-container *ngIf="suites$ | async as suites; else loading">
+
+    <!-- Empty state -->
     <div *ngIf="suites.length > 0; else empty" class="suites-tree">
-      <ng-container *ngTemplateOutlet="tree; context: { $implicit: suites }"></ng-container>
+      <ng-container
+        *ngTemplateOutlet="tree; context: { $implicit: suites }">
+      </ng-container>
     </div>
+
     <ng-template #empty>
       <div class="empty-state">
         <p>No test suites found for this project.</p>
         <button class="create-btn">+ Create First Suite</button>
       </div>
     </ng-template>
+
   </ng-container>
 
+  <!-- Loading -->
   <ng-template #loading>
     <div class="loading-state">
       <app-spinner label="Loading test suites..."></app-spinner>
@@ -27,36 +39,46 @@
   </ng-template>
 </div>
 
+<!-- ================= TREE ================= -->
 <ng-template #tree let-suites>
   <ul class="tree">
     <li *ngFor="let suite of suites" class="tree-node">
+
       <div class="node-content">
-        <!-- Expand/collapse toggle – clickable, stops propagation -->
+
+        <!-- Expand toggle -->
         <span
           class="expand-toggle"
           [class.has-children]="hasChildren(suite)"
-          (click)="toggleSuite(suite, $event)"
-        >
+          (click)="toggleSuite(suite, $event)">
+
           <span *ngIf="hasChildren(suite)">
             {{ isExpanded(suite) ? '▼' : '▶' }}
           </span>
+
           <span *ngIf="!hasChildren(suite)">•</span>
         </span>
 
-        <!-- Folder icon and suite name – navigates on click -->
+        <!-- Suite navigation -->
         <span class="suite-icon" (click)="selectSuite(suite)">📁</span>
-        <span class="suite-name" (click)="selectSuite(suite)">{{ suite.name }}</span>
+        <span class="suite-name" (click)="selectSuite(suite)">
+          {{ suite.name }}
+        </span>
 
-        <!-- Loading indicator while fetching children -->
+        <!-- Optional loading indicator -->
         <span *ngIf="suite.loading" class="loading-indicator">
           <app-spinner [inline]="true"></app-spinner>
         </span>
+
       </div>
 
-      <!-- Recursively render children when expanded -->
-      <ng-container *ngIf="isExpanded(suite) && suite.children && suite.children.length > 0">
-        <ng-container *ngTemplateOutlet="tree; context: { $implicit: suite.children }"></ng-container>
+      <!-- Children (recursive) -->
+      <ng-container *ngIf="isExpanded(suite) && hasChildren(suite)">
+        <ng-container
+          *ngTemplateOutlet="tree; context: { $implicit: suite.children ?? [] }">
+        </ng-container>
       </ng-container>
+
     </li>
   </ul>
 </ng-template>
