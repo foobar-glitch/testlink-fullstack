@@ -1,6 +1,22 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { Observable } from 'rxjs';
+import { TestCase } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class TestCaseService {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
 
+  /**
+   * Get all test cases belonging to a specific test suite.
+   * Endpoint: GET /projects/:projectId/suites/:suiteId/cases
+   */
+  getTestCases(projectId: number, suiteId: number): Observable<TestCase[]> {
+    return this.http.get<TestCase[]>(
+      `${this.apiUrl}projects/${projectId}/suites/${suiteId}/cases`,
+      { withCredentials: true }
+    );
+  }
 }
