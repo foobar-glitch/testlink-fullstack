@@ -56,15 +56,16 @@ export interface TestSuite {
   testSuiteId: number;
   name: string;
   description: string;
-  project: Project;           // Nested project info
+  project: Project;
   stamp: UserCreatedTimeStamp;
-  // UI state
-  children?: TestSuite[];
-  expanded?: boolean;
-  loading?: boolean;
-  // Optional stats (not provided by backend yet)
-  childCount?: number;
-  testCaseCount?: number;
+  children?: TestSuite[];          // now always populated from backend
+  expanded?: boolean;              // UI state only
+}
+
+export interface TestSuiteHierarchy {
+  current: TestSuite;
+  parent: TestSuite | null;
+  children: TestSuite[];
 }
 // ─── Test Case ───────────────────────────────────────────────────────────────
 export interface TestCase {

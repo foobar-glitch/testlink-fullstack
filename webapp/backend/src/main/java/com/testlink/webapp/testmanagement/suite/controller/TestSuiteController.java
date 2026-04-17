@@ -4,7 +4,6 @@ import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.testmanagement.suite.dto.TestSuiteHierarchyDTO;
-import com.testlink.webapp.testmanagement.suite.dto.TestSuiteItemDTO;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.mapper.TestSuiteMapper;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -30,7 +30,7 @@ public class TestSuiteController {
     private final TestSuiteMapper testSuiteMapper;
 
     @GetMapping("/{projectId}/suites")
-    public ResponseEntity<List<TestSuiteItemDTO>> getTestSuites(
+    public ResponseEntity<List<TestSuiteHierarchyDTO>> getTestSuites(
             @PathVariable Long projectId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
@@ -39,9 +39,20 @@ public class TestSuiteController {
         List<TestSuite> rootTree =
                 testSuiteService.findProjectTestSuiteRootTree(ctx.project());
 
-        return ResponseEntity.ok(
-                testSuiteMapper.toDtoList(rootTree)
-        );
+        List<TestSuiteHierarchyDTO> hierarchyDTO = new ArrayList<>();
+
+        for(TestSuite item: rootTree){
+            TestSuiteHierarchyDTO itemHierarchyDTO = TestSuiteHierarchyDTO.builder()
+                    .current(testSuiteMapper.toDto(item))
+                    .parent(null)
+                    .children(testSuiteMapper.toDtoList(
+                            testSuiteService.findChildrenOfTestSuiteInProject(ctx.project(), item)))
+                            .build();
+            hierarchyDTO.add(itemHierarchyDTO);
+
+        }
+
+        return ResponseEntity.ok(hierarchyDTO);
     }
 
     @GetMapping("/{projectId}/suites/{suiteId}")
@@ -51,35 +62,16 @@ public class TestSuiteController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         AccessContext ctx = buildContext(projectId, customUserDetails);
-
         TestSuite testSuite = testSuiteService.findBySuiteId(suiteId);
-
-        TestSuiteHierarchyDTO hierarchyDTO =
-                new TestSuiteHierarchyDTO(
-                        testSuiteMapper.toDto(testSuite),
-                        testSuiteMapper.toDto(testSuite.getParentTestSuite())
-                );
+        TestSuiteHierarchyDTO hierarchyDTO = TestSuiteHierarchyDTO.builder()
+                .current(testSuiteMapper.toDto(testSuite))
+                .parent(testSuiteMapper.toDto(testSuite.getParentTestSuite()))
+                .children(testSuiteMapper.toDtoList(testSuiteService.findChildrenOfTestSuiteInProject(ctx.project(), testSuite)))
+                .build();
 
         return ResponseEntity.ok(hierarchyDTO);
     }
 
-    @GetMapping("/{projectId}/suites/{suiteId}/children")
-    public ResponseEntity<List<TestSuiteItemDTO>> getChildSuites(
-            @PathVariable Long projectId,
-            @PathVariable Long suiteId,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
-    ) {
-        AccessContext ctx = buildContext(projectId, customUserDetails);
-
-        TestSuite testSuite = testSuiteService.findBySuiteId(suiteId);
-
-        List<TestSuite> children =
-                testSuiteService.findChildrenOfTestSuiteInProject(ctx.project(), testSuite);
-
-        return ResponseEntity.ok(
-                testSuiteMapper.toDtoList(children)
-        );
-    }
 
     private AccessContext buildContext(Long projectId, CustomUserDetails userDetails) {
         User user = userDetails.getUser();

@@ -30,7 +30,8 @@
 <ng-template #tree let-suites>
   <ul class="tree">
     <li *ngFor="let suite of suites" class="tree-node">
-      <div class="node-content" (click)="selectSuite(suite)">
+      <div class="node-content">
+        <!-- Expand/collapse toggle – clickable, stops propagation -->
         <span
           class="expand-toggle"
           [class.has-children]="hasChildren(suite)"
@@ -41,12 +42,18 @@
           </span>
           <span *ngIf="!hasChildren(suite)">•</span>
         </span>
-        <span class="suite-icon">📁</span>
-        <span class="suite-name">{{ suite.name }}</span>
+
+        <!-- Folder icon and suite name – navigates on click -->
+        <span class="suite-icon" (click)="selectSuite(suite)">📁</span>
+        <span class="suite-name" (click)="selectSuite(suite)">{{ suite.name }}</span>
+
+        <!-- Loading indicator while fetching children -->
         <span *ngIf="suite.loading" class="loading-indicator">
           <app-spinner [inline]="true"></app-spinner>
         </span>
       </div>
+
+      <!-- Recursively render children when expanded -->
       <ng-container *ngIf="isExpanded(suite) && suite.children && suite.children.length > 0">
         <ng-container *ngTemplateOutlet="tree; context: { $implicit: suite.children }"></ng-container>
       </ng-container>
