@@ -64,6 +64,8 @@ export const MOCK_SUITES: TestSuite[] = [
   { id: 14, projectId: 3, parentId: null, name: 'Products API', description: '', childCount: 0, testCaseCount: 24 },
 ];
 */
+
+/*
 // ─── Test Cases ──────────────────────────────────────────────────────────────
 const makeSteps = (actions: string[]): import('../models').TestStep[] =>
   actions.map((action, i) => ({ order: i + 1, action, expectedResult: `Expected result for step ${i + 1}` }));
@@ -135,4 +137,4 @@ export const MOCK_EXECUTIONS: TestExecution[] = [
   { id: 19, runId: 3, testCaseId: 12, testCase: MOCK_TEST_CASES[11], status: 'not_run', notes: '', executedBy: null, executedAt: null },
   { id: 20, runId: 3, testCaseId: 13, testCase: MOCK_TEST_CASES[12], status: 'not_run', notes: '', executedBy: null, executedAt: null },
 ];
-
+*/

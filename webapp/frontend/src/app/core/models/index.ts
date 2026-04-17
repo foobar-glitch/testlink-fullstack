@@ -11,6 +11,11 @@ export interface User {
   roles: string[];
 }
 
+export interface UserSummary{
+  userId: number;
+  username: string
+}
+
 export interface AuthResponse {
   message: string;
   user: User;
@@ -22,7 +27,7 @@ export interface TimeStamp {
 }
 
 export interface UserCreatedTimeStamp {
-  user: User;
+  user: UserSummary;
   timeStamp: TimeStamp;
 }
 
@@ -96,21 +101,18 @@ export interface TestSuiteHierarchy {
   children: TestSuite[];
 }
 
+export type TestCaseStatus = 'draft' | 'active' | 'deprecated';
+
 // ─── Test Case ───────────────────────────────────────────────────────────────
 export interface TestCase {
-  id: number;
-  suiteId: number;
-  projectId: number;
+  testCaseId: number;
+  project: Project;
+  testSuite: TestSuiteItem;
+  identifierNumber: number;
   title: string;
   description: string;
-  steps: TestStep[];
-  expectedResult: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'active' | 'draft' | 'deprecated';
-  version: number;
-  assignedTo: string | null;
-  createdAt: string;
-  updatedAt: string;
+  status: TestCaseStatus;
+  stamp: UserCreatedTimeStamp;
 }
 
 export interface TestStep {

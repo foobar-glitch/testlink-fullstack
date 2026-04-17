@@ -1,1 +1,60 @@
-<p>test-case-list works!</p>
+<div class="test-case-list-container">
+  <header class="header">
+    <div class="title-section">
+      <h2>Test Cases</h2>
+      <span *ngIf="suiteName$ | async as suiteName" class="suite-name">
+        {{ suiteName }}
+      </span>
+    </div>
+    <button
+      class="back-btn"
+      [routerLink]="['/projects', projectId, 'suites']"
+    >
+      ← Back to Suites
+    </button>
+  </header>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="error-state">
+    <app-error-banner
+      [message]="errorMessage"
+      (dismissed)="errorMessage = ''"
+    ></app-error-banner>
+  </div>
+
+  <!-- Data -->
+  <ng-container *ngIf="testCases$ | async as testCases; else loading">
+    <div *ngIf="testCases.length > 0; else empty" class="test-cases-grid">
+      <div *ngFor="let tc of testCases" class="test-case-card">
+        <div class="card-header">
+          <span class="identifier">{{ getTestCaseIdentifier(tc) }}</span>
+          <app-status-badge [status]="tc.status"></app-status-badge>
+        </div>
+        <h3 class="title">{{ tc.title }}</h3>
+        <p class="description">{{ tc.description }}</p>
+        <div class="meta">
+          <span class="created-by">
+            Created by {{ tc.stamp.user.username }}
+          </span>
+          <span class="created-at">
+            {{ tc.stamp.timeStamp.createdAt | date: 'mediumDate' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #empty>
+      <div class="empty-state">
+        <p>No test cases found in this suite.</p>
+        <button class="create-btn">+ Create First Test Case</button>
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <!-- Loading -->
+  <ng-template #loading>
+    <div class="loading-state">
+      <app-spinner label="Loading test cases..."></app-spinner>
+    </div>
+  </ng-template>
+</div>
