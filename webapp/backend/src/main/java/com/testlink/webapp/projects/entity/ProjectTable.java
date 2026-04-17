@@ -1,6 +1,6 @@
 package com.testlink.webapp.projects.entity;
 
-import com.testlink.webapp.config.entitiy.UserCreatedTimeStampedEntity;
+import com.testlink.webapp.shared.entity.UserCreatedTimeStampedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,7 +16,7 @@ public class ProjectTable extends UserCreatedTimeStampedEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long projectId;
 
-    @Column(name = "project_key", nullable = false, length = 20)
+    @Column(name = "project_key", nullable = false, length = 20, unique = true)
     private String projectKey;
 
     @Column(name = "display_name", nullable = false, length = 50)

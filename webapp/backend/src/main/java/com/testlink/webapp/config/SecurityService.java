@@ -1,6 +1,6 @@
 package com.testlink.webapp.config;
 
-import com.testlink.webapp.userAuthentication.entity.CustomUserDetails;
+import com.testlink.webapp.user.entity.CustomUserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
