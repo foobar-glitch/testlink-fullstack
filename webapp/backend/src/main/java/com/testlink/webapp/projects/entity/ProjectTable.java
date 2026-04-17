@@ -25,6 +25,7 @@ public class ProjectTable extends UserCreatedTimeStampedEntity {
     @Column(name = "description", nullable = false, length = 500)
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private ProjectStatus status = ProjectStatus.ACTIVE;
 

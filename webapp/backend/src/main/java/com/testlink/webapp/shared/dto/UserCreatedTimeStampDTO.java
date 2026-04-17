@@ -1,10 +1,9 @@
 package com.testlink.webapp.shared.dto;
 
-import com.testlink.webapp.user.dto.UserTableDTO;
-
+import com.testlink.webapp.user.dto.UserSummaryDTO;
 import lombok.Builder;
 
 @Builder
 public record UserCreatedTimeStampDTO(
-        UserTableDTO user, TimeStampDTO timeStamp
+        UserSummaryDTO user, TimeStampDTO timeStamp
 ) {}
