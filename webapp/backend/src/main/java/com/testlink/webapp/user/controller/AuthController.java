@@ -3,7 +3,7 @@ package com.testlink.webapp.user.controller;
 
 import com.testlink.webapp.user.dto.AuthResponse;
 import com.testlink.webapp.user.dto.LoginRequestDTO;
-import com.testlink.webapp.user.dto.UserTableDTO;
+import com.testlink.webapp.user.dto.UserDTO;
 import com.testlink.webapp.user.entity.CustomUserDetails;
 import com.testlink.webapp.user.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,7 +44,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserTableDTO> me(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<UserDTO> me(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(authService.getCurrentUser(userDetails));
     }
 }

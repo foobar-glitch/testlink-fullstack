@@ -231,7 +231,8 @@ def populate_users(conn, USERS_TABLE: str, AUTHORITY_TABLE: str):
 
     print("Test users and authorities created successfully.")
     cur.close()
-    
+
+
 
 # -------------------------
 # MAIN INIT (CLEAN ORDER)

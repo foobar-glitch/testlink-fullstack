@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProjectTable extends UserCreatedTimeStampedEntity {
+public class Project extends UserCreatedTimeStampedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long projectId;

@@ -12,10 +12,10 @@ import lombok.Getter;
 @Getter
 public class CustomUserDetails implements UserDetails {
 
-    private final UserTable user;
+    private final User user;
     private final List<SimpleGrantedAuthority> authorities;
 
-    public CustomUserDetails(UserTable user) {
+    public CustomUserDetails(User user) {
         this.user = user;
 
         this.authorities = user.getAuthorities().stream()

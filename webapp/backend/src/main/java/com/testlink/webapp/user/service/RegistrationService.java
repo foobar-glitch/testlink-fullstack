@@ -4,13 +4,11 @@ import com.testlink.webapp.shared.exception.BadRequestException;
 import com.testlink.webapp.shared.exception.ConflictException;
 import com.testlink.webapp.shared.exception.ForbiddenException;
 import com.testlink.webapp.user.dto.RegisterUserDTO;
-import com.testlink.webapp.user.entity.RegisterTable;
+import com.testlink.webapp.user.entity.Registration;
 import com.testlink.webapp.user.entity.TempUser;
-import com.testlink.webapp.user.entity.UserTable;
+import com.testlink.webapp.user.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -49,18 +47,18 @@ public class RegistrationService {
     public void validateToken(String token) {
         String lookupToken = hashValue(token.getBytes());
 
-        RegisterTable registerTable = registerService.findByRegisterToken(lookupToken)
+        Registration registration = registerService.findByRegisterToken(lookupToken)
                 .orElseThrow(() -> new ForbiddenException("Invalid or expired token"));
 
-        if (LocalDateTime.now().isAfter(registerTable.getExpiredAt())) {
-            registerService.deleteRegisterTable(registerTable);
-            tempUserService.deleteTempUser(registerTable.getTempUser());
+        if (LocalDateTime.now().isAfter(registration.getExpiredAt())) {
+            registerService.deleteRegisterTable(registration);
+            tempUserService.deleteTempUser(registration.getTempUser());
             throw new ForbiddenException("Token has expired");
         }
 
-        TempUser tempUser = registerTable.getTempUser();
+        TempUser tempUser = registration.getTempUser();
 
-        UserTable user = new UserTable();
+        User user = new User();
         user.setEmail(tempUser.getEmail());
         user.setUsername(tempUser.getUsername());
         user.setPasswordHash(tempUser.getPasswordHash());
@@ -70,7 +68,7 @@ public class RegistrationService {
 
         userService.saveUser(user);
 
-        registerService.deleteRegisterTable(registerTable);
+        registerService.deleteRegisterTable(registration);
         tempUserService.deleteTempUser(tempUser);
     }
 

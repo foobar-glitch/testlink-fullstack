@@ -7,7 +7,7 @@
 -- Project 1: E-Commerce Platform (ID 1)
 INSERT INTO test_suites (test_suite_id, project_id, parent_id, name, description, created_by)
 VALUES
-    (1, 1, NULL, 'Authentication', 'Login, register, session tests', 1),
+    (1, 1, NULL, 'Authentication', 'Login, registration, session tests', 1),
     (2, 1, 1,    'Login Flow', '', 1),
     (3, 1, 1,    'Registration', '', 1),
     (4, 1, NULL, 'Product Catalog', 'Browse, search, filter products', 1),

@@ -2,9 +2,9 @@ package com.testlink.webapp.user.service;
 
 import com.testlink.webapp.user.dto.AuthResponse;
 import com.testlink.webapp.user.dto.LoginRequestDTO;
-import com.testlink.webapp.user.dto.UserTableDTO;
+import com.testlink.webapp.user.dto.UserDTO;
 import com.testlink.webapp.user.entity.CustomUserDetails;
-import com.testlink.webapp.user.entity.UserTable;
+import com.testlink.webapp.user.entity.User;
 import com.testlink.webapp.user.mapper.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,8 +38,8 @@ public class AuthService {
         CustomUserDetails principal =
                 (CustomUserDetails) authentication.getPrincipal();
 
-        UserTable user = principal.getUser();
-        UserTableDTO userDto = userMapper.toDto(user);
+        User user = principal.getUser();
+        UserDTO userDto = userMapper.toDto(user);
 
         return new AuthResponse(
                 "Login successful",
@@ -63,7 +63,7 @@ public class AuthService {
         );
     }
 
-    public UserTableDTO getCurrentUser(CustomUserDetails userDetails) {
+    public UserDTO getCurrentUser(CustomUserDetails userDetails) {
         if (userDetails == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
         }

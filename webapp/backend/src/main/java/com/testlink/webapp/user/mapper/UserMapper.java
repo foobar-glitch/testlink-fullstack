@@ -1,8 +1,8 @@
 package com.testlink.webapp.user.mapper;
 
-import com.testlink.webapp.user.dto.UserTableDTO;
-import com.testlink.webapp.user.entity.AuthorityTable;
-import com.testlink.webapp.user.entity.UserTable;
+import com.testlink.webapp.user.dto.UserDTO;
+import com.testlink.webapp.user.entity.Authority;
+import com.testlink.webapp.user.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -13,18 +13,18 @@ import java.util.stream.Collectors;
 public interface UserMapper {
 
     @Mapping(target = "roles", source = "authorities")
-    UserTableDTO toDto(UserTable user);
+    UserDTO toDto(User user);
 
 
-    default String mapAuthority(AuthorityTable authority) {
+    default String mapAuthority(Authority authority) {
         return authority.getAuthority();
     }
 
-    default Set<String> mapAuthorities(Set<AuthorityTable> authorities) {
+    default Set<String> mapAuthorities(Set<Authority> authorities) {
         if (authorities == null) return Set.of();
 
         return authorities.stream()
-                .map(AuthorityTable::getAuthority)
+                .map(Authority::getAuthority)
                 .collect(Collectors.toSet());
     }
 }

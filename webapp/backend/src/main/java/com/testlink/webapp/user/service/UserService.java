@@ -2,15 +2,13 @@ package com.testlink.webapp.user.service;
 
 import com.testlink.webapp.shared.exception.ResourceNotFoundException;
 import com.testlink.webapp.shared.exception.UnauthorizedException;
-import com.testlink.webapp.user.entity.UserTable;
-import com.testlink.webapp.user.repository.UserTableRepository;
+import com.testlink.webapp.user.entity.User;
+import com.testlink.webapp.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,52 +17,52 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserTableRepository userTableRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<UserTable> getAllUsers() {
-        return userTableRepository.findAll();
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
-    public Optional<UserTable> getUserById(Long userId) {
-        return userTableRepository.findById(userId);
+    public Optional<User> getUserById(Long userId) {
+        return userRepository.findById(userId);
     }
 
-    public UserTable getUserByIdOrThrow(Long userId) {
-        return userTableRepository.findById(userId)
+    public User getUserByIdOrThrow(Long userId) {
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
     }
 
-    public Optional<UserTable> getUserByUsername(String username) {
-        return userTableRepository.findByUsernameIgnoreCase(username);
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsernameIgnoreCase(username);
     }
 
-    public Optional<UserTable> getUserByEmail(String email) {
-        return userTableRepository.findByEmailIgnoreCase(email);
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email);
     }
 
     public boolean existsByEmailIgnoreCase(String email) {
-        return userTableRepository.existsByEmailIgnoreCase(email);
+        return userRepository.existsByEmailIgnoreCase(email);
     }
 
     public boolean existsByUsernameIgnoreCase(String username) {
-        return userTableRepository.existsByUsernameIgnoreCase(username);
+        return userRepository.existsByUsernameIgnoreCase(username);
     }
 
-    public UserTable saveUser(UserTable user) {
-        return userTableRepository.save(user);
+    public User saveUser(User user) {
+        return userRepository.save(user);
     }
 
-    public void deleteUser(UserTable user) {
-        userTableRepository.delete(user);
+    public void deleteUser(User user) {
+        userRepository.delete(user);
     }
 
-    public Optional<UserTable> findByUsernameAndPassword(String username, String rawPassword) {
-        return userTableRepository.findByUsernameIgnoreCase(username)
+    public Optional<User> findByUsernameAndPassword(String username, String rawPassword) {
+        return userRepository.findByUsernameIgnoreCase(username)
                 .filter(user -> passwordEncoder.matches(rawPassword, user.getPasswordHash()));
     }
 
-    public UserTable getCurrentAuthenticatedUser() {
+    public User getCurrentAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null ||
@@ -73,7 +71,7 @@ public class UserService {
             throw new UnauthorizedException("User is not authenticated");
         }
 
-        return userTableRepository.findByUsernameIgnoreCase(authentication.getName())
+        return userRepository.findByUsernameIgnoreCase(authentication.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
     }
 }

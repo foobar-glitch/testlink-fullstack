@@ -5,7 +5,7 @@ import com.testlink.webapp.shared.dto.TimeStampDTO;
 import com.testlink.webapp.shared.dto.UserCreatedTimeStampDTO;
 import com.testlink.webapp.shared.entity.UserCreatedTimeStampedEntity;
 import com.testlink.webapp.user.dto.UserSummaryDTO;
-import com.testlink.webapp.user.entity.UserTable;
+import com.testlink.webapp.user.entity.User;
 import com.testlink.webapp.user.mapper.UserMapper;
 import org.mapstruct.Mapper;
 
@@ -13,7 +13,7 @@ import org.mapstruct.Mapper;
 public abstract class BaseAuditMapper {
     
     protected UserCreatedTimeStampDTO mapAudit(UserCreatedTimeStampedEntity entity) {
-        UserTable createdBy = entity.getCreatedBy();
+        User createdBy = entity.getCreatedBy();
         UserSummaryDTO userSummary = createdBy != null
                 ? UserSummaryDTO.builder()
                   .userId(createdBy.getUserId())

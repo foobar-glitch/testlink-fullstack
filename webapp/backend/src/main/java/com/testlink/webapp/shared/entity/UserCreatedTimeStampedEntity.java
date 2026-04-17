@@ -1,6 +1,6 @@
 package com.testlink.webapp.shared.entity;
 
-import com.testlink.webapp.user.entity.UserTable;
+import com.testlink.webapp.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,5 +11,5 @@ import lombok.Setter;
 public abstract class UserCreatedTimeStampedEntity extends TimeStampedEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
-    private UserTable createdBy;
+    private User createdBy;
 }

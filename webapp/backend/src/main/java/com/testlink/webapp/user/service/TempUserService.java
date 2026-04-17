@@ -1,8 +1,8 @@
 package com.testlink.webapp.user.service;
 
-import com.testlink.webapp.user.entity.RegisterTable;
+import com.testlink.webapp.user.entity.Registration;
 import com.testlink.webapp.user.entity.TempUser;
-import com.testlink.webapp.user.repository.RegisterTableRepository;
+import com.testlink.webapp.user.repository.RegistrationRepository;
 import com.testlink.webapp.user.repository.TempUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +20,7 @@ import static com.testlink.webapp.shared.util.HashingHelper.hashValue;
 public class TempUserService {
 
     private final TempUserRepository tempUserRepository;
-    private final RegisterTableRepository registerTableRepository;
+    private final RegistrationRepository registrationRepository;
     private final PasswordEncoder passwordEncoder;
 
     public List<TempUser> getAllUsers() {
@@ -67,13 +67,13 @@ public class TempUserService {
         String rawToken = UUID.randomUUID().toString();
         String hashedToken = hashValue(rawToken.getBytes());
 
-        RegisterTable registerTable = RegisterTable.builder()
+        Registration registration = Registration.builder()
                 .tempUser(user)
                 .registerToken(hashedToken)
                 .expiredAt(now.plusHours(24))
                 .build();
 
-        registerTableRepository.save(registerTable);
+        registrationRepository.save(registration);
 
         return rawToken;
     }

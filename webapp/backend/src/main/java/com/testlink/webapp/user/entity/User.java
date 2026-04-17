@@ -14,7 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserTable extends TimeStampedEntity {
+public class User extends TimeStampedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,12 +36,12 @@ public class UserTable extends TimeStampedEntity {
             fetch = FetchType.LAZY,
             orphanRemoval = true
     )
-    private Set<AuthorityTable> authorities = new HashSet<>();
+    private Set<Authority> authorities = new HashSet<>();
 
     // business methods
 
     public void addAuthority(String roleName) {
-        this.authorities.add(new AuthorityTable(this, roleName));
+        this.authorities.add(new Authority(this, roleName));
     }
 
     public void deleteAuthority(String roleName) {

@@ -1,8 +1,7 @@
 package com.testlink.webapp.user.service;
 
-import com.testlink.webapp.user.entity.ResetTable;
-import com.testlink.webapp.user.entity.UserTable;
-import com.testlink.webapp.user.repository.ResetTableRepository;
+import com.testlink.webapp.user.entity.User;
+import com.testlink.webapp.user.repository.PasswordResetToken;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,23 +15,23 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ResetService {
 
-    private final ResetTableRepository resetTableRepository;
+    private final PasswordResetToken passwordResetToken;
 
-    public Optional<ResetTable> findByResetToken(String resetToken) {
-        return resetTableRepository.findByResetToken(resetToken);
+    public Optional<com.testlink.webapp.user.entity.PasswordResetToken> findByResetToken(String resetToken) {
+        return passwordResetToken.findByResetToken(resetToken);
     }
 
-    public ResetTable save(ResetTable resetTable) {
-        return resetTableRepository.save(resetTable);
+    public com.testlink.webapp.user.entity.PasswordResetToken save(com.testlink.webapp.user.entity.PasswordResetToken passwordResetToken) {
+        return this.passwordResetToken.save(passwordResetToken);
     }
 
-    public void delete(@NonNull ResetTable resetTable) {
-        resetTableRepository.delete(resetTable);
+    public void delete(@NonNull com.testlink.webapp.user.entity.PasswordResetToken passwordResetToken) {
+        this.passwordResetToken.delete(passwordResetToken);
     }
 
-    public void deleteByUser(@NonNull UserTable user) {
+    public void deleteByUser(@NonNull User user) {
         log.debug("Deleting reset tokens for user: {}", user.getUsername());
-        List<ResetTable> tokens = resetTableRepository.findByUser(user);
-        resetTableRepository.deleteAll(tokens);
+        List<com.testlink.webapp.user.entity.PasswordResetToken> tokens = passwordResetToken.findByUser(user);
+        passwordResetToken.deleteAll(tokens);
     }
 }

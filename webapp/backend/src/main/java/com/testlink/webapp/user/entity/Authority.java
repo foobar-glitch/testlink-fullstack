@@ -15,7 +15,7 @@ import org.springframework.security.core.GrantedAuthority;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthorityTable extends TimeStampedEntity implements GrantedAuthority {
+public class Authority extends TimeStampedEntity implements GrantedAuthority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +24,7 @@ public class AuthorityTable extends TimeStampedEntity implements GrantedAuthorit
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserTable user;
+    private User user;
 
     @Column(name = "authority", nullable = false, length = 50)
     private String authority;
@@ -42,7 +42,7 @@ public class AuthorityTable extends TimeStampedEntity implements GrantedAuthorit
     // CONVENIENCE CONSTRUCTOR
     // =========================
 
-    public AuthorityTable(UserTable user, String authority) {
+    public Authority(User user, String authority) {
         this.user = user;
         this.authority = authority;
     }

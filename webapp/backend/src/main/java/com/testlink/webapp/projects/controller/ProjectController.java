@@ -2,7 +2,7 @@ package com.testlink.webapp.projects.controller;
 
 
 import com.testlink.webapp.projects.dto.ProjectResponseDTO;
-import com.testlink.webapp.projects.entity.ProjectTable;
+import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.projects.mapper.ProjectMapper;
 import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.shared.dto.ApiResponse;
@@ -26,7 +26,7 @@ public class ProjectController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ProjectResponseDTO>> getProject(@PathVariable Long id) {
-        ProjectTable project = projectService.getProjectById(id);
+        Project project = projectService.getProjectById(id);
         var response = ApiResponse.<ProjectResponseDTO>builder()
                 .success(true)
                 .data(projectMapper.toDto(project))

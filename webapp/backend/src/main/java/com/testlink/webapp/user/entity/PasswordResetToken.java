@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResetTable extends TimeStampedEntity {
+public class PasswordResetToken extends TimeStampedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +24,7 @@ public class ResetTable extends TimeStampedEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserTable user;
+    private User user;
 
     @Column(name = "reset_token", nullable = false, length = 255, unique = true)
     private String resetToken;

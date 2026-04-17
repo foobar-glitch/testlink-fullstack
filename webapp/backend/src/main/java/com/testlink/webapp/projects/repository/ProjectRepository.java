@@ -1,12 +1,12 @@
 package com.testlink.webapp.projects.repository;
 
-import com.testlink.webapp.projects.entity.ProjectTable;
+import com.testlink.webapp.projects.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface ProjectTableRepository extends JpaRepository<ProjectTable, Long> {
-    Optional<ProjectTable> findByProjectKey(String projectKey);
+public interface ProjectRepository extends JpaRepository<Project, Long> {
+    Optional<Project> findByProjectKey(String projectKey);
 }
