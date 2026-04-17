@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PasswordResetToken extends JpaRepository<com.testlink.webapp.user.entity.PasswordResetToken, Long> {
+public interface PasswordResetTokenRepository extends JpaRepository<com.testlink.webapp.user.entity.PasswordResetToken, Long> {
     Optional<com.testlink.webapp.user.entity.PasswordResetToken> findByResetToken(String resetToken);
     List<com.testlink.webapp.user.entity.PasswordResetToken> findByUser(User user);
 }

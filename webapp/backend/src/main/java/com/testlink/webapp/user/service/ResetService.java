@@ -1,7 +1,8 @@
 package com.testlink.webapp.user.service;
 
+import com.testlink.webapp.user.entity.PasswordResetToken;
 import com.testlink.webapp.user.entity.User;
-import com.testlink.webapp.user.repository.PasswordResetToken;
+import com.testlink.webapp.user.repository.PasswordResetTokenRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,23 +16,23 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ResetService {
 
-    private final PasswordResetToken passwordResetToken;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
-    public Optional<com.testlink.webapp.user.entity.PasswordResetToken> findByResetToken(String resetToken) {
-        return passwordResetToken.findByResetToken(resetToken);
+    public Optional<PasswordResetToken> findByResetToken(String resetToken) {
+        return passwordResetTokenRepository.findByResetToken(resetToken);
     }
 
-    public com.testlink.webapp.user.entity.PasswordResetToken save(com.testlink.webapp.user.entity.PasswordResetToken passwordResetToken) {
-        return this.passwordResetToken.save(passwordResetToken);
+    public PasswordResetToken save(com.testlink.webapp.user.entity.PasswordResetToken passwordResetToken) {
+        return this.passwordResetTokenRepository.save(passwordResetToken);
     }
 
-    public void delete(@NonNull com.testlink.webapp.user.entity.PasswordResetToken passwordResetToken) {
-        this.passwordResetToken.delete(passwordResetToken);
+    public void delete(@NonNull PasswordResetToken passwordResetToken) {
+        this.passwordResetTokenRepository.delete(passwordResetToken);
     }
 
     public void deleteByUser(@NonNull User user) {
         log.debug("Deleting reset tokens for user: {}", user.getUsername());
-        List<com.testlink.webapp.user.entity.PasswordResetToken> tokens = passwordResetToken.findByUser(user);
-        passwordResetToken.deleteAll(tokens);
+        List<PasswordResetToken> tokens = passwordResetTokenRepository.findByUser(user);
+        passwordResetTokenRepository.deleteAll(tokens);
     }
 }
