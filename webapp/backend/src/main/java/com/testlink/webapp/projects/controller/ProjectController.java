@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 
-//TODO: Check read rights on project_membership, return there
 @RestController
 @RequestMapping("/projects")
 @RequiredArgsConstructor

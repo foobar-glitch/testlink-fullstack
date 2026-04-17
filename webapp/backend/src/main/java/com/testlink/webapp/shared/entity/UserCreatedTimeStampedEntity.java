@@ -10,6 +10,6 @@ import lombok.Setter;
 @Setter
 public abstract class UserCreatedTimeStampedEntity extends TimeStampedEntity {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
+    @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 }

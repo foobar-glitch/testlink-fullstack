@@ -8,7 +8,7 @@
 -- ======================================================================
 
 -- Project 1 - Suite 2 (Login Flow) - Numbers 1..10
-INSERT INTO test_cases (test_case_id, project_id, test_suite_id, number, title, description, status, created_by)
+INSERT INTO test_cases (test_case_id, project_id, test_suite_id, identifier_number, title, description, status, created_by)
 VALUES
     (1, 1, 2, 1, 'Valid credentials login', 'Verify user can log in with correct username and password.', 'ACTIVE', 1),
     (2, 1, 2, 2, 'Invalid password shows error', 'Verify error message appears for wrong password.', 'ACTIVE', 1),
@@ -23,7 +23,7 @@ VALUES
 ON CONFLICT (test_case_id) DO NOTHING;
 
 -- Project 1 - Suite 5 (Search) - Numbers 11..13
-INSERT INTO test_cases (test_case_id, project_id, test_suite_id, number, title, description, status, created_by)
+INSERT INTO test_cases (test_case_id, project_id, test_suite_id, identifier_number, title, description, status, created_by)
 VALUES
     (11, 1, 5, 11, 'Basic keyword search returns results', 'Verify search returns relevant products.', 'ACTIVE', 1),
     (12, 1, 5, 12, 'No results shows empty state', 'Verify empty state UI appears when no results found.', 'ACTIVE', 1),
@@ -31,7 +31,7 @@ VALUES
 ON CONFLICT (test_case_id) DO NOTHING;
 
 -- Project 1 - Suite 9 (Cart Management) - Numbers 14..16
-INSERT INTO test_cases (test_case_id, project_id, test_suite_id, number, title, description, status, created_by)
+INSERT INTO test_cases (test_case_id, project_id, test_suite_id, identifier_number, title, description, status, created_by)
 VALUES
     (14, 1, 9, 14, 'Add item to cart', 'Verify item is added and cart count updates.', 'ACTIVE', 1),
     (15, 1, 9, 15, 'Remove item from cart', 'Verify item removal updates total correctly.', 'ACTIVE', 1),

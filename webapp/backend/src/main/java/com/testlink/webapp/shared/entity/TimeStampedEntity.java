@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 public abstract class TimeStampedEntity {
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")

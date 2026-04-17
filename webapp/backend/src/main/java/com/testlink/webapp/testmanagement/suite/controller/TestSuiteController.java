@@ -1,14 +1,15 @@
 package com.testlink.webapp.testmanagement.suite.controller;
 
 import com.testlink.webapp.projects.entity.Project;
+import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.projects.entity.ProjectRole;
+import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.testmanagement.suite.dto.TestSuiteHierarchyDTO;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.mapper.TestSuiteMapper;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
-import com.testlink.webapp.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,21 +25,20 @@ import java.util.List;
 @RequestMapping("/projects")
 @RequiredArgsConstructor
 public class TestSuiteController {
-
-    private final ProjectService projectService;
     private final TestSuiteService testSuiteService;
     private final TestSuiteMapper testSuiteMapper;
+    private final ProjectAccessService projectAccessService;
 
     @GetMapping("/{projectId}/suites")
     public ResponseEntity<List<TestSuiteHierarchyDTO>> getTestSuites(
             @PathVariable Long projectId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        AccessContext ctx = buildContext(projectId, customUserDetails);
+        ProjectMembership projectMembership =  projectAccessService.checkAccessOfUserInProject(
+                projectId, customUserDetails.getUser(), ProjectRole.VIEWER
+        );
 
-        List<TestSuite> rootTree =
-                testSuiteService.findProjectTestSuiteRootTree(ctx.project());
-
+        List<TestSuite> rootTree = testSuiteService.findProjectTestSuiteRootTree(projectMembership.getProject());
         List<TestSuiteHierarchyDTO> hierarchyDTO = new ArrayList<>();
 
         for(TestSuite item: rootTree){
@@ -46,10 +46,9 @@ public class TestSuiteController {
                     .current(testSuiteMapper.toDto(item))
                     .parent(null)
                     .children(testSuiteMapper.toDtoList(
-                            testSuiteService.findChildrenOfTestSuiteInProject(ctx.project(), item)))
+                            testSuiteService.findChildrenOfTestSuiteInProject(projectMembership.getProject(), item)))
                             .build();
             hierarchyDTO.add(itemHierarchyDTO);
-
         }
 
         return ResponseEntity.ok(hierarchyDTO);
@@ -61,31 +60,18 @@ public class TestSuiteController {
             @PathVariable Long suiteId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        AccessContext ctx = buildContext(projectId, customUserDetails);
+        ProjectMembership projectMembership =  projectAccessService.checkAccessOfUserInProject(
+                projectId, customUserDetails.getUser(), ProjectRole.VIEWER
+        );
         TestSuite testSuite = testSuiteService.findBySuiteId(suiteId);
         TestSuiteHierarchyDTO hierarchyDTO = TestSuiteHierarchyDTO.builder()
                 .current(testSuiteMapper.toDto(testSuite))
                 .parent(testSuiteMapper.toDto(testSuite.getParentTestSuite()))
-                .children(testSuiteMapper.toDtoList(testSuiteService.findChildrenOfTestSuiteInProject(ctx.project(), testSuite)))
+                .children(testSuiteMapper.toDtoList(
+                        testSuiteService.findChildrenOfTestSuiteInProject(projectMembership.getProject(), testSuite))
+                )
                 .build();
-
         return ResponseEntity.ok(hierarchyDTO);
     }
 
-
-    private AccessContext buildContext(Long projectId, CustomUserDetails userDetails) {
-        User user = userDetails.getUser();
-        Project project = projectService.getProjectById(projectId);
-
-        projectService.verifyMemberShipRights(
-                project,
-                user,
-                ProjectRole.VIEWER
-        );
-
-        return new AccessContext(user, project);
-    }
-
-    // simple internal helper record
-    private record AccessContext(User user, Project project) {}
 }

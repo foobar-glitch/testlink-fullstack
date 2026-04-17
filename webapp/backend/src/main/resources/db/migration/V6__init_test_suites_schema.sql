@@ -39,7 +39,7 @@ CREATE TABLE test_cases (
                             test_case_id BIGSERIAL PRIMARY KEY,
                             project_id BIGINT NOT NULL,
                             test_suite_id BIGINT NOT NULL,
-                            number INT NOT NULL,
+                            identifier_number INT NOT NULL,
                             title VARCHAR(255) NOT NULL,
                             description TEXT,
                             status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
@@ -60,7 +60,7 @@ CREATE TABLE test_cases (
                                     REFERENCES users(user_id)
                                     ON DELETE RESTRICT,
                             CONSTRAINT uk_test_case_project_number
-                                UNIQUE (project_id, number),
+                                UNIQUE (project_id, identifier_number),
                             CONSTRAINT chk_test_case_status
                                 CHECK (status IN ('DRAFT', 'ACTIVE', 'DEPRECATED'))
 );
@@ -68,12 +68,12 @@ CREATE TABLE test_cases (
 COMMENT ON COLUMN test_cases.status IS 'Current state: DRAFT, ACTIVE, DEPRECATED';
 
 COMMENT ON TABLE test_cases IS 'Individual test cases, numbered per project';
-COMMENT ON COLUMN test_cases.number IS 'Project-scoped test case number (e.g., 1221 in ECU-1221)';
+COMMENT ON COLUMN test_cases.identifier_number IS 'Project-scoped test case number (e.g., 1221 in ECU-1221)';
 
 -- Indexes for performance
 CREATE INDEX idx_test_cases_project ON test_cases(project_id);
 CREATE INDEX idx_test_cases_test_suite ON test_cases(test_suite_id);
-CREATE INDEX idx_test_cases_project_number ON test_cases(project_id, number);
+CREATE INDEX idx_test_cases_project_number ON test_cases(project_id, identifier_number);
 
 
 -- =========================
@@ -195,7 +195,7 @@ CREATE INDEX idx_test_case_versions_created_by ON test_case_versions(created_by)
 -- Test Cases indexes (already partially present; ensure all are included)
 CREATE INDEX IF NOT EXISTS idx_test_cases_project ON test_cases(project_id);
 CREATE INDEX IF NOT EXISTS idx_test_cases_test_suite ON test_cases(test_suite_id);
-CREATE INDEX IF NOT EXISTS idx_test_cases_project_number ON test_cases(project_id, number);
+CREATE INDEX IF NOT EXISTS idx_test_cases_project_number ON test_cases(project_id, identifier_number);
 CREATE INDEX IF NOT EXISTS idx_test_cases_status ON test_cases(status);
 
 -- Test Suites indexes (already present; repeat for safety)
