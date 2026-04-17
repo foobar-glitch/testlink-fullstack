@@ -4,46 +4,56 @@
     <button class="logout-btn" (click)="logout()">Logout</button>
   </header>
 
-  <div *ngIf="loading" class="loading-state">
-    <app-spinner label="Loading projects..."></app-spinner>
-  </div>
-
   <div *ngIf="errorMessage" class="error-state">
     <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
   </div>
 
-  <div *ngIf="!loading && !errorMessage" class="projects-grid">
-    <div
-      *ngFor="let project of projects"
-      class="project-card"
-      (click)="selectProject(project)"
-    >
-      <div class="project-header">
-        <span class="prefix">{{ project.prefix }}</span>
-        <h3>{{ project.name }}</h3>
-      </div>
-      <p class="description">{{ project.description }}</p>
-      <div class="stats">
-        <div class="stat">
-          <span class="stat-label">Suites</span>
-          <span class="stat-value">{{ project.stats.suiteCount }}</span>
+  <ng-container *ngIf="projects$ | async as projects; else loading">
+    <div *ngIf="projects.length > 0; else empty" class="projects-grid">
+      <div
+        *ngFor="let project of projects"
+        class="project-card"
+        (click)="selectProject(project)"
+      >
+        <!-- project card content unchanged -->
+        <div class="project-header">
+          <span class="prefix">{{ project.projectKey }}</span>
+          <h3>{{ project.displayName }}</h3>
         </div>
-        <div class="stat">
-          <span class="stat-label">Test Cases</span>
-          <span class="stat-value">{{ project.stats.testCaseCount }}</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Runs</span>
-          <span class="stat-value">{{ project.stats.testRunCount }}</span>
-        </div>
-      </div>
-      <div class="created">
-        Created {{ project.createdAt | date:'mediumDate' }}
-      </div>
-    </div>
+        <p class="description">{{ project.description }}</p>
 
-    <div *ngIf="projects.length === 0" class="empty-state">
-      <p>No projects available.</p>
+        <!--
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">Suites</span>
+            <span class="stat-value">{{ project.stats?.suiteCount ?? 0 }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Test Cases</span>
+            <span class="stat-value">{{ project.stats?.testCaseCount ?? 0 }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Runs</span>
+            <span class="stat-value">{{ project.stats?.testRunCount ?? 0 }}</span>
+          </div>
+        </div>
+        -->
+
+        <div class="created">
+          Created {{ project.stamp?.timeStamp?.createdAt | date:'mediumDate' }}
+        </div>
+      </div>
     </div>
-  </div>
+    <ng-template #empty>
+      <div class="empty-state">
+        <p>No projects available.</p>
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="loading-state">
+      <app-spinner label="Loading projects..."></app-spinner>
+    </div>
+  </ng-template>
 </div>

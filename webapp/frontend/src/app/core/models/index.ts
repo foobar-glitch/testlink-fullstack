@@ -156,5 +156,6 @@ export interface PageRequest {
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
-  message?: string;
+  message?: string;      // optional, backend may omit
+  timestamp?: string;    // add this if you want to use it
 }

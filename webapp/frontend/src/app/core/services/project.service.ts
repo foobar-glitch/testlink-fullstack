@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 import { Project, PagedResponse, PageRequest, ApiResponse, ProjectMembership } from '../models';
-import { MOCK_PROJECTS } from '../mock/mock-data';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 

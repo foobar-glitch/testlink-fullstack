@@ -13,7 +13,8 @@ export const MOCK_USERS: User[] = [
 */
 
 // ─── Projects ────────────────────────────────────────────────────────────────
-export const MOCK_PROJECTS: Project[] = [
+/*
+const MOCK_PROJECTS: Project[] = [
   {
     id: 1, name: 'E-Commerce Platform', prefix: 'ECP',
     description: 'Frontend & backend testing for the main shopping platform.',
@@ -39,6 +40,8 @@ export const MOCK_PROJECTS: Project[] = [
     stats: { suiteCount: 6, testCaseCount: 54, testRunCount: 9 }
   },
 ];
+*/
+
 
 // ─── Test Suites ─────────────────────────────────────────────────────────────
 export const MOCK_SUITES: TestSuite[] = [

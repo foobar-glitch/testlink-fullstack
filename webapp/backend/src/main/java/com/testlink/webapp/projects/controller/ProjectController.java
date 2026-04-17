@@ -23,7 +23,7 @@ import java.util.List;
 
 //TODO: Check read rights on project_membership, return there
 @RestController
-@RequestMapping("/api/projects")
+@RequestMapping("/projects")
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;

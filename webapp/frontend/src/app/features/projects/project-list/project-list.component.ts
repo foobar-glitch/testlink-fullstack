@@ -1,50 +1,46 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { ProjectService } from '../../../core/services/project.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { ApiResponse, Project, ProjectMembership } from '../../../core/models';
-// 👇 Add these two imports
+import { Project } from '../../../core/models';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../shared/components/error-banner/error-banner.component';
 
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  // 👇 Add SpinnerComponent and ErrorBannerComponent to the imports array
   imports: [CommonModule, RouterModule, SpinnerComponent, ErrorBannerComponent],
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss']
 })
-export class ProjectListComponent implements OnInit {
+export class ProjectListComponent {
   private projectService = inject(ProjectService);
   private auth = inject(AuthService);
 
-  projects: Project[] = [];
-  loading = true;
+  projects$: Observable<Project[]>;
   errorMessage = '';
 
-
-  ngOnInit(): void {
+  constructor() {
     const user = this.auth.currentUser;
     if (user) {
-      this.projectService.getProjectMemberships().subscribe({
-        next: (projectsMember: ApiResponse<ProjectMembership[]>) => {
-
-          this.projects = projects;
-          this.loading = false;
-        },
-        error: (err) => {
+      this.projects$ = this.projectService.getProjectMemberships().pipe(
+        map(response => response.data.map(m => m.project)),
+        catchError(err => {
           this.errorMessage = err.message || 'Failed to load projects';
-          this.loading = false;
-        }
-      });
+          return of([]);
+        })
+      );
+    } else {
+      this.errorMessage = 'Please log in to view projects.';
+      this.projects$ = of([]);
     }
   }
 
   selectProject(project: Project): void {
     this.projectService.selectProject(project);
-    // Navigate later with Router
   }
 
   logout(): void {
