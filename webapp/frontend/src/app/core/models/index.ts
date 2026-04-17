@@ -53,18 +53,19 @@ export interface ProjectStats {
 
 // ─── Test Suite ──────────────────────────────────────────────────────────────
 export interface TestSuite {
-  id: number;
-  projectId: number;
-  parentId: number | null;
+  testSuiteId: number;
   name: string;
   description: string;
-  childCount: number;
-  testCaseCount: number;
+  project: Project;           // Nested project info
+  stamp: UserCreatedTimeStamp;
+  // UI state
   children?: TestSuite[];
   expanded?: boolean;
   loading?: boolean;
+  // Optional stats (not provided by backend yet)
+  childCount?: number;
+  testCaseCount?: number;
 }
-
 // ─── Test Case ───────────────────────────────────────────────────────────────
 export interface TestCase {
   id: number;

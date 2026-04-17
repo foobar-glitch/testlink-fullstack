@@ -35,7 +35,7 @@ public class ProjectController {
         List<ProjectMembership> projectMembership = projectService.getUserProjects(userDetails.getUser());
         ApiResponse<List<ProjectMembershipDTO>> response = ApiResponse.<List<ProjectMembershipDTO>>builder()
                 .success(true)
-                .data(projectMembership.stream().map(projectMapper::toMembershipDto).toList())
+                .data(projectMapper.toMembershipDtoList(projectMembership))
                 .timestamp(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(response);

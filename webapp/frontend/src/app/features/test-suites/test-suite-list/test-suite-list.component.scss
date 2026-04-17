@@ -1,0 +1,118 @@
+.suite-list-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  h2 {
+    margin: 0;
+    color: #e2e8f0;
+  }
+}
+
+.back-btn {
+  background: transparent;
+  border: 1px solid #4a5270;
+  color: #e2e8f0;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: #6b7a9f;
+  }
+}
+
+.tree {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+
+  .tree {
+    padding-left: 28px;
+  }
+}
+
+.tree-node {
+  margin: 4px 0;
+}
+
+.node-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.expand-toggle {
+  width: 18px;
+  display: inline-block;
+  text-align: center;
+  color: #8892b0;
+  font-size: 12px;
+  cursor: pointer;
+
+  &.has-children {
+    color: #4f8ef7;
+  }
+}
+
+.suite-icon {
+  font-size: 16px;
+}
+
+.suite-name {
+  flex: 1;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.suite-meta {
+  font-size: 12px;
+  color: #4a5270;
+}
+
+.loading-indicator {
+  margin-left: 8px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #8892b0;
+
+  .create-btn {
+    margin-top: 16px;
+    background: #4f8ef7;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  justify-content: center;
+  min-height: 200px;
+}

@@ -1,7 +1,7 @@
 // project-list.component.ts
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ProjectService } from '../../../core/services/project.service';
@@ -21,6 +21,7 @@ import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-b
 export class ProjectListComponent {
   private projectService = inject(ProjectService);
   private auth = inject(AuthService);
+  private router = inject(Router)
 
   memberships$: Observable<ProjectMembership[]>;
   errorMessage = '';
@@ -43,6 +44,7 @@ export class ProjectListComponent {
 
   selectProject(project: Project): void {
     this.projectService.selectProject(project);
+    this.router.navigate(['/projects', project.projectId, 'suites']);
   }
 
   logout(): void {
