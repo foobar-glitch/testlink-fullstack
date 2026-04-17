@@ -49,6 +49,6 @@ export class TestSuiteListComponent {
   }
 
   hasChildren(suite: TestSuite): boolean {
-    return suite?.children?.length > 0;
+    return (suite.children?.length ?? 0) > 0;
   }
 }
