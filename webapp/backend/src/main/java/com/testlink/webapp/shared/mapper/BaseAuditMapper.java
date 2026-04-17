@@ -8,14 +8,10 @@ import com.testlink.webapp.user.dto.UserSummaryDTO;
 import com.testlink.webapp.user.entity.UserTable;
 import com.testlink.webapp.user.mapper.UserMapper;
 import org.mapstruct.Mapper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(componentModel = "spring", uses = {UserMapper.class})
 public abstract class BaseAuditMapper {
-
-    @Autowired
-    protected UserMapper userMapper;
-
+    
     protected UserCreatedTimeStampDTO mapAudit(UserCreatedTimeStampedEntity entity) {
         UserTable createdBy = entity.getCreatedBy();
         UserSummaryDTO userSummary = createdBy != null
