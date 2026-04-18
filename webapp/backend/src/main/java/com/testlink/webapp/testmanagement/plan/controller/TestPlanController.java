@@ -1,12 +1,17 @@
 package com.testlink.webapp.testmanagement.plan.controller;
 
 import com.testlink.webapp.projects.entity.Project;
+import com.testlink.webapp.projects.entity.ProjectRole;
+import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.testmanagement.plan.dto.TestPlanDTO;
 import com.testlink.webapp.testmanagement.plan.mapper.TestPlanMapper;
 import com.testlink.webapp.testmanagement.plan.service.TestPlanService;
 import com.testlink.webapp.testmanagement.testcase.service.ValidatePathService;
+import com.testlink.webapp.user.entity.CustomUserDetails;
+import com.testlink.webapp.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,18 +27,21 @@ public class TestPlanController {
     private final TestPlanService testPlanService;
     private final TestPlanMapper testPlanMapper;
     private final ValidatePathService validatePathService;
+    private final ProjectAccessService accessService;
 
 
     @GetMapping("")
-    public List<TestPlanDTO> testPlansOfProjects(@PathVariable String projectKey){
+    public List<TestPlanDTO> testPlansOfProjects(@PathVariable String projectKey, @AuthenticationPrincipal CustomUserDetails userDetails){
         Project project = projectService.getProjectByKey(projectKey);
+        accessService.checkAccessOfUserInProject(project, userDetails.getUser(), ProjectRole.VIEWER);
         return testPlanMapper.toDtoList(testPlanService.findTestPlanOfProject(project));
     }
 
     @GetMapping("/{testPlanId}")
-    public TestPlanDTO testPlanOfProjectOfId(@PathVariable String projectKey, @PathVariable Long testPlanId){
+    public TestPlanDTO testPlanOfProjectOfId(@PathVariable String projectKey, @PathVariable Long testPlanId, @AuthenticationPrincipal CustomUserDetails userDetails){
         ValidatePathService.ProjectTestPlan projectTestPlan = validatePathService.checkTestPlanPath(
                 projectKey, testPlanId);
+        accessService.checkAccessOfUserInProject(projectTestPlan.project(), userDetails.getUser(), ProjectRole.VIEWER);
         return testPlanMapper.toDto(projectTestPlan.testPlan());
     }
 
