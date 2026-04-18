@@ -5,17 +5,12 @@ import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
-import com.testlink.webapp.shared.exception.BadRequestException;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseDTO;
-import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
-import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseMapper;
-import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseVersionMapper;
 import com.testlink.webapp.testmanagement.testcase.service.TestCaseService;
-import com.testlink.webapp.testmanagement.testcase.service.TestCaseVersionService;
 import com.testlink.webapp.testmanagement.testcase.service.ValidatePathService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
 import com.testlink.webapp.user.entity.User;
@@ -49,14 +44,12 @@ public class TestCaseController {
             @PathVariable Long suiteId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
+        ValidatePathService.ProjectTestSuite projectTestSuite = validatePathService.checkPath(projectKey, suiteId);
         User user = customUserDetails.getUser();
-        Project project = projectService.getProjectByKey(projectKey);
         ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
-                project, user, ProjectRole.VIEWER);
-        TestSuite testSuite = testSuiteService.findBySuiteId(suiteId);
-        validatePathService.checkSuiteInProject(testSuite, project);
+                projectTestSuite.project(), user, ProjectRole.VIEWER);
         List<TestCase> testCases = testCaseService.findAllTestCasesOfProjectAndSuite(
-                membership.getProject(), testSuite);
+                membership.getProject(), projectTestSuite.testSuite());
         return ResponseEntity.ok(testCaseMapper.toDtoList(testCases));
     }
 
@@ -68,17 +61,12 @@ public class TestCaseController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){
         User user = customUserDetails.getUser();
-        TestSuite suite = testSuiteService.findBySuiteId(suiteId);
-        Project project = projectService.getProjectByKey(projectKey);
-        validatePathService.checkSuiteInProject(suite, project);
+        ValidatePathService.ProjectTestSuiteTestCase testSuiteTestCase = validatePathService.checkPath(projectKey, suiteId, testCaseIdentifier);
 
         ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
-                project, user, ProjectRole.VIEWER);
+                testSuiteTestCase.project(), user, ProjectRole.VIEWER);
 
-        TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(membership.getProject(), testCaseIdentifier);
-
-        validatePathService.checkTestCaseInSuite(testCase, suite);
-        return ResponseEntity.ok(testCaseMapper.toDto(testCase)
+        return ResponseEntity.ok(testCaseMapper.toDto(testSuiteTestCase.testCase())
         );
     }
 

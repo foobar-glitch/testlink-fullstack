@@ -48,15 +48,10 @@ public class TestCaseVersionController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         User user = userDetails.getUser();
-        Project project = projectService.getProjectByKey(projectKey);
-        ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
-                project, user, ProjectRole.VIEWER);
-        TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(membership.getProject(), testCaseIdentifier);
+        ValidatePathService.ProjectTestSuiteTestCase testSuiteTestCase = validatePathService.checkPath(projectKey, suiteId, testCaseIdentifier);
 
-        TestSuite suite = testSuiteService.findBySuiteId(suiteId);
-        validatePathService.checkSuiteInProject(suite, project);
-        validatePathService.checkTestCaseInSuite(testCase, suite);
-        List<TestCaseVersion> versions = testCaseVersionService.getVersionsForTestCase(testCase);
+        projectAccessService.checkAccessOfUserInProject(testSuiteTestCase.project(), user, ProjectRole.VIEWER);
+        List<TestCaseVersion> versions = testCaseVersionService.getVersionsForTestCase(testSuiteTestCase.testCase());
         return ResponseEntity.ok(testCaseVersionMapper.toDtoList(versions));
     }
 
@@ -69,16 +64,10 @@ public class TestCaseVersionController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         User user = userDetails.getUser();
-        Project project = projectService.getProjectByKey(projectKey);
-        ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
-                project, user, ProjectRole.VIEWER);
-        TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(membership.getProject(), testCaseIdentifier);
+        ValidatePathService.ProjectTestSuiteTestCaseTestVersion projectTestSuiteTestCaseTestVersion = validatePathService.checkPath(projectKey, suiteId, testCaseIdentifier, versionNumber);
+        projectAccessService.checkAccessOfUserInProject(projectTestSuiteTestCaseTestVersion.project(), user, ProjectRole.VIEWER);
 
-        TestSuite suite = testSuiteService.findBySuiteId(suiteId);
-        validatePathService.checkSuiteInProject(suite, project);
-        validatePathService.checkTestCaseInSuite(testCase, suite);
-        TestCaseVersion testCaseVersion = testCaseVersionService.findByTestCaseAndVersionNumber(testCase, versionNumber);
-        return ResponseEntity.ok(testCaseVersionMapper.toDto(testCaseVersion));
+        return ResponseEntity.ok(testCaseVersionMapper.toDto(projectTestSuiteTestCaseTestVersion.testCaseVersion()));
     }
 }
 
