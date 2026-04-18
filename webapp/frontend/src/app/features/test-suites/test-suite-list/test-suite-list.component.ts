@@ -4,9 +4,9 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TestSuiteService } from '../../../core/services/test-suite.service';
-import { TestSuite } from '../../../core/models';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../shared/components/error-banner/error-banner.component';
+import { TestSuite } from '../../../core/models/testsuite';
 
 @Component({
   selector: 'app-test-suite-list',

@@ -25,7 +25,7 @@
   <!-- Data -->
   <ng-container *ngIf="testCases$ | async as testCases; else loading">
     <div *ngIf="testCases.length > 0; else empty" class="test-cases-grid">
-      <div *ngFor="let tc of testCases" class="test-case-card">
+      <div *ngFor="let tc of testCases" class="test-case-card" (click)="selectTestCase(tc)">
         <div class="card-header">
           <span class="identifier">{{ getTestCaseIdentifier(tc) }}</span>
           <app-status-badge [status]="tc.status"></app-status-badge>

@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ExecutionStatus } from '../../../core/models'; // adjust import path
+
+import { ExecutionStatus } from '../../../core/models/testexecution'; // adjust import path
 
 
 @Component({

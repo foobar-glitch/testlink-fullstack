@@ -1,15 +1,15 @@
 // src/app/features/test-cases/test-case-list/test-case-list.component.ts
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { TestCaseService } from '../../../core/services/test-case.service';
 import { TestSuiteService } from '../../../core/services/test-suite.service';
-import { TestCase } from '../../../core/models';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../shared/components/error-banner/error-banner.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { TestCase } from '../../../core/models/testsuite';
 
 @Component({
   selector: 'app-test-case-list',
@@ -28,6 +28,7 @@ export class TestCaseListComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly testCaseService = inject(TestCaseService);
   private readonly testSuiteService = inject(TestSuiteService);
+  private readonly router = inject(Router);
 
   readonly projectId: number;
   readonly suiteId: number;
@@ -61,5 +62,16 @@ export class TestCaseListComponent {
 
   getTestCaseIdentifier(testCase: TestCase): string {
     return `${testCase.testSuite.project.projectKey}-${testCase.identifierNumber}`;
+  }
+  selectTestCase(testCase: TestCase): void {
+    this.router.navigate([
+      '/projects',
+      this.projectId,
+      'suites',
+      this.suiteId,
+      'cases',
+      testCase.testCaseId,
+      'versions'
+    ]);
   }
 }

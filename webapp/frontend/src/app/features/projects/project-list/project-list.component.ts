@@ -5,10 +5,10 @@ import { Observable, of } from 'rxjs';
 import { map, catchError, filter, switchMap, startWith } from 'rxjs/operators';
 import { ProjectService } from '../../../core/services/project.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { ProjectMembership } from '../../../core/models';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../shared/components/error-banner/error-banner.component';
 import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
+import { ProjectMembership } from '../../../core/models/project';
 
 @Component({
   selector: 'app-project-list',

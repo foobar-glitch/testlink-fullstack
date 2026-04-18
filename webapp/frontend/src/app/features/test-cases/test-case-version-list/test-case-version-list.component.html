@@ -1,0 +1,51 @@
+<div class="version-list-container">
+  <header class="header">
+    <div class="title-section">
+      <h2>Version History</h2>
+      <span *ngIf="testCaseTitle$ | async as title" class="testcase-title">
+        {{ title }}
+      </span>
+    </div>
+    <button class="back-btn" [routerLink]="['/projects', projectId, 'suites', suiteId, 'cases']">
+      ← Back to Test Cases
+    </button>
+  </header>
+
+  <div *ngIf="errorMessage" class="error-state">
+    <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
+  </div>
+
+  <ng-container *ngIf="versions$ | async as versions; else loading">
+    <div *ngIf="versions.length > 0; else empty" class="versions-table">
+      <table>
+        <thead>
+        <tr>
+          <th>Version</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let version of versions" (click)="viewVersion(version.testCaseVersionId)" class="clickable-row">
+          <td>v{{ version.versionNumber }}</td>
+          <td><app-status-badge [status]="version.status"></app-status-badge></td>
+          <td>{{ version.testCase.stamp.timeStamp.createdAt | date:'medium' }}</td>
+          <td><button class="view-btn">View</button></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #empty>
+      <div class="empty-state">
+        <p>No versions found for this test case.</p>
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="loading-state">
+      <app-spinner label="Loading versions..."></app-spinner>
+    </div>
+  </ng-template>
+</div>

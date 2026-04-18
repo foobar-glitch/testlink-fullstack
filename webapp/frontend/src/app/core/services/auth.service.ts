@@ -2,8 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, catchError, Observable, of, tap } from 'rxjs';
 import { Router } from '@angular/router';
-import { User, LoginRequest, AuthResponse } from '../models';
 import { environment } from '../../../environments/environment';
+import { AuthResponse, Authentication, LoginRequest } from '../models/authentication';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -11,12 +11,12 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly apiUrl = environment.apiUrl;
 
-  private _currentUser$ = new BehaviorSubject<User | null>(null);
+  private _currentUser$ = new BehaviorSubject<Authentication | null>(null);
   readonly currentUser$ = this._currentUser$.asObservable();
 
   private isInitialized = false;
 
-  get currentUser(): User | null {
+  get currentUser(): Authentication | null {
     return this._currentUser$.value;
   }
 
@@ -28,11 +28,11 @@ export class AuthService {
    * Initialize the service by fetching the current user from the backend.
    * Call this once during app startup (e.g., in APP_INITIALIZER).
    */
-  initialize(): Observable<User | null> {
+  initialize(): Observable<Authentication | null> {
     if (this.isInitialized) {
       return of(this.currentUser);
     }
-    return this.http.get<User>(`${this.apiUrl}auth/me`, { withCredentials: true }).pipe(
+    return this.http.get<Authentication>(`${this.apiUrl}auth/me`, { withCredentials: true }).pipe(
       tap(user => {
         this._currentUser$.next(user);
         this.isInitialized = true;
@@ -72,7 +72,7 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  private extractUserFromResponse(response: AuthResponse): User | null {
+  private extractUserFromResponse(response: AuthResponse): Authentication | null {
     if (response && (response as any).user) {
       return (response as any).user;
     }
@@ -80,7 +80,7 @@ export class AuthService {
       return (response as any).data.user;
     }
     if (response && 'id' in response && 'username' in response) {
-      return response as unknown as User;
+      return response as unknown as Authentication;
     }
     console.warn('Unable to extract user from AuthResponse', response);
     return null;

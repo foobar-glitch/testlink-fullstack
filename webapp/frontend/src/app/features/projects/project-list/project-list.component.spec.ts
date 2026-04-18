@@ -4,9 +4,9 @@ import { of, throwError } from 'rxjs';
 import { ProjectListComponent } from './project-list.component';
 import { ProjectService } from '../../../core/services/project.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Project } from '../../../core/models';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../shared/components/error-banner/error-banner.component';
+import { Project } from '../../../core/models/project';
 
 describe('ProjectListComponent', () => {
   let component: ProjectListComponent;

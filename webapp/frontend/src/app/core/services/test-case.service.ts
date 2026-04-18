@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
-import { TestCase } from '../models';
+import { environment } from '../../../environments/environment';
+import { TestCase } from '../models/testsuite';
 
 @Injectable({ providedIn: 'root' })
 export class TestCaseService {
@@ -16,6 +16,17 @@ export class TestCaseService {
   getTestCases(projectId: number, suiteId: number): Observable<TestCase[]> {
     return this.http.get<TestCase[]>(
       `${this.apiUrl}projects/${projectId}/suites/${suiteId}/cases`,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * Get a single test case by its ID.
+   * Endpoint: GET /projects/:projectId/suites/:suiteId/cases/:testCaseId
+   */
+  getTestCase(projectId: number, suiteId: number, testCaseId: number): Observable<TestCase> {
+    return this.http.get<TestCase>(
+      `${this.apiUrl}projects/${projectId}/suites/${suiteId}/cases/${testCaseId}`,
       { withCredentials: true }
     );
   }

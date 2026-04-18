@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProjectRole } from '../../../core/models';
+
+import { ProjectRole } from '../../../core/models/project';
 
 
 
