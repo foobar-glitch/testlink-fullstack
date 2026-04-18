@@ -1,25 +1,54 @@
-<form (ngSubmit)="onSubmit()">
-  <div class="input-group">
-    <input
-      [(ngModel)]="username"
-      name="username"
-      placeholder="Username"
-      required
-    />
+<!-- login.component.html -->
+<!-- Matches the React shop's clean white card login style -->
+<div class="login-container">
+
+  <div class="brand">
+    <div class="brand-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10.5" stroke="#6c63ff" stroke-width="2"/>
+        <path d="M7.5 12.5l3 3 6-6" stroke="#6c63ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h2>TestFlow</h2>
+    <p class="subtitle">Sign in to your workspace</p>
   </div>
 
-  <div class="input-group">
-    <input
-      type="password"
-      [(ngModel)]="password"
-      name="password"
-      placeholder="Password"
-      required
-    />
-  </div>
+  <app-error-banner
+    *ngIf="errorMessage"
+    [message]="errorMessage"
+    (dismissed)="errorMessage = ''"
+  ></app-error-banner>
 
-  <button type="submit" [disabled]="loading">
-    <app-spinner *ngIf="loading" [inline]="true"></app-spinner>
-    <span *ngIf="!loading">Login</span>
-  </button>
-</form>
+  <form (ngSubmit)="onSubmit()">
+    <div class="input-group">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        [(ngModel)]="username"
+        name="username"
+        placeholder="Enter your username"
+        autocomplete="username"
+        required
+      />
+    </div>
+
+    <div class="input-group">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        [(ngModel)]="password"
+        name="password"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+        required
+      />
+    </div>
+
+    <button type="submit" class="submit-btn" [disabled]="loading">
+      <app-spinner *ngIf="loading" [inline]="true"></app-spinner>
+      <span *ngIf="!loading">Sign in</span>
+    </button>
+  </form>
+
+</div>

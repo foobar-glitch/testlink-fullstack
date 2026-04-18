@@ -1,29 +1,39 @@
 // ─── role-badge.component.scss ───────────────────────────────────────────────
 @use '../../styles/variables' as vars;
+
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 8px;           /* Adjusted padding for label look */
-  border-radius: 4px;         /* Changed from pill to rounded rectangle */
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: vars.$radius-pill;
   font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
   border: 1px solid transparent;
 
-  /* You can remove the .dot styles entirely if you deleted it from HTML */
+  .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
 
   &.admin {
-    background: #9a7800;      /* Solid background for a "proper label" */
-    color: #fff;              /* White text for better contrast */
+    background: rgba(#c49a00, 0.1);
+    color: #9a7800;
+    border-color: rgba(#c49a00, 0.3);
   }
-
   &.tester {
-    background: vars.$accent; /* Solid accent color */
-    color: #fff;
+    background: vars.$accent-soft;
+    color: vars.$accent-dark;
+    border-color: vars.$accent-mid;
   }
-
   &.viewer {
-    background: #7c3aed;      /* Solid purple */
-    color: #fff;
+    background: rgba(#a78bfa, 0.1);
+    color: darken(#a78bfa, 20%);
+    border-color: rgba(#a78bfa, 0.3);
   }
 }

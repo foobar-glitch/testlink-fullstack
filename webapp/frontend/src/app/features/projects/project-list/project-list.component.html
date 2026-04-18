@@ -1,57 +1,56 @@
+<!-- project-list.component.html -->
+<!-- The global app-header now handles logout + breadcrumbs.
+     This page owns the page-level heading + content only. -->
 <div class="project-list-container">
+
   <header class="header">
-    <h2>Projects</h2>
-    <button class="logout-btn" (click)="logout()">Logout</button>
+    <div class="title-group">
+      <h2>Projects</h2>
+      <span class="count" *ngIf="memberships$ | async as m">{{ m.length }} project{{ m.length !== 1 ? 's' : '' }}</span>
+    </div>
   </header>
 
-  <div *ngIf="errorMessage" class="error-state">
-    <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
+  <div *ngIf="errorMessage">
+    <app-error-banner
+      [message]="errorMessage"
+      (dismissed)="errorMessage = ''"
+    ></app-error-banner>
   </div>
 
   <ng-container *ngIf="memberships$ | async as memberships; else loading">
+
     <div *ngIf="memberships.length > 0; else empty" class="projects-grid">
       <div
-        *ngFor="let membership of memberships$ | async"
+        *ngFor="let membership of memberships"
         class="project-card"
         (click)="selectProject(membership.project)"
+        role="button"
+        tabindex="0"
+        (keydown.enter)="selectProject(membership.project)"
       >
         <div class="project-header">
           <span class="prefix">{{ membership.project.projectKey }}</span>
           <h3>{{ membership.project.displayName }}</h3>
         </div>
 
-        <!-- Role badge -->
         <div class="role-badge">
           <app-role-badge [role]="membership.role"></app-role-badge>
         </div>
 
         <p class="description">{{ membership.project.description }}</p>
-        <!--
-        <div class="stats">
-          <div class="stat">
-            <span class="stat-label">Suites</span>
-            <span class="stat-value">{{ project.stats?.suiteCount ?? 0 }}</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Test Cases</span>
-            <span class="stat-value">{{ project.stats?.testCaseCount ?? 0 }}</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Runs</span>
-            <span class="stat-value">{{ project.stats?.testRunCount ?? 0 }}</span>
-          </div>
-        </div>
-        -->
+
         <div class="created">
           Created {{ membership.project.stamp?.timeStamp?.createdAt | date:'mediumDate' }}
         </div>
       </div>
     </div>
+
     <ng-template #empty>
       <div class="empty-state">
         <p>No projects available.</p>
       </div>
     </ng-template>
+
   </ng-container>
 
   <ng-template #loading>
@@ -59,4 +58,5 @@
       <app-spinner label="Loading projects..."></app-spinner>
     </div>
   </ng-template>
+
 </div>

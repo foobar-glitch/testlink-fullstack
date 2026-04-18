@@ -1,0 +1,151 @@
+// ─── app-header.component.scss ───────────────────────────────────────────────
+// Mirrors the React shop's .user-header: white, sticky, 60px, DM Sans,
+// logo left · breadcrumb center · user pill + logout right.
+@use '../../styles/variables' as vars;
+@use '../../styles/mixins' as mix;
+
+:host {
+  display: block;
+}
+
+.app-header {
+  background: vars.$white;
+  border-bottom: 1px solid vars.$border;
+  box-shadow: vars.$shadow-sm;
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  font-family: vars.$font;
+}
+
+// ── Brand / logo ──────────────────────────────────────────────────────────────
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  flex-shrink: 0;
+
+  .brand-icon {
+    width: 32px;
+    height: 32px;
+    background: vars.$accent-soft;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: vars.$transition;
+  }
+
+  .brand-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: vars.$text;
+    letter-spacing: -0.2px;
+  }
+
+  &:hover .brand-icon {
+    background: vars.$accent-mid;
+  }
+}
+
+// ── Breadcrumb nav ────────────────────────────────────────────────────────────
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+
+  .crumb {
+    font-size: 13px;
+    font-weight: 600;
+    color: vars.$muted;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.15s;
+
+    &:hover { color: vars.$accent; }
+
+    &.current {
+      color: vars.$text;
+      cursor: default;
+    }
+  }
+
+  .crumb-sep {
+    font-size: 14px;
+    color: vars.$border;
+    flex-shrink: 0;
+  }
+}
+
+// ── Spacer ────────────────────────────────────────────────────────────────────
+.spacer { flex: 1; }
+
+// ── Right icons ───────────────────────────────────────────────────────────────
+.icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: vars.$gray-light;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-pill;
+  padding: 4px 12px 4px 4px;
+
+  .avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: vars.$accent;
+    color: vars.$white;
+    font-size: 10px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0.3px;
+  }
+
+  .username {
+    font-size: 13px;
+    font-weight: 600;
+    color: vars.$text;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.icon-btn {
+  @include mix.icon-btn;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: vars.$muted;
+
+  &:hover {
+    color: vars.$red;
+    background: rgba(vars.$red, 0.08);
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 600px) {
+  .app-header { padding: 0 14px; gap: 10px; }
+  .breadcrumb { display: none; }
+  .username { display: none; }
+  .user-pill { padding: 4px; }
+}
