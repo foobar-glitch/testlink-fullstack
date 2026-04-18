@@ -5,13 +5,15 @@ import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
-import com.testlink.webapp.shared.exception.BadRequestException;
+import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
+import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseVersionMapper;
 import com.testlink.webapp.testmanagement.testcase.service.TestCaseService;
 import com.testlink.webapp.testmanagement.testcase.service.TestCaseVersionService;
+import com.testlink.webapp.testmanagement.testcase.service.ValidatePathService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
 import com.testlink.webapp.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/projects")
+@RequestMapping("/projects/project-key/{projectKey}/suite/{suiteId}/testcase-identifier/{testCaseIdentifier}/versions")
 @RequiredArgsConstructor
 public class TestCaseVersionController {
     private final ProjectService projectService;
@@ -35,7 +37,10 @@ public class TestCaseVersionController {
     private final TestCaseVersionService testCaseVersionService;
     private final TestCaseVersionMapper testCaseVersionMapper;
 
-    @GetMapping("/project-key/{projectKey}/suite/{suiteId}/testcase-identifier/{testCaseIdentifier}/versions")
+    private final ValidatePathService validatePathService;
+    private final TestSuiteService testSuiteService;
+
+    @GetMapping("")
     public ResponseEntity<List<TestCaseVersionDTO>> getVersions(
             @PathVariable String projectKey,
             @PathVariable Long suiteId,
@@ -47,14 +52,15 @@ public class TestCaseVersionController {
         ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
                 project, user, ProjectRole.VIEWER);
         TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(membership.getProject(), testCaseIdentifier);
-        if(!testCase.getTestSuite().getTestSuiteId().equals(suiteId)){
-            throw new BadRequestException(String.format("SuiteId %d not in testcase %d", suiteId, testCaseIdentifier));
-        }
+
+        TestSuite suite = testSuiteService.findBySuiteId(suiteId);
+        validatePathService.checkSuiteInProject(suite, project);
+        validatePathService.checkTestCaseInSuite(testCase, suite);
         List<TestCaseVersion> versions = testCaseVersionService.getVersionsForTestCase(testCase);
         return ResponseEntity.ok(testCaseVersionMapper.toDtoList(versions));
     }
 
-    @GetMapping("/project-key/{projectKey}/suite/{suiteId}/testcase-identifier/{testCaseIdentifier}/version/{versionNumber}")
+    @GetMapping("/{versionNumber}")
     public ResponseEntity<TestCaseVersionDTO> getVersion(
             @PathVariable String projectKey,
             @PathVariable Long suiteId,
@@ -67,9 +73,10 @@ public class TestCaseVersionController {
         ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
                 project, user, ProjectRole.VIEWER);
         TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(membership.getProject(), testCaseIdentifier);
-        if(!testCase.getTestSuite().getTestSuiteId().equals(suiteId)){
-            throw new BadRequestException(String.format("SuiteId %d not in testcase %d", suiteId, testCaseIdentifier));
-        }
+
+        TestSuite suite = testSuiteService.findBySuiteId(suiteId);
+        validatePathService.checkSuiteInProject(suite, project);
+        validatePathService.checkTestCaseInSuite(testCase, suite);
         TestCaseVersion testCaseVersion = testCaseVersionService.findByTestCaseAndVersionNumber(testCase, versionNumber);
         return ResponseEntity.ok(testCaseVersionMapper.toDto(testCaseVersion));
     }

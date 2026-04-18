@@ -58,7 +58,7 @@ export class TestCaseVersionListComponent {
 
     // Fetch the test case details to get the title
     this.testCaseTitle$ = this.testCaseService
-      .getTestCase(this.projectKey, this.testCaseIdentifier)
+      .getTestCase(this.projectKey, this.testCaseIdentifier, this.suiteId)
       .pipe(
         map(tc => tc?.title || 'Test Case'),
         catchError(() => of('Test Case'))
