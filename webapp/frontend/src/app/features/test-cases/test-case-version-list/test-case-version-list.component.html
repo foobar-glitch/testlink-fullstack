@@ -6,8 +6,11 @@
         {{ title }}
       </span>
     </div>
-    <button class="back-btn" [routerLink]="['/projects']">
-      ← Back to Projects
+    <button
+      class="back-btn"
+      [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases']"
+    >
+      ← Back to Test Cases
     </button>
   </header>
 
