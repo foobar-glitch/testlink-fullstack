@@ -34,8 +34,7 @@ public class TestCaseVersionController {
     private final TestCaseVersionService testCaseVersionService;
     private final TestCaseVersionMapper testCaseVersionMapper;
 
-
-    @GetMapping("/testcase/{projectKey}/{testCaseIdentifier}/versions")
+    @GetMapping("/project-key/{projectKey}/testcase-identifier/{testCaseIdentifier}/versions")
     public ResponseEntity<List<TestCaseVersionDTO>> getVersions(
             @PathVariable String projectKey,
             @PathVariable Long testCaseIdentifier,
@@ -50,7 +49,7 @@ public class TestCaseVersionController {
         return ResponseEntity.ok(testCaseVersionMapper.toDtoList(versions));
     }
 
-    @GetMapping("/testcase/{projectKey}/{testCaseIdentifier}/version/{versionNumber}")
+    @GetMapping("/project-key/{projectKey}/testcase-identifier/{testCaseIdentifier}/version/{versionNumber}")
     public ResponseEntity<TestCaseVersionDTO> getVersion(
             @PathVariable String projectKey,
             @PathVariable Long testCaseIdentifier,

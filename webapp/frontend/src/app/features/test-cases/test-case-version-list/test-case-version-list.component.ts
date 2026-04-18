@@ -42,7 +42,6 @@ export class TestCaseVersionListComponent {
     this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
     this.testCaseIdentifier = Number(this.route.snapshot.paramMap.get('testCaseIdentifier'));
 
-    console.log(this.projectKey);
 
     // Fetch versions using projectKey and testCaseIdentifier
     this.versions$ = this.versionService

@@ -53,7 +53,7 @@ public class TestCaseController {
         return ResponseEntity.ok(testCaseMapper.toDtoList(testCases));
     }
 
-    @GetMapping("/testcase/{projectKey}/{testCaseIdentifier}")
+    @GetMapping("/project-key/{projectKey}/testcase-identifier/{testCaseIdentifier}")
     public ResponseEntity<TestCaseDTO> getTestCaseOfProjectNumber(
             @PathVariable String projectKey,
             @PathVariable Long testCaseIdentifier,

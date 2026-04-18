@@ -2,8 +2,9 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 import { TestSuiteService } from '../../../core/services/test-suite.service';
+import { ProjectService } from '../../../core/services/project.service';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../shared/components/error-banner/error-banner.component';
 import { TestSuite } from '../../../core/models/testsuite';
@@ -19,15 +20,19 @@ export class TestSuiteListComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly testSuiteService = inject(TestSuiteService);
+  private readonly projectService = inject(ProjectService);
 
-  readonly projectId: number;
+  readonly projectKey: string;
   readonly suites$: Observable<TestSuite[]>;
   errorMessage = '';
 
   constructor() {
-    this.projectId = Number(this.route.snapshot.paramMap.get('projectId'));
+    // Extract the project key from the route parameters
+    this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
 
-    this.suites$ = this.testSuiteService.getTestSuitesByProject(this.projectId).pipe(
+    // Fetch the project by its key to get the project ID, then load test suites
+    this.suites$ = this.projectService.getProjectByKey(this.projectKey).pipe(
+      switchMap(project => this.testSuiteService.getTestSuitesByProject(project.projectId)),
       catchError(err => {
         this.errorMessage = err.message || 'Failed to load test suites';
         return of([]);
@@ -41,10 +46,16 @@ export class TestSuiteListComponent {
   }
 
   selectSuite(suite: TestSuite): void {
-    this.router.navigate(['/projects', this.projectId, 'suites', suite.testSuiteId, 'cases']);
+    // Navigate using the new project-key based URL structure
+    this.router.navigate([
+      '/projects/project-key',
+      this.projectKey,
+      'suites',
+      suite.testSuiteId,
+      'cases'
+    ]);
   }
 
-  // No ?. or ?? needed — children and expanded are always set by the service
   hasChildren(suite: TestSuite): boolean {
     return suite.children.length > 0;
   }

@@ -9,10 +9,6 @@ export class TestCaseService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
-  /**
-   * Get all test cases belonging to a specific test suite.
-   * Endpoint: GET /projects/:projectId/suites/:suiteId/cases
-   */
   getTestCases(projectId: number, suiteId: number): Observable<TestCase[]> {
     return this.http.get<TestCase[]>(
       `${this.apiUrl}projects/${projectId}/suites/${suiteId}/cases`,
@@ -20,13 +16,9 @@ export class TestCaseService {
     );
   }
 
-  /**
-   * Get a single test case by its ID.
-   * Endpoint: GET /projects/:projectId/suites/:suiteId/cases/:testCaseId
-   */
   getTestCase(projectKey: string, testCaseIdentifier: number): Observable<TestCase> {
     return this.http.get<TestCase>(
-      `${this.apiUrl}projects/testcase/${projectKey}/${testCaseIdentifier}`,
+      `${this.apiUrl}projects/project-key/${projectKey}/testcase-identifier/${testCaseIdentifier}`,
       { withCredentials: true }
     );
   }

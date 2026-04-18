@@ -39,4 +39,9 @@ public class ProjectController {
         Project project = projectService.getProjectById(id);
         return ResponseEntity.ok(projectMapper.toDto(project));
     }
+
+    @GetMapping("/project-key/{projectKey}")
+    public ResponseEntity<ProjectDTO> getProjectByKey(@PathVariable String projectKey){
+        return  ResponseEntity.ok(projectMapper.toDto(projectService.getProjectByKey(projectKey)));
+    }
 }

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ProjectMembership } from '../models/project';
+import { Project, ProjectMembership } from '../models/project';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
@@ -17,4 +17,12 @@ export class ProjectService {
       withCredentials: true,
     });
   }
+
+  getProjectByKey(projectKey: string): Observable<Project> {
+    return this.http.get<Project>(`${this.apiUrl}projects/project-key/${projectKey}`, {
+      withCredentials: true,
+    });
+  }
+
+
 }

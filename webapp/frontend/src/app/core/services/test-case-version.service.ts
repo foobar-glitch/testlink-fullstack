@@ -12,14 +12,14 @@ export class TestCaseVersionService {
 
   getVersionsByTestCase(projectKey: string, testCaseIdentifier: number): Observable<TestCaseVersion[]> {
     return this.http.get<TestCaseVersion[]>(
-      `${this.apiUrl}projects/testcase/${projectKey}/${testCaseIdentifier}/versions`,
+      `${this.apiUrl}projects/project-key/${projectKey}/testcase-identifier/${testCaseIdentifier}/versions`,
       { withCredentials: true }
     );
   }
 
-  getSpecificVersion(projectKey: string, testCaseIdentifier: number, versionNumber: number): Observable<TestCaseVersion[]> {
-    return this.http.get<TestCaseVersion[]>(
-      `${this.apiUrl}project/testcase/${projectKey}/${testCaseIdentifier}/version/${versionNumber}`,
+  getSpecificVersion(projectKey: string, testCaseIdentifier: number, versionNumber: number): Observable<TestCaseVersion> {
+    return this.http.get<TestCaseVersion>(
+      `${this.apiUrl}projects/project-key/${projectKey}/testcase-identifier/${testCaseIdentifier}/version/${versionNumber}`,
       { withCredentials: true }
     );
   }

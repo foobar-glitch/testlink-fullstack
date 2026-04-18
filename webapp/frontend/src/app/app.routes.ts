@@ -3,15 +3,13 @@ import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
-
   {
     path: 'projects',
     canActivate: [authGuard],
     loadComponent: () => import('./features/projects/project-list/project-list.component').then(m => m.ProjectListComponent)
   },
-
   {
-    path: 'projects/:projectId',
+    path: 'projects/project-key/:projectKey',
     canActivate: [authGuard],
     children: [
       { path: 'suites', loadComponent: () => import('./features/test-suites/test-suite-list/test-suite-list.component').then(m => m.TestSuiteListComponent) },
@@ -19,21 +17,11 @@ export const routes: Routes = [
       { path: '', redirectTo: 'suites', pathMatch: 'full' }
     ]
   },
-
-  // New simplified version history route
   {
-    path: 'testcase/:projectKey/:testCaseIdentifier/versions',
+    path: 'projects/project-key/:projectKey/testcase-identifier/:testCaseIdentifier/versions',
     canActivate: [authGuard],
     loadComponent: () => import('./features/test-cases/test-case-version-list/test-case-version-list.component').then(m => m.TestCaseVersionListComponent)
   },
-
-  // Optional: route for viewing a specific version (if you add a detail page later)
-  // {
-  //   path: 'testcase/:projectKey-:testCaseIdentifier/version/:versionNumber',
-  //   canActivate: [authGuard],
-  //   loadComponent: () => import('./features/test-cases/test-case-version-detail/test-case-version-detail.component').then(m => m.TestCaseVersionDetailComponent)
-  // },
-
   { path: '', redirectTo: '/projects', pathMatch: 'full' },
   { path: '**', redirectTo: '/projects' }
 ];

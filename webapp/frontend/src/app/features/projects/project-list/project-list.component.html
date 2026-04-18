@@ -13,7 +13,7 @@
       <div
         *ngFor="let membership of memberships$ | async"
         class="project-card"
-        (click)="selectProject(membership.project.projectId)"
+        (click)="selectProject(membership.project)"
       >
         <div class="project-header">
           <span class="prefix">{{ membership.project.projectKey }}</span>
