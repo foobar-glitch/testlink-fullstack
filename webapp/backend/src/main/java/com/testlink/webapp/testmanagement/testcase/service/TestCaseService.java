@@ -15,6 +15,10 @@ import java.util.List;
 public class TestCaseService {
     private final TestCaseRepository testCaseRepository;
 
+    public TestCase findById(Long testCaseId){
+        return testCaseRepository.findById(testCaseId).orElseThrow(() -> new ResourceNotFoundException("Testcase", "testCaseId", testCaseId));
+    }
+
     public List<TestCase> findAllTestCasesOfProjectAndSuite(Project project, TestSuite testSuite){
         return testCaseRepository.findAllByProjectAndTestSuite(project, testSuite);
     }
