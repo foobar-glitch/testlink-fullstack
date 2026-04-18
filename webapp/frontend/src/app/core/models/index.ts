@@ -106,7 +106,6 @@ export type TestCaseStatus = 'draft' | 'active' | 'deprecated';
 // ─── Test Case ───────────────────────────────────────────────────────────────
 export interface TestCase {
   testCaseId: number;
-  project: Project;
   testSuite: TestSuiteItem;
   identifierNumber: number;
   title: string;

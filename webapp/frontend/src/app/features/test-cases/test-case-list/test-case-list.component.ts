@@ -60,6 +60,6 @@ export class TestCaseListComponent {
   }
 
   getTestCaseIdentifier(testCase: TestCase): string {
-    return `${testCase.project.projectKey}-${testCase.identifierNumber}`;
+    return `${testCase.testSuite.project.projectKey}-${testCase.identifierNumber}`;
   }
 }

@@ -1,6 +1,6 @@
 package com.testlink.webapp.testmanagement.testcase.mapper;
 
-import com.testlink.webapp.projects.mapper.ProjectMapper;
+
 import com.testlink.webapp.shared.mapper.BaseAuditMapper;
 import com.testlink.webapp.testmanagement.suite.mapper.TestSuiteMapper;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseDTO;
@@ -12,11 +12,10 @@ import java.util.List;
 
 @Mapper(
         componentModel = "spring",
-        uses = {ProjectMapper.class, TestSuiteMapper.class}
+        uses = {TestSuiteMapper.class}
 )
 public abstract class TestCaseMapper extends BaseAuditMapper {
 
-    @Mapping(target = "project", source = "project")
     @Mapping(target = "testSuite", source = "testSuite")
     @Mapping(target = "stamp", expression = "java(mapAudit(testCase))")
     public abstract TestCaseDTO toDto(TestCase testCase);

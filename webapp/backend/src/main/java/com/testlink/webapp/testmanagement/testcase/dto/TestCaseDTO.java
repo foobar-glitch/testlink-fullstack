@@ -9,7 +9,6 @@ import lombok.Builder;
 @Builder
 public record TestCaseDTO (
         Long testCaseId,
-        ProjectDTO project,
         TestSuiteItemDTO testSuite,
         Long identifierNumber,
         String title,
