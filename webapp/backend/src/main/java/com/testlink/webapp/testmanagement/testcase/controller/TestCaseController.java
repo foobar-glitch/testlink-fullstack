@@ -38,15 +38,17 @@ public class TestCaseController {
     private final TestCaseService testCaseService;
     private final TestCaseMapper testCaseMapper;
 
-    @GetMapping("/{projectId}/suites/{suiteId}/cases")
+
+    @GetMapping("/project-key/{projectKey}/suites/{suiteId}/cases")
     public ResponseEntity<List<TestCaseDTO>> getTestCasesOfSuite(
-            @PathVariable Long projectId,
+            @PathVariable String projectKey,
             @PathVariable Long suiteId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         User user = customUserDetails.getUser();
+        Project project = projectService.getProjectByKey(projectKey);
         ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
-                projectId, user, ProjectRole.VIEWER);
+                project, user, ProjectRole.VIEWER);
         TestSuite testSuite = testSuiteService.findBySuiteId(suiteId);
         List<TestCase> testCases = testCaseService.findAllTestCasesOfProjectAndSuite(
                 membership.getProject(), testSuite);

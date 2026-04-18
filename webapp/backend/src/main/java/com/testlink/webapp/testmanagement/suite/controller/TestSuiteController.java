@@ -28,14 +28,13 @@ public class TestSuiteController {
     private final TestSuiteService testSuiteService;
     private final TestSuiteMapper testSuiteMapper;
     private final ProjectAccessService projectAccessService;
+    private final ProjectService projectService;
 
-    @GetMapping("/{projectId}/suites")
-    public ResponseEntity<List<TestSuiteHierarchyDTO>> getTestSuites(
-            @PathVariable Long projectId,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
-    ) {
+    @GetMapping("/project-key/{projectKey}/suites")
+    public ResponseEntity<List<TestSuiteHierarchyDTO>> getTestSuitesOfProductKey(@PathVariable String projectKey, @AuthenticationPrincipal CustomUserDetails customUserDetails){
+        Project project = projectService.getProjectByKey(projectKey);
         ProjectMembership projectMembership =  projectAccessService.checkAccessOfUserInProject(
-                projectId, customUserDetails.getUser(), ProjectRole.VIEWER
+                project, customUserDetails.getUser(), ProjectRole.VIEWER
         );
 
         List<TestSuite> rootTree = testSuiteService.findProjectTestSuiteRootTree(projectMembership.getProject());
@@ -47,21 +46,24 @@ public class TestSuiteController {
                     .parent(null)
                     .children(testSuiteMapper.toDtoList(
                             testSuiteService.findChildrenOfTestSuiteInProject(projectMembership.getProject(), item)))
-                            .build();
+                    .build();
             hierarchyDTO.add(itemHierarchyDTO);
         }
 
         return ResponseEntity.ok(hierarchyDTO);
+
     }
 
-    @GetMapping("/{projectId}/suites/{suiteId}")
+
+    @GetMapping("/project-key/{projectKey}/suites/{suiteId}")
     public ResponseEntity<TestSuiteHierarchyDTO> getTestSuite(
-            @PathVariable Long projectId,
+            @PathVariable String projectKey,
             @PathVariable Long suiteId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
+        Project project = projectService.getProjectByKey(projectKey);
         ProjectMembership projectMembership =  projectAccessService.checkAccessOfUserInProject(
-                projectId, customUserDetails.getUser(), ProjectRole.VIEWER
+                project, customUserDetails.getUser(), ProjectRole.VIEWER
         );
         TestSuite testSuite = testSuiteService.findBySuiteId(suiteId);
         TestSuiteHierarchyDTO hierarchyDTO = TestSuiteHierarchyDTO.builder()

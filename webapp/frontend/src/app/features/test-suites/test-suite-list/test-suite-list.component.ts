@@ -26,13 +26,11 @@ export class TestSuiteListComponent {
   readonly suites$: Observable<TestSuite[]>;
   errorMessage = '';
 
+  // test-suite-list.component.ts
   constructor() {
-    // Extract the project key from the route parameters
     this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
 
-    // Fetch the project by its key to get the project ID, then load test suites
-    this.suites$ = this.projectService.getProjectByKey(this.projectKey).pipe(
-      switchMap(project => this.testSuiteService.getTestSuitesByProject(project.projectId)),
+    this.suites$ = this.testSuiteService.getTestSuitesByProjectKey(this.projectKey).pipe(
       catchError(err => {
         this.errorMessage = err.message || 'Failed to load test suites';
         return of([]);

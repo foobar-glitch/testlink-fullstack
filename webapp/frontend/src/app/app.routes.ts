@@ -13,15 +13,15 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'suites', loadComponent: () => import('./features/test-suites/test-suite-list/test-suite-list.component').then(m => m.TestSuiteListComponent) },
+      {
+        path: 'suites/:suiteId/testcase/:testCaseIdentifier/versions',
+        loadComponent: () => import('./features/test-cases/test-case-version-list/test-case-version-list.component').then(m => m.TestCaseVersionListComponent)
+      },
       { path: 'suites/:suiteId/cases', loadComponent: () => import('./features/test-cases/test-case-list/test-case-list.component').then(m => m.TestCaseListComponent) },
       { path: '', redirectTo: 'suites', pathMatch: 'full' }
     ]
   },
-  {
-    path: 'projects/project-key/:projectKey/testcase-identifier/:testCaseIdentifier/versions',
-    canActivate: [authGuard],
-    loadComponent: () => import('./features/test-cases/test-case-version-list/test-case-version-list.component').then(m => m.TestCaseVersionListComponent)
-  },
+  // { path: 'projects/project-key/:projectKey/testcase-identifier/:testCaseIdentifier/versions', redirectTo: 'projects/project-key/:projectKey/suites/:suiteId/testcase/:testCaseIdentifier/versions' },
   { path: '', redirectTo: '/projects', pathMatch: 'full' },
   { path: '**', redirectTo: '/projects' }
 ];
