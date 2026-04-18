@@ -73,7 +73,7 @@ export class TestCaseListComponent {
       projectKey,
       'suites',
       suiteId,
-      'testcase',
+      'testcases',
       identifier,
       'versions'
     ]);

@@ -50,7 +50,7 @@ export class TestSuiteListComponent {
       this.projectKey,
       'suites',
       suite.testSuiteId,
-      'cases'
+      'testcases'
     ]);
   }
 

@@ -14,14 +14,14 @@ export const routes: Routes = [
     children: [
       { path: 'suites', loadComponent: () => import('./features/test-suites/test-suite-list/test-suite-list.component').then(m => m.TestSuiteListComponent) },
       {
-        path: 'suites/:suiteId/testcase/:testCaseIdentifier/versions',
+        path: 'suites/:suiteId/testcases/:testCaseIdentifier/versions',
         loadComponent: () => import('./features/test-cases/test-case-version-list/test-case-version-list.component').then(m => m.TestCaseVersionListComponent)
       },
-      { path: 'suites/:suiteId/cases', loadComponent: () => import('./features/test-cases/test-case-list/test-case-list.component').then(m => m.TestCaseListComponent) },
+      { path: 'suites/:suiteId/testcases', loadComponent: () => import('./features/test-cases/test-case-list/test-case-list.component').then(m => m.TestCaseListComponent) },
       { path: '', redirectTo: 'suites', pathMatch: 'full' }
     ]
   },
-  // { path: 'projects/project-key/:projectKey/testcase-identifier/:testCaseIdentifier/versions', redirectTo: 'projects/project-key/:projectKey/suites/:suiteId/testcase/:testCaseIdentifier/versions' },
+  // { path: 'projects/project-key/:projectKey/testcase-identifier/:testCaseIdentifier/versions', redirectTo: 'projects/project-key/:projectKey/suites/:suiteId/testcases/:testCaseIdentifier/versions' },
   { path: '', redirectTo: '/projects', pathMatch: 'full' },
   { path: '**', redirectTo: '/projects' }
 ];
