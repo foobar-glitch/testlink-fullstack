@@ -76,62 +76,141 @@ CREATE TRIGGER trg_test_plan_runs_updated_at
 EXECUTE FUNCTION set_updated_at();
 
 -- =========================
--- TEST PLAN RUN CASES TABLE
+-- TEST RUN ITEMS TABLE
 -- =========================
-CREATE TABLE test_plan_run_cases (
-                                     test_plan_run_case_id BIGSERIAL PRIMARY KEY,
-                                     test_plan_run_id BIGINT NOT NULL,
-                                     test_case_id BIGINT NOT NULL,
-                                     test_case_version_id BIGINT,            -- optional: lock to a specific version
-                                     status VARCHAR(20) NOT NULL DEFAULT 'NOT_RUN',
-                                     assigned_to BIGINT,
-                                     executed_at TIMESTAMPTZ,
-                                     notes TEXT,
-                                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                                     updated_at TIMESTAMPTZ,
-                                     created_by BIGINT NOT NULL,
+CREATE TABLE test_run_items (
+                                test_run_item_id BIGSERIAL PRIMARY KEY,
 
-                                     CONSTRAINT fk_run_cases_test_plan_run
-                                         FOREIGN KEY (test_plan_run_id)
-                                             REFERENCES test_plan_runs(test_plan_run_id)
-                                             ON DELETE CASCADE,
-                                     CONSTRAINT fk_run_cases_test_case
-                                         FOREIGN KEY (test_case_id)
-                                             REFERENCES test_cases(test_case_id)
-                                             ON DELETE CASCADE,
-                                     CONSTRAINT fk_run_cases_test_case_version
-                                         FOREIGN KEY (test_case_version_id)
-                                             REFERENCES test_case_versions(test_case_version_id)
-                                             ON DELETE SET NULL,
-                                     CONSTRAINT fk_run_cases_assigned_to
-                                         FOREIGN KEY (assigned_to)
-                                             REFERENCES users(user_id)
-                                             ON DELETE SET NULL,
-                                     CONSTRAINT fk_run_cases_created_by
-                                         FOREIGN KEY (created_by)
-                                             REFERENCES users(user_id)
-                                             ON DELETE RESTRICT,
-                                     CONSTRAINT uk_run_case_unique
-                                         UNIQUE (test_plan_run_id, test_case_id),   -- prevent duplicate cases in the same run
-                                     CONSTRAINT chk_run_case_status
-                                         CHECK (status IN ('NOT_RUN', 'PASSED', 'FAILED', 'BLOCKED', 'SKIPPED'))
+                                test_run_id BIGINT NOT NULL,
+                                test_case_id BIGINT NOT NULL,
+                                test_case_version_id BIGINT NOT NULL,
+
+                                assigned_to BIGINT,
+                                executed_by BIGINT,
+
+                                status VARCHAR(20) NOT NULL DEFAULT 'NOT_RUN',
+
+                                executed_at TIMESTAMPTZ,
+                                notes TEXT,
+
+                                created_by BIGINT NOT NULL,
+                                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                                updated_at TIMESTAMPTZ,
+
+                                CONSTRAINT fk_run_item_run
+                                    FOREIGN KEY (test_run_id)
+                                        REFERENCES test_plan_runs(test_plan_run_id)
+                                        ON DELETE CASCADE,
+
+                                CONSTRAINT fk_run_item_case
+                                    FOREIGN KEY (test_case_id)
+                                        REFERENCES test_cases(test_case_id)
+                                        ON DELETE CASCADE,
+
+                                CONSTRAINT fk_run_item_version
+                                    FOREIGN KEY (test_case_version_id)
+                                        REFERENCES test_case_versions(test_case_version_id)
+                                        ON DELETE CASCADE,
+
+                                CONSTRAINT fk_run_item_assigned_to
+                                    FOREIGN KEY (assigned_to)
+                                        REFERENCES users(user_id)
+                                        ON DELETE SET NULL,
+
+                                CONSTRAINT fk_run_item_executed_by
+                                    FOREIGN KEY (executed_by)
+                                        REFERENCES users(user_id)
+                                        ON DELETE SET NULL,
+
+                                CONSTRAINT fk_run_item_created_by
+                                    FOREIGN KEY (created_by)
+                                        REFERENCES users(user_id)
+                                        ON DELETE RESTRICT,
+
+                                CONSTRAINT uk_run_item_unique
+                                    UNIQUE (test_run_id, test_case_id),
+
+                                CONSTRAINT chk_run_item_status
+                                    CHECK (status IN ('NOT_RUN', 'PASSED', 'FAILED', 'BLOCKED', 'SKIPPED'))
 );
 
-COMMENT ON TABLE test_plan_run_cases IS 'Execution records for test cases included in a test plan run';
-COMMENT ON COLUMN test_plan_run_cases.test_case_version_id IS 'Optional: specific test case version used for this execution';
-COMMENT ON COLUMN test_plan_run_cases.status IS 'Current execution status: NOT_RUN, PASSED, FAILED, BLOCKED, SKIPPED';
-COMMENT ON COLUMN test_plan_run_cases.assigned_to IS 'User responsible for executing this test case';
-COMMENT ON COLUMN test_plan_run_cases.executed_at IS 'When the test case was last executed';
-COMMENT ON COLUMN test_plan_run_cases.notes IS 'Execution notes or failure reason';
+COMMENT ON TABLE test_run_items IS 'Execution records for test cases included in a test plan run';
+COMMENT ON COLUMN test_run_items.test_case_version_id IS 'Specific version of the test case used for this execution (mandatory)';
+COMMENT ON COLUMN test_run_items.assigned_to IS 'User responsible for executing this test case';
+COMMENT ON COLUMN test_run_items.executed_by IS 'User who actually performed the execution';
+COMMENT ON COLUMN test_run_items.status IS 'Execution outcome: NOT_RUN, PASSED, FAILED, BLOCKED, SKIPPED';
+COMMENT ON COLUMN test_run_items.executed_at IS 'Timestamp when the execution was performed';
+COMMENT ON COLUMN test_run_items.notes IS 'Execution notes, bug IDs, or failure reason';
+COMMENT ON COLUMN test_run_items.created_by IS 'User who created this run item record';
+
 
 -- Indexes for performance
-CREATE INDEX idx_run_cases_test_plan_run ON test_plan_run_cases(test_plan_run_id);
-CREATE INDEX idx_run_cases_test_case ON test_plan_run_cases(test_case_id);
-CREATE INDEX idx_run_cases_assigned_to ON test_plan_run_cases(assigned_to);
-CREATE INDEX idx_run_cases_status ON test_plan_run_cases(status);   -- for filtering by status
+CREATE INDEX idx_run_items_run ON test_run_items(test_run_id);
+CREATE INDEX idx_run_items_case ON test_run_items(test_case_id);
+CREATE INDEX idx_run_items_version ON test_run_items(test_case_version_id);
+CREATE INDEX idx_run_items_assigned_to ON test_run_items(assigned_to);
+CREATE INDEX idx_run_items_executed_by ON test_run_items(executed_by);
+CREATE INDEX idx_run_items_status ON test_run_items(status);
 
-DROP TRIGGER IF EXISTS trg_test_plan_run_cases_updated_at ON test_plan_run_cases;
-CREATE TRIGGER trg_test_plan_run_cases_updated_at
-    BEFORE UPDATE ON test_plan_run_cases
+-- Trigger for updated_at
+DROP TRIGGER IF EXISTS trg_test_run_items_updated_at ON test_run_items;
+CREATE TRIGGER trg_test_run_items_updated_at
+    BEFORE UPDATE ON test_run_items
+    FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+-- =========================
+-- TEST STEP RESULTS TABLE
+-- =========================
+CREATE TABLE test_step_results (
+                                   test_step_result_id BIGSERIAL PRIMARY KEY,
+
+                                   test_run_item_id BIGINT NOT NULL,
+                                   test_case_version_step_id BIGINT NOT NULL,
+
+                                   status VARCHAR(20) NOT NULL DEFAULT 'NOT_RUN',
+
+                                   actual_result TEXT,
+                                   notes TEXT,
+
+                                   executed_at TIMESTAMPTZ,
+
+                                   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                                   updated_at TIMESTAMPTZ,
+
+                                   CONSTRAINT fk_step_result_run_item
+                                       FOREIGN KEY (test_run_item_id)
+                                           REFERENCES test_run_items(test_run_item_id)
+                                           ON DELETE CASCADE,
+
+                                   CONSTRAINT fk_step_result_step
+                                       FOREIGN KEY (test_case_version_step_id)
+                                           REFERENCES test_case_version_steps(step_id)
+                                           ON DELETE CASCADE,
+
+                                   CONSTRAINT uk_step_result_unique
+                                       UNIQUE (test_run_item_id, test_case_version_step_id),
+
+                                   CONSTRAINT chk_step_result_status
+                                       CHECK (status IN ('NOT_RUN', 'PASSED', 'FAILED', 'BLOCKED', 'SKIPPED'))
+);
+
+COMMENT ON TABLE test_step_results IS 'Execution results for individual steps within a test run item';
+COMMENT ON COLUMN test_step_results.test_run_item_id IS 'Reference to the parent test run item';
+COMMENT ON COLUMN test_step_results.test_case_version_step_id IS 'Reference to the specific test step (from a test case version)';
+COMMENT ON COLUMN test_step_results.status IS 'Outcome of this step: NOT_RUN, PASSED, FAILED, BLOCKED, SKIPPED';
+COMMENT ON COLUMN test_step_results.actual_result IS 'What actually happened during execution';
+COMMENT ON COLUMN test_step_results.notes IS 'Additional comments or failure details';
+COMMENT ON COLUMN test_step_results.executed_at IS 'Timestamp when the step was executed';
+
+-- Indexes for performance
+CREATE INDEX idx_step_results_run_item ON test_step_results(test_run_item_id);
+CREATE INDEX idx_step_results_step ON test_step_results(test_case_version_step_id);
+CREATE INDEX idx_step_results_status ON test_step_results(status);
+
+-- Trigger for updated_at
+DROP TRIGGER IF EXISTS trg_test_step_results_updated_at ON test_step_results;
+CREATE TRIGGER trg_test_step_results_updated_at
+    BEFORE UPDATE ON test_step_results
     FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
