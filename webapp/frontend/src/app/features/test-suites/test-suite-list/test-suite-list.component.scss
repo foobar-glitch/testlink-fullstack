@@ -1,112 +1,141 @@
+// ─── test-suite-list.component.scss ──────────────────────────────────────────
+@use '../../../shared/styles/variables' as vars;
+@use '../../../shared/styles/mixins' as mix;
+
+// ── Page layout ───────────────────────────────────────────────────────────────
 .suite-list-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 24px;
+  padding: vars.$spacing-xl vars.$spacing-lg;
+
+  @media (max-width: 600px) {
+    padding: vars.$spacing-lg vars.$spacing-md;
+  }
 }
 
+// ── Header ────────────────────────────────────────────────────────────────────
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  border-bottom: 2px solid vars.$text;
+  padding-bottom: 10px;
+  margin-bottom: vars.$spacing-xl;
 
   h2 {
-    margin: 0;
-    color: #e2e8f0;
+    font-size: 22px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: vars.$text;
   }
 }
 
 .back-btn {
-  background: transparent;
-  border: 1px solid #4a5270;
-  color: #e2e8f0;
-  padding: 6px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
+  @include mix.btn-ghost;
+}
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: #6b7a9f;
-  }
+// ── Tree ──────────────────────────────────────────────────────────────────────
+.suites-tree {
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+  box-shadow: vars.$shadow-sm;
+  overflow: hidden;
 }
 
 .tree {
   list-style: none;
-  padding-left: 0;
+  padding: 8px 0;
   margin: 0;
 
+  // Nested indentation
   .tree {
-    padding-left: 28px;
+    padding: 0 0 4px 0;
+    border-left: 2px solid vars.$border;
+    margin-left: 28px;
   }
 }
 
 .tree-node {
-  margin: 4px 0;
+  margin: 0;
 }
 
 .node-content {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 9px 16px;
   cursor: pointer;
   transition: background 0.15s;
+  border-bottom: 1px solid transparent;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: vars.$accent-soft;
   }
 }
 
 .expand-toggle {
-  width: 18px;
-  display: inline-block;
-  text-align: center;
-  color: #8892b0;
-  font-size: 12px;
-  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: vars.$muted;
+  flex-shrink: 0;
+  border-radius: 4px;
+  transition: vars.$transition;
 
   &.has-children {
-    color: #4f8ef7;
+    color: vars.$accent;
+    background: vars.$accent-soft;
+
+    &:hover {
+      background: vars.$accent-mid;
+    }
   }
 }
 
 .suite-icon {
-  font-size: 16px;
+  font-size: 15px;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .suite-name {
   flex: 1;
-  color: #e2e8f0;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
+  color: vars.$text;
+  transition: color 0.15s;
+
+  .node-content:hover & {
+    color: vars.$accent;
+  }
 }
 
 .suite-meta {
   font-size: 12px;
-  color: #4a5270;
+  color: vars.$muted;
 }
 
 .loading-indicator {
-  margin-left: 8px;
+  margin-left: 6px;
 }
 
+// ── States ────────────────────────────────────────────────────────────────────
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 200px;
-  color: #8892b0;
+  min-height: 240px;
+  gap: vars.$spacing-md;
+  color: vars.$muted;
+  font-size: 15px;
 
   .create-btn {
-    margin-top: 16px;
-    background: #4f8ef7;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
+    @include mix.btn-primary;
   }
 }
 
@@ -114,5 +143,6 @@
 .error-state {
   display: flex;
   justify-content: center;
+  align-items: center;
   min-height: 200px;
 }

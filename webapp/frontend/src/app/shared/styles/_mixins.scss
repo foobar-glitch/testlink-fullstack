@@ -1,4 +1,7 @@
-// _mixins.scss
+// ─── TestFlow — Mixins (React shop port) ─────────────────────────────────────
+@use 'variables' as vars;
+
+// Flex row centred
 @mixin flex-center($gap: 10px) {
   display: flex;
   align-items: center;
@@ -6,7 +9,92 @@
   gap: $gap;
 }
 
-@mixin status-badge($bg-opacity, $color) {
-  background: rgba($color, $bg-opacity);
-  color: $color;
+// Flex row aligned (not centred on main axis)
+@mixin flex-row($gap: 8px) {
+  display: flex;
+  align-items: center;
+  gap: $gap;
+}
+
+// Status pill — light bg tinted with colour
+@mixin status-badge($color) {
+  background: rgba($color, 0.12);
+  color: darken($color, 8%);
+  border: 1px solid rgba($color, 0.25);
+}
+
+// Icon button (header icons, back buttons, etc.)
+@mixin icon-btn {
+  background: none;
+  border: none;
+  border-radius: vars.$radius-sm;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: vars.$transition;
+  color: vars.$text;
+  font-family: vars.$font;
+
+  &:hover {
+    background: vars.$accent-soft;
+    color: vars.$accent;
+  }
+}
+
+// Card
+@mixin card {
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+  box-shadow: vars.$shadow-sm;
+}
+
+// Primary button
+@mixin btn-primary {
+  background: vars.$accent;
+  color: vars.$white;
+  border: none;
+  border-radius: vars.$radius-md;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: vars.$font;
+  cursor: pointer;
+  transition: vars.$transition;
+
+  &:hover:not(:disabled) {
+    background: vars.$accent-dark;
+    transform: translateY(-1px);
+    box-shadow: vars.$shadow-md;
+  }
+
+  &:active:not(:disabled) { transform: translateY(0); }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Ghost button (back links, secondary actions)
+@mixin btn-ghost {
+  background: none;
+  border: 1.5px solid vars.$border;
+  border-radius: vars.$radius-sm;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: vars.$font;
+  color: vars.$text;
+  cursor: pointer;
+  transition: vars.$transition;
+
+  &:hover {
+    border-color: vars.$accent;
+    color: vars.$accent;
+    background: vars.$accent-soft;
+  }
 }

@@ -1,34 +1,73 @@
-// src/styles.scss
+// ─── TestFlow — Global styles (React shop design system) ─────────────────────
+@use 'app/shared/styles/variables' as vars;
 
-// CSS Custom Properties (runtime theming)
-:root {
-  --color-primary: #4f8ef7;
-  --color-success: #2dd4a0;
-  --color-danger: #f76f6f;
-  --color-warning: #f5c542;
-  --color-muted: #8892b0;
-  --color-border-light: rgba(255, 255, 255, 0.06);
-  --color-bg-dark: #0a0c10;
-  --color-text-light: #e2e8f0;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap');
 
-  --radius-sm: 6px;
-  --radius-pill: 12px;
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 14px;
-  --spacing-lg: 24px;
-}
-
-// Global resets
-body {
-  margin: 0;
-  background-color: var(--color-bg-dark);
-  color: var(--color-text-light);
-  font-family: system-ui, -apple-system, sans-serif;
-}
+// ── Reset ─────────────────────────────────────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; }
 
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+}
+
+body {
+  background: vars.$page-bg;
+  color: vars.$text;
+  font-family: vars.$font;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+// ── CSS custom properties (runtime) ───────────────────────────────────────────
+:root {
+  --accent:       #6c63ff;
+  --accent-soft:  #f0eeff;
+  --accent-dark:  #5a52e0;
+  --text:         #111;
+  --muted:        #777;
+  --border:       #e8e8e8;
+  --white:        #fff;
+  --page-bg:      #fafafa;
+  --red:          #df0000;
+  --green:        #2d8a28;
+
+  --shadow-sm:    0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:    0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg:    0 8px 24px rgba(0,0,0,0.12);
+
+  --radius-sm:    6px;
+  --radius-md:    12px;
+  --radius-pill:  999px;
+
+  --font: 'DM Sans', system-ui, sans-serif;
+  --transition: all 0.2s ease;
+}
+
+// ── Typography helpers ────────────────────────────────────────────────────────
+h1, h2, h3, h4, h5, h6 {
+  font-family: vars.$font;
+  font-weight: 800;
+  color: vars.$text;
+  margin: 0;
+  line-height: 1.2;
+}
+
+p { margin: 0; }
+
+a {
+  color: vars.$accent;
+  text-decoration: none;
+  &:hover { color: vars.$accent-dark; }
+}
+
+// ── Scrollbar ─────────────────────────────────────────────────────────────────
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: vars.$border;
+  border-radius: 3px;
+  &:hover { background: darken(vars.$border, 10%); }
 }

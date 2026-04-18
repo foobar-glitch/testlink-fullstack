@@ -1,36 +1,41 @@
+// ─── error-banner.component.scss ─────────────────────────────────────────────
 @use '../../styles/variables' as vars;
 @use '../../styles/mixins' as mix;
 
 .banner {
-  @include mix.flex-center(10px);
-  background: rgba(247, 111, 111, 0.12);
-  border: 1px solid #f76f6f;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(vars.$red, 0.06);
+  border: 1px solid rgba(vars.$red, 0.25);
   border-radius: vars.$radius-sm;
   padding: 10px vars.$spacing-md;
   margin-bottom: vars.$spacing-md;
 
   .icon {
-    color: #f76f6f;
+    color: vars.$red;
     font-size: 14px;
+    flex-shrink: 0;
   }
 
   .msg {
     flex: 1;
     font-size: 13px;
-    color: #f76f6f;
+    color: darken(vars.$red, 10%);
+    font-weight: 500;
   }
 
   .close {
     background: none;
     border: none;
-    color: #f76f6f;
+    color: vars.$red;
     cursor: pointer;
     font-size: 12px;
     padding: 2px 4px;
+    border-radius: 4px;
     transition: opacity 0.2s;
+    font-family: vars.$font;
 
-    &:hover {
-      opacity: 0.8;
-    }
+    &:hover { opacity: 0.7; }
   }
 }

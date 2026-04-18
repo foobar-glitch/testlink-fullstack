@@ -1,54 +1,53 @@
+// ─── status-badge.component.scss ─────────────────────────────────────────────
+@use '../../styles/variables' as vars;
+
 .badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: vars.$radius-pill;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.3px;
   text-transform: uppercase;
   white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  transition: all 0.1s ease;
   border: 1px solid transparent;
+  transition: vars.$transition;
 
-  // Execution statuses
   &.pass {
-    background: rgba(45, 212, 160, 0.15);
-    color: #2dd4a0;
-    border-color: rgba(45, 212, 160, 0.3);
+    background: rgba(#2d8a28, 0.1);
+    color: #1e6b1a;
+    border-color: rgba(#2d8a28, 0.25);
   }
   &.fail {
-    background: rgba(247, 111, 111, 0.15);
-    color: #f76f6f;
-    border-color: rgba(247, 111, 111, 0.3);
+    background: rgba(#df0000, 0.1);
+    color: #b80000;
+    border-color: rgba(#df0000, 0.25);
   }
   &.blocked {
-    background: rgba(245, 197, 66, 0.15);
-    color: #f5c542;
-    border-color: rgba(245, 197, 66, 0.3);
+    background: rgba(#c49a00, 0.1);
+    color: #9a7800;
+    border-color: rgba(#c49a00, 0.25);
   }
   &.not_run {
-    background: rgba(255, 255, 255, 0.06);
-    color: #4a5270;
-    border-color: rgba(255, 255, 255, 0.1);
+    background: vars.$gray-light;
+    color: vars.$muted;
+    border-color: vars.$border;
   }
-
-  // Test case statuses
   &.draft {
-    background: rgba(167, 139, 250, 0.15);
-    color: #a78bfa;
-    border-color: rgba(167, 139, 250, 0.3);
+    background: rgba(#a78bfa, 0.1);
+    color: darken(#a78bfa, 20%);
+    border-color: rgba(#a78bfa, 0.3);
   }
   &.active {
-    background: rgba(79, 142, 247, 0.15);
-    color: #4f8ef7;
-    border-color: rgba(79, 142, 247, 0.3);
+    background: vars.$accent-soft;
+    color: vars.$accent-dark;
+    border-color: vars.$accent-mid;
   }
   &.deprecated {
-    background: rgba(255, 255, 255, 0.06);
-    color: #6b7280;
-    border-color: rgba(255, 255, 255, 0.1);
+    background: vars.$gray-light;
+    color: vars.$muted;
+    border-color: vars.$border;
   }
 }
