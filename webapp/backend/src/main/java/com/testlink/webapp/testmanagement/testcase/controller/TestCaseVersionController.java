@@ -1,14 +1,10 @@
 package com.testlink.webapp.testmanagement.testcase.controller;
 
-import com.testlink.webapp.projects.entity.Project;
-import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
-import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionDTO;
-import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseVersionMapper;
 import com.testlink.webapp.testmanagement.testcase.service.TestCaseService;
@@ -48,7 +44,7 @@ public class TestCaseVersionController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         User user = userDetails.getUser();
-        ValidatePathService.ProjectTestSuiteTestCase testSuiteTestCase = validatePathService.checkPath(projectKey, suiteId, testCaseIdentifier);
+        ValidatePathService.ProjectTestSuiteTestCase testSuiteTestCase = validatePathService.checkTestSuitePath(projectKey, suiteId, testCaseIdentifier);
 
         projectAccessService.checkAccessOfUserInProject(testSuiteTestCase.project(), user, ProjectRole.VIEWER);
         List<TestCaseVersion> versions = testCaseVersionService.getVersionsForTestCase(testSuiteTestCase.testCase());
@@ -64,7 +60,7 @@ public class TestCaseVersionController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         User user = userDetails.getUser();
-        ValidatePathService.ProjectTestSuiteTestCaseTestVersion projectTestSuiteTestCaseTestVersion = validatePathService.checkPath(projectKey, suiteId, testCaseIdentifier, versionNumber);
+        ValidatePathService.ProjectTestSuiteTestCaseTestVersion projectTestSuiteTestCaseTestVersion = validatePathService.checkTestSuitePath(projectKey, suiteId, testCaseIdentifier, versionNumber);
         projectAccessService.checkAccessOfUserInProject(projectTestSuiteTestCaseTestVersion.project(), user, ProjectRole.VIEWER);
 
         return ResponseEntity.ok(testCaseVersionMapper.toDto(projectTestSuiteTestCaseTestVersion.testCaseVersion()));

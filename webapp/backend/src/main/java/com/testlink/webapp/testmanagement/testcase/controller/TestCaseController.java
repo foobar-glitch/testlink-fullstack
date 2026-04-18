@@ -1,11 +1,9 @@
 package com.testlink.webapp.testmanagement.testcase.controller;
 
-import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
-import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
@@ -44,7 +42,7 @@ public class TestCaseController {
             @PathVariable Long suiteId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        ValidatePathService.ProjectTestSuite projectTestSuite = validatePathService.checkPath(projectKey, suiteId);
+        ValidatePathService.ProjectTestSuite projectTestSuite = validatePathService.checkTestSuitePath(projectKey, suiteId);
         User user = customUserDetails.getUser();
         ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
                 projectTestSuite.project(), user, ProjectRole.VIEWER);
@@ -61,7 +59,7 @@ public class TestCaseController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){
         User user = customUserDetails.getUser();
-        ValidatePathService.ProjectTestSuiteTestCase testSuiteTestCase = validatePathService.checkPath(projectKey, suiteId, testCaseIdentifier);
+        ValidatePathService.ProjectTestSuiteTestCase testSuiteTestCase = validatePathService.checkTestSuitePath(projectKey, suiteId, testCaseIdentifier);
 
         ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
                 testSuiteTestCase.project(), user, ProjectRole.VIEWER);
