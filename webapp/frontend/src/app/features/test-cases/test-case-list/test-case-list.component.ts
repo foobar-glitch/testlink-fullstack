@@ -64,14 +64,6 @@ export class TestCaseListComponent {
     return `${testCase.testSuite.project.projectKey}-${testCase.identifierNumber}`;
   }
   selectTestCase(testCase: TestCase): void {
-    this.router.navigate([
-      '/projects',
-      this.projectId,
-      'suites',
-      this.suiteId,
-      'cases',
-      testCase.testCaseId,
-      'versions'
-    ]);
+    this.router.navigate([`/testcase/${testCase.testSuite.project.projectKey}/${testCase.identifierNumber}/versions`]);
   }
 }

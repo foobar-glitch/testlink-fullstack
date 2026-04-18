@@ -6,8 +6,8 @@
         {{ title }}
       </span>
     </div>
-    <button class="back-btn" [routerLink]="['/projects', projectId, 'suites', suiteId, 'cases']">
-      ← Back to Test Cases
+    <button class="back-btn" [routerLink]="['/projects']">
+      ← Back to Projects
     </button>
   </header>
 
@@ -27,11 +27,13 @@
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let version of versions" (click)="viewVersion(version.testCaseVersionId)" class="clickable-row">
+        <tr *ngFor="let version of versions" class="clickable-row">
           <td>v{{ version.versionNumber }}</td>
           <td><app-status-badge [status]="version.status"></app-status-badge></td>
           <td>{{ version.testCase.stamp.timeStamp.createdAt | date:'medium' }}</td>
-          <td><button class="view-btn">View</button></td>
+          <td>
+            <button class="view-btn" (click)="viewVersion(version)">View</button>
+          </td>
         </tr>
         </tbody>
       </table>

@@ -1,10 +1,10 @@
 package com.testlink.webapp.testmanagement.testcase.controller;
 
+import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
-import com.testlink.webapp.shared.exception.BadRequestException;
-import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
+import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
@@ -24,41 +24,48 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/projects/{projectId}")
+@RequestMapping("/projects")
 @RequiredArgsConstructor
 public class TestCaseVersionController {
+    private final ProjectService projectService;
+    private final ProjectAccessService projectAccessService;
 
     private final TestCaseService testCaseService;
     private final TestCaseVersionService testCaseVersionService;
     private final TestCaseVersionMapper testCaseVersionMapper;
-    private final ProjectAccessService projectAccessService;
 
-    @GetMapping("/testcases/{testCaseId}/versions")
+
+    @GetMapping("/testcase/{projectKey}/{testCaseIdentifier}/versions")
     public ResponseEntity<List<TestCaseVersionDTO>> getVersions(
-            @PathVariable Long projectId,
-            @PathVariable Long testCaseId,
+            @PathVariable String projectKey,
+            @PathVariable Long testCaseIdentifier,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         User user = userDetails.getUser();
+        Project project = projectService.getProjectByKey(projectKey);
         ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
-                projectId, user, ProjectRole.VIEWER);
-
-        TestCase testCase = testCaseService.findById(testCaseId);
-
+                project, user, ProjectRole.VIEWER);
+        TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(membership.getProject(), testCaseIdentifier);
         List<TestCaseVersion> versions = testCaseVersionService.getVersionsForTestCase(testCase);
         return ResponseEntity.ok(testCaseVersionMapper.toDtoList(versions));
     }
 
-    @GetMapping("versions/{versionId}")
+    @GetMapping("/testcase/{projectKey}/{testCaseIdentifier}/version/{versionNumber}")
     public ResponseEntity<TestCaseVersionDTO> getVersion(
-            @PathVariable Long projectId,
-            @PathVariable Long versionId,
+            @PathVariable String projectKey,
+            @PathVariable Long testCaseIdentifier,
+            @PathVariable Long versionNumber,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         User user = userDetails.getUser();
-        projectAccessService.checkAccessOfUserInProject(projectId, user, ProjectRole.VIEWER);
-
-        TestCaseVersion version = testCaseVersionService.getVersionById(versionId);
-        return ResponseEntity.ok(testCaseVersionMapper.toDto(version));
+        Project project = projectService.getProjectByKey(projectKey);
+        ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
+                project, user, ProjectRole.VIEWER);
+        TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(membership.getProject(), testCaseIdentifier);
+        TestCaseVersion testCaseVersion = testCaseVersionService.findByTestCaseAndVersionNumber(testCase, versionNumber);
+        return ResponseEntity.ok(testCaseVersionMapper.toDto(testCaseVersion));
     }
 }
+
+
+

@@ -8,9 +8,13 @@ import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseDTO;
+import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
+import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseMapper;
+import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseVersionMapper;
 import com.testlink.webapp.testmanagement.testcase.service.TestCaseService;
+import com.testlink.webapp.testmanagement.testcase.service.TestCaseVersionService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
 import com.testlink.webapp.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +31,11 @@ import java.util.List;
 @RequestMapping("/projects")
 @RequiredArgsConstructor
 public class TestCaseController {
-    private final TestSuiteService testSuiteService;
-    private final TestCaseService testCaseService;
     private final ProjectAccessService projectAccessService;
     private final ProjectService projectService;
+
+    private final TestSuiteService testSuiteService;
+    private final TestCaseService testCaseService;
     private final TestCaseMapper testCaseMapper;
 
     @GetMapping("/{projectId}/suites/{suiteId}/cases")
@@ -48,7 +53,7 @@ public class TestCaseController {
         return ResponseEntity.ok(testCaseMapper.toDtoList(testCases));
     }
 
-    @GetMapping("/case-identifier/{projectKey}-{testCaseIdentifier}")
+    @GetMapping("/testcase/{projectKey}/{testCaseIdentifier}")
     public ResponseEntity<TestCaseDTO> getTestCaseOfProjectNumber(
             @PathVariable String projectKey,
             @PathVariable Long testCaseIdentifier,
@@ -62,5 +67,7 @@ public class TestCaseController {
                 testCaseService.findByProjectAndIdentifierNumber(membership.getProject(), testCaseIdentifier))
         );
     }
+
+
 
 }

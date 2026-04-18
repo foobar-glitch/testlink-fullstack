@@ -18,8 +18,8 @@ public class TestCaseVersionService {
         return testCaseVersionRepository.findAllByTestCaseOrderByVersionNumberDesc(testCase);
     }
 
-    public TestCaseVersion getVersionById(Long versionId) {
-        return testCaseVersionRepository.findById(versionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Test case version", "id", versionId));
+    public TestCaseVersion findByTestCaseAndVersionNumber(TestCase testCase, Long versionNumber) {
+        return testCaseVersionRepository.findByTestCaseAndVersionNumber(testCase, versionNumber)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("%s not found with version number %d", testCase.getTitle(), versionNumber)));
     }
 }

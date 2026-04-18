@@ -24,9 +24,9 @@ export class TestCaseService {
    * Get a single test case by its ID.
    * Endpoint: GET /projects/:projectId/suites/:suiteId/cases/:testCaseId
    */
-  getTestCase(projectId: number, suiteId: number, testCaseId: number): Observable<TestCase> {
+  getTestCase(projectKey: string, testCaseIdentifier: number): Observable<TestCase> {
     return this.http.get<TestCase>(
-      `${this.apiUrl}projects/${projectId}/suites/${suiteId}/cases/${testCaseId}`,
+      `${this.apiUrl}projects/testcase/${projectKey}/${testCaseIdentifier}`,
       { withCredentials: true }
     );
   }

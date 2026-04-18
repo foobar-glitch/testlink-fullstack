@@ -27,7 +27,8 @@
     <div *ngIf="testCases.length > 0; else empty" class="test-cases-grid">
       <div *ngFor="let tc of testCases" class="test-case-card" (click)="selectTestCase(tc)">
         <div class="card-header">
-          <span class="identifier">{{ getTestCaseIdentifier(tc) }}</span>
+          <!-- Use projectKey and identifierNumber directly from the test case -->
+          <span class="identifier">{{ tc.testSuite.project.projectKey }}-{{ tc.identifierNumber }}</span>
           <app-status-badge [status]="tc.status"></app-status-badge>
         </div>
         <h3 class="title">{{ tc.title }}</h3>
