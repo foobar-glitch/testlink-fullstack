@@ -5,6 +5,7 @@ import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
+import com.testlink.webapp.shared.exception.BadRequestException;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
@@ -34,9 +35,10 @@ public class TestCaseVersionController {
     private final TestCaseVersionService testCaseVersionService;
     private final TestCaseVersionMapper testCaseVersionMapper;
 
-    @GetMapping("/project-key/{projectKey}/testcase-identifier/{testCaseIdentifier}/versions")
+    @GetMapping("/project-key/{projectKey}/suite/{suiteId}/testcase-identifier/{testCaseIdentifier}/versions")
     public ResponseEntity<List<TestCaseVersionDTO>> getVersions(
             @PathVariable String projectKey,
+            @PathVariable Long suiteId,
             @PathVariable Long testCaseIdentifier,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
@@ -45,13 +47,17 @@ public class TestCaseVersionController {
         ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
                 project, user, ProjectRole.VIEWER);
         TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(membership.getProject(), testCaseIdentifier);
+        if(!testCase.getTestSuite().getTestSuiteId().equals(suiteId)){
+            throw new BadRequestException(String.format("SuiteId %d not in testcase %d", suiteId, testCaseIdentifier));
+        }
         List<TestCaseVersion> versions = testCaseVersionService.getVersionsForTestCase(testCase);
         return ResponseEntity.ok(testCaseVersionMapper.toDtoList(versions));
     }
 
-    @GetMapping("/project-key/{projectKey}/testcase-identifier/{testCaseIdentifier}/version/{versionNumber}")
+    @GetMapping("/project-key/{projectKey}/suite/{suiteId}/testcase-identifier/{testCaseIdentifier}/version/{versionNumber}")
     public ResponseEntity<TestCaseVersionDTO> getVersion(
             @PathVariable String projectKey,
+            @PathVariable Long suiteId,
             @PathVariable Long testCaseIdentifier,
             @PathVariable Long versionNumber,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -61,6 +67,9 @@ public class TestCaseVersionController {
         ProjectMembership membership = projectAccessService.checkAccessOfUserInProject(
                 project, user, ProjectRole.VIEWER);
         TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(membership.getProject(), testCaseIdentifier);
+        if(!testCase.getTestSuite().getTestSuiteId().equals(suiteId)){
+            throw new BadRequestException(String.format("SuiteId %d not in testcase %d", suiteId, testCaseIdentifier));
+        }
         TestCaseVersion testCaseVersion = testCaseVersionService.findByTestCaseAndVersionNumber(testCase, versionNumber);
         return ResponseEntity.ok(testCaseVersionMapper.toDto(testCaseVersion));
     }

@@ -10,16 +10,16 @@ export class TestCaseVersionService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
-  getVersionsByTestCase(projectKey: string, testCaseIdentifier: number): Observable<TestCaseVersion[]> {
+  getVersionsByTestCase(projectKey: string, testCaseIdentifier: number, suiteId: number): Observable<TestCaseVersion[]> {
     return this.http.get<TestCaseVersion[]>(
-      `${this.apiUrl}projects/project-key/${projectKey}/testcase-identifier/${testCaseIdentifier}/versions`,
+      `${this.apiUrl}projects/project-key/${projectKey}/suite/${suiteId}/testcase-identifier/${testCaseIdentifier}/versions`,
       { withCredentials: true }
     );
   }
 
-  getSpecificVersion(projectKey: string, testCaseIdentifier: number, versionNumber: number): Observable<TestCaseVersion> {
+  getSpecificVersion(projectKey: string, testCaseIdentifier: number, versionNumber: number, suiteId: number): Observable<TestCaseVersion> {
     return this.http.get<TestCaseVersion>(
-      `${this.apiUrl}projects/project-key/${projectKey}/testcase-identifier/${testCaseIdentifier}/version/${versionNumber}`,
+      `${this.apiUrl}projects/project-key/${projectKey}/suite/${suiteId}/testcase-identifier/${testCaseIdentifier}/version/${versionNumber}`,
       { withCredentials: true }
     );
   }

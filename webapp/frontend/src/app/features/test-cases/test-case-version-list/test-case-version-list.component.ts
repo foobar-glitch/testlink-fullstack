@@ -31,6 +31,7 @@ export class TestCaseVersionListComponent {
   // Extract from route: e.g., /testcase/ECP-1/versions
   readonly projectKey: string;
   readonly testCaseIdentifier: number;
+  readonly suiteId: number;
 
 
   versions$: Observable<TestCaseVersion[]>;
@@ -41,12 +42,13 @@ export class TestCaseVersionListComponent {
 
     this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
     this.testCaseIdentifier = Number(this.route.snapshot.paramMap.get('testCaseIdentifier'));
-
+    //only for validation testcase validated by projectKey plus testCaseIdentifier like ECU-1212
+    this.suiteId = Number(this.route.snapshot.paramMap.get('suiteId'));
 
 
     // Fetch versions using projectKey and testCaseIdentifier
     this.versions$ = this.versionService
-      .getVersionsByTestCase(this.projectKey, this.testCaseIdentifier)
+      .getVersionsByTestCase(this.projectKey, this.testCaseIdentifier, this.suiteId)
       .pipe(
         catchError(err => {
           this.errorMessage = err.message || 'Failed to load versions';
