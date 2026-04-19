@@ -1,5 +1,24 @@
 // ─── Test Run ────────────────────────────────────────────────────────────────
 import { TestCase } from './testsuite';
+import { UserCreatedTimeStamp } from './tablemetadata';
+import { Project } from './project';
+
+export interface TestPlan {
+  testPlanId: number;
+  project: Project;
+  name: string;
+  description: string;
+  stamp: UserCreatedTimeStamp;
+}
+
+export interface TestPlanRun {
+  testPlanRunId: number;
+  testPlan: TestPlan;
+  name: string;
+  environment: string;
+  build: string;
+  stamp: UserCreatedTimeStamp;
+}
 
 export type ExecutionStatus = 'pass' | 'fail' | 'blocked' | 'not_run';
 

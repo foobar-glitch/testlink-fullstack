@@ -21,7 +21,7 @@ public class TestPlan extends UserCreatedTimeStampedEntity {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 250)
     private String name;
 
     @Column(name = "description", length = 500)

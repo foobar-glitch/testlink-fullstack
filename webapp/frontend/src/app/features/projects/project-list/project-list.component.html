@@ -1,8 +1,4 @@
-<!-- project-list.component.html -->
-<!-- The global app-header now handles logout + breadcrumbs.
-     This page owns the page-level heading + content only. -->
 <div class="project-list-container">
-
   <header class="header">
     <div class="title-group">
       <h2>Projects</h2>
@@ -18,15 +14,12 @@
   </div>
 
   <ng-container *ngIf="memberships$ | async as memberships; else loading">
-
     <div *ngIf="memberships.length > 0; else empty" class="projects-grid">
       <div
         *ngFor="let membership of memberships"
         class="project-card"
-        (click)="selectProject(membership.project)"
         role="button"
         tabindex="0"
-        (keydown.enter)="selectProject(membership.project)"
       >
         <div class="project-header">
           <span class="prefix">{{ membership.project.projectKey }}</span>
@@ -42,6 +35,22 @@
         <div class="created">
           Created {{ membership.project.stamp?.timeStamp?.createdAt | date:'mediumDate' }}
         </div>
+
+        <!-- Navigation buttons -->
+        <div class="card-actions">
+          <button
+            class="action-btn suites-btn"
+            (click)="goToSuites(membership.project, $event)"
+          >
+            📂 Suites
+          </button>
+          <button
+            class="action-btn plans-btn"
+            (click)="goToTestPlans(membership.project, $event)"
+          >
+            📋 Plans
+          </button>
+        </div>
       </div>
     </div>
 
@@ -50,7 +59,6 @@
         <p>No projects available.</p>
       </div>
     </ng-template>
-
   </ng-container>
 
   <ng-template #loading>
@@ -58,5 +66,4 @@
       <app-spinner label="Loading projects..."></app-spinner>
     </div>
   </ng-template>
-
 </div>

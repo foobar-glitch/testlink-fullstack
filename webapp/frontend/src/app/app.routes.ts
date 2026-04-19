@@ -17,9 +17,19 @@ export const routes: Routes = [
         path: 'suites/:suiteId/testcases/:testCaseIdentifier/versions',
         loadComponent: () => import('./features/test-cases/test-case-version-list/test-case-version-list.component').then(m => m.TestCaseVersionListComponent)
       },
-      { path: 'suites/:suiteId/testcases', loadComponent: () => import('./features/test-cases/test-case-list/test-case-list.component').then(m => m.TestCaseListComponent) },
+      { path: 'testplans', loadComponent: () => import('./features/test-plans/test-plan-list/test-plan-list.component').then(m => m.TestPlanListComponent) },
+      { path: 'testplans/:testPlanId/runs', loadComponent: () => import('./features/test-plans/test-plan-run-list/test-plan-run-list.component').then(m => m.TestPlanRunListComponent) },
+  { path: '', redirectTo: 'suites', pathMatch: 'full' },
       { path: '', redirectTo: 'suites', pathMatch: 'full' }
     ]
+  },
+  {
+    path: 'projects/project-key/:projectKey/testplans/:testPlanId/runs',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/test-plans/test-plan-run-list/test-plan-run-list.component').then(
+        m => m.TestPlanRunListComponent
+      ),
   },
   // { path: 'projects/project-key/:projectKey/testcase-identifier/:testCaseIdentifier/versions', redirectTo: 'projects/project-key/:projectKey/suites/:suiteId/testcases/:testCaseIdentifier/versions' },
   { path: '', redirectTo: '/projects', pathMatch: 'full' },

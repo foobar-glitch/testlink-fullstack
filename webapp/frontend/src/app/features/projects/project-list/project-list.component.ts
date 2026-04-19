@@ -43,8 +43,15 @@ export class ProjectListComponent {
     );
   }
 
-  selectProject(project: Project): void {
+
+  goToSuites(project: Project, event: Event): void {
+    event.stopPropagation();
     this.router.navigate(['/projects/project-key', project.projectKey, 'suites']);
+  }
+
+  goToTestPlans(project: Project, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/projects/project-key', project.projectKey, 'testplans']);
   }
 
   logout(): void {

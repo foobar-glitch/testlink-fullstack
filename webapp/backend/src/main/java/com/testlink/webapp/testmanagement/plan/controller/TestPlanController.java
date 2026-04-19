@@ -11,6 +11,7 @@ import com.testlink.webapp.testmanagement.testcase.service.ValidatePathService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
 import com.testlink.webapp.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,18 +32,18 @@ public class TestPlanController {
 
 
     @GetMapping("")
-    public List<TestPlanDTO> testPlansOfProjects(@PathVariable String projectKey, @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<List<TestPlanDTO>> testPlansOfProjects(@PathVariable String projectKey, @AuthenticationPrincipal CustomUserDetails userDetails){
         Project project = projectService.getProjectByKey(projectKey);
         accessService.checkAccessOfUserInProject(project, userDetails.getUser(), ProjectRole.VIEWER);
-        return testPlanMapper.toDtoList(testPlanService.findTestPlanOfProject(project));
+        return ResponseEntity.ok(testPlanMapper.toDtoList(testPlanService.findTestPlanOfProject(project)));
     }
 
     @GetMapping("/{testPlanId}")
-    public TestPlanDTO testPlanOfProjectOfId(@PathVariable String projectKey, @PathVariable Long testPlanId, @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<TestPlanDTO> testPlanOfProjectOfId(@PathVariable String projectKey, @PathVariable Long testPlanId, @AuthenticationPrincipal CustomUserDetails userDetails){
         ValidatePathService.ProjectTestPlan projectTestPlan = validatePathService.checkTestPlanPath(
                 projectKey, testPlanId);
         accessService.checkAccessOfUserInProject(projectTestPlan.project(), userDetails.getUser(), ProjectRole.VIEWER);
-        return testPlanMapper.toDto(projectTestPlan.testPlan());
+        return ResponseEntity.ok(testPlanMapper.toDto(projectTestPlan.testPlan()));
     }
 
 }

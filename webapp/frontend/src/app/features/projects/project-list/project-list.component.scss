@@ -42,9 +42,7 @@
   }
 }
 
-.logout-btn {
-  @include mix.btn-ghost;
-}
+// 移除了未使用的 .logout-btn 规则，因为模板中已没有此按钮
 
 // ── Project grid ──────────────────────────────────────────────────────────────
 .projects-grid {
@@ -155,4 +153,42 @@
   gap: vars.$spacing-md;
   color: vars.$muted;
   font-size: 15px;
+}
+
+// ── Card actions (Suites / Plans buttons) ─────────────────────────────────────
+.card-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  border-top: 1px solid vars.$border;
+  padding-top: 16px;
+}
+
+.action-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: vars.$transition;
+  color: vars.$text;
+  text-align: center;
+  letter-spacing: 0.3px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  &.suites-btn:hover {
+    border-color: vars.$accent;
+    color: vars.$accent;
+  }
+
+  &.plans-btn:hover {
+    border-color: vars.$color-warning;
+    color: vars.$color-warning;
+  }
 }

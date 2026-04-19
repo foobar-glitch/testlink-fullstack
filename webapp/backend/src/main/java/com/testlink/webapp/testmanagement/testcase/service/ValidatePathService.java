@@ -4,6 +4,8 @@ import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.shared.exception.BadRequestException;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlan;
+import com.testlink.webapp.testmanagement.plan.entity.TestPlanRun;
+import com.testlink.webapp.testmanagement.plan.service.TestPlanRunService;
 import com.testlink.webapp.testmanagement.plan.service.TestPlanService;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
@@ -21,6 +23,7 @@ public class ValidatePathService {
     private final TestCaseService testCaseService;
     private final TestCaseVersionService testCaseVersionService;
     private final TestPlanService testPlanService;
+    private final TestPlanRunService testPlanRunService;
 
     public ProjectTestSuite checkTestSuitePath(String projectKey, Long suiteId){
         Project project = projectService.getProjectByKey(projectKey);
@@ -34,7 +37,7 @@ public class ValidatePathService {
     public ProjectTestSuiteTestCase checkTestSuitePath(String projectKey, Long suiteId, Long testCaseIdentifier){
         ProjectTestSuite data = this.checkTestSuitePath(projectKey, suiteId);
         TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(data.project(), testCaseIdentifier);
-        if(!testCase.getTestSuite().equals(data.testSuite())){
+        if(!data.testSuite().equals(testCase.getTestSuite())){
             throw new BadRequestException(String.format("TestCase %d not in SuiteId %d", testCaseIdentifier, suiteId));
         }
         return ProjectTestSuiteTestCase.builder().project(data.project()).testSuite(data.testSuite()).testCase(testCase).build();
@@ -47,7 +50,7 @@ public class ValidatePathService {
         TestCaseVersion testCaseVersion = testCaseVersionService.findByTestCaseAndVersionNumber(
                 data.testCase(), versionId
         );
-        if(!testCaseVersion.getTestCase().getIdentifierNumber().equals(testCaseIdentifier)){
+        if(!data.testCase().equals(testCaseVersion.getTestCase())){
             throw new BadRequestException(String.format("Version %d not in TestCase %d", versionId, testCaseIdentifier));
         }
         return ProjectTestSuiteTestCaseTestVersion.builder()
@@ -67,6 +70,18 @@ public class ValidatePathService {
         return ProjectTestPlan.builder().project(project).testPlan(testPlan).build();
     }
 
+    public ProjectTestPlanTestPlanRun checkTestPlanPath(String projectKey, Long testPlanId, Long testRunId){
+        ProjectTestPlan data = this.checkTestPlanPath(projectKey, testPlanId);
+        TestPlanRun testPlanRun = testPlanRunService.findByTestRunId(testRunId);
+        if(!data.testPlan().equals(testPlanRun.getTestPlan())){
+            throw new BadRequestException(String.format("TestPlan %d not in Project %s", testRunId, testPlanId));
+        }
+        return ProjectTestPlanTestPlanRun.builder()
+                .project(data.project())
+                .testPlan(data.testPlan())
+                .testPlanRun(testPlanRun).build();
+    }
+
     @Builder
     public record ProjectTestSuite(Project project, TestSuite testSuite){}
     @Builder
@@ -76,5 +91,7 @@ public class ValidatePathService {
 
     @Builder
     public record ProjectTestPlan(Project project, TestPlan testPlan){}
+    @Builder
+    public record ProjectTestPlanTestPlanRun(Project project, TestPlan testPlan, TestPlanRun testPlanRun){}
 
 }
