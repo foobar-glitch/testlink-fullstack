@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { TestCaseListComponent } from './features/test-cases/test-case-list/test-case-list.component';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
@@ -13,6 +14,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'suites', loadComponent: () => import('./features/test-suites/test-suite-list/test-suite-list.component').then(m => m.TestSuiteListComponent) },
+      {
+        path: 'suites/:suiteId/testcases',
+        loadComponent: () => import('./features/test-cases/test-case-list/test-case-list.component').then(m => m.TestCaseListComponent)
+      },
+      
       {
         path: 'suites/:suiteId/testcases/:testCaseIdentifier/versions',
         loadComponent: () => import('./features/test-cases/test-case-version-list/test-case-version-list.component').then(m => m.TestCaseVersionListComponent)

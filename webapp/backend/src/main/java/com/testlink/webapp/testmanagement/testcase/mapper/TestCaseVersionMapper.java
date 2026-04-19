@@ -1,5 +1,6 @@
 package com.testlink.webapp.testmanagement.testcase.mapper;
 
+import com.testlink.webapp.shared.mapper.BaseAuditMapper;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import org.mapstruct.Mapper;
@@ -11,12 +12,12 @@ import java.util.List;
         componentModel = "spring",
         uses = {TestCaseMapper.class}
 )
-public interface TestCaseVersionMapper {
+public abstract class TestCaseVersionMapper extends BaseAuditMapper {
     @Mapping(target = "testCaseVersionId", source = "testCaseVersionId")
     @Mapping(target = "testCase", source = "testCase")
     @Mapping(target = "versionNumber", source = "versionNumber")
     @Mapping(target = "status", source = "status")
-    TestCaseVersionDTO toDto(TestCaseVersion testCaseVersion);
-
-    List<TestCaseVersionDTO> toDtoList(List<TestCaseVersion> testCaseVersions);
+    @Mapping(target = "stamp", expression = "java(mapAudit(testCaseVersion))")
+    public abstract TestCaseVersionDTO toDto(TestCaseVersion testCaseVersion);
+    public abstract List<TestCaseVersionDTO> toDtoList(List<TestCaseVersion> testCaseVersions);
 }
