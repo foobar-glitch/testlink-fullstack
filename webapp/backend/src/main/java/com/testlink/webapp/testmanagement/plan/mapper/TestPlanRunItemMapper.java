@@ -22,7 +22,7 @@ import java.util.List;
 public abstract class TestPlanRunItemMapper extends BaseAuditMapper {
 
     @Mapping(target = "testRunItemId", source = "testRunItemId")
-    @Mapping(target = "testRun", source = "testRun")
+    @Mapping(target = "testPlanRun", source = "testPlanRun")
     @Mapping(target = "testCase", source = "testCase")
     @Mapping(target = "testCaseVersion", source = "testCaseVersion")
     @Mapping(target = "assignedTo", source = "assignedTo")

@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { TestPlanRunService } from '../../../core/services/test-plan-run.service';
@@ -17,6 +17,7 @@ import { TestPlanRun } from '../../../core/models/testexecution';
   styleUrls: ['./test-plan-run-list.component.scss'],
 })
 export class TestPlanRunListComponent {
+  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly testPlanRunService = inject(TestPlanRunService);
   private readonly testPlanService = inject(TestPlanService);
@@ -48,5 +49,17 @@ export class TestPlanRunListComponent {
         map(plan => plan.name),
         catchError(() => of('Test Plan'))
       );
+  }
+
+  selectRun(run: TestPlanRun): void {
+    this.router.navigate([
+      '/projects/project-key',
+      this.projectKey,
+      'testplans',
+      this.testPlanId,
+      'runs',
+      run.testPlanRunId,
+      'items'
+    ]);
   }
 }

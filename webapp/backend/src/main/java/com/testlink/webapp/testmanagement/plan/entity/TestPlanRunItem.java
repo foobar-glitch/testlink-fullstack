@@ -26,7 +26,7 @@ public class TestPlanRunItem extends UserCreatedTimeStampedEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "test_run_id")
-    private TestPlanRun testRun;
+    private TestPlanRun testPlanRun;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "test_case_id")

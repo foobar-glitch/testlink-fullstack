@@ -1,7 +1,8 @@
 // ─── Test Run ────────────────────────────────────────────────────────────────
-import { TestCase } from './testsuite';
+import { TestCase, TestCaseVersion } from './testsuite';
 import { UserCreatedTimeStamp } from './tablemetadata';
 import { Project } from './project';
+import { UserSummary } from './authentication';
 
 export interface TestPlan {
   testPlanId: number;
@@ -22,6 +23,23 @@ export interface TestPlanRun {
 
 export type ExecutionStatus = 'pass' | 'fail' | 'blocked' | 'not_run';
 
+export type TestRunStatus = 'NOT_RUN' | 'PASSED' | 'FAILED' | 'BLOCKED' | 'SKIPPED';
+
+export interface TestPlanRunItem {
+  testRunItemId: number;
+  testPlanRun: TestPlanRun;
+  testCase: TestCase;
+  testCaseVersion: TestCaseVersion;
+  assignedTo: UserSummary | null;
+  executedBy: UserSummary | null;
+  status: TestRunStatus;
+  executedAt: string | null;
+  notes: string | null;
+  stamp: UserCreatedTimeStamp;
+}
+
+//TODO RunSummary
+/*
 export interface TestRun {
   id: number;
   projectId: number;
@@ -58,3 +76,4 @@ export interface ExecutionUpdateRequest {
   status: ExecutionStatus;
   notes?: string;
 }
+*/

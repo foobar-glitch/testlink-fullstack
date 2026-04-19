@@ -5,6 +5,8 @@ import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.shared.exception.BadRequestException;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlan;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlanRun;
+import com.testlink.webapp.testmanagement.plan.entity.TestPlanRunItem;
+import com.testlink.webapp.testmanagement.plan.service.TestPlanRunItemService;
 import com.testlink.webapp.testmanagement.plan.service.TestPlanRunService;
 import com.testlink.webapp.testmanagement.plan.service.TestPlanService;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
@@ -24,6 +26,7 @@ public class ValidatePathService {
     private final TestCaseVersionService testCaseVersionService;
     private final TestPlanService testPlanService;
     private final TestPlanRunService testPlanRunService;
+    private final TestPlanRunItemService testPlanRunItemService;
 
     public ProjectTestSuite checkTestSuitePath(String projectKey, Long suiteId){
         Project project = projectService.getProjectByKey(projectKey);
@@ -82,6 +85,23 @@ public class ValidatePathService {
                 .testPlanRun(testPlanRun).build();
     }
 
+    public ProjectTestPlanTestPlanRunItem checkTestPlanPath(String projectKey, Long testPlanId, Long testRunId, Long testRunItemId){
+        ProjectTestPlanTestPlanRun data = this.checkTestPlanPath(projectKey, testPlanId, testRunId);
+        TestPlanRunItem testPlanRunItem = testPlanRunItemService.findByTestPlanRunItemId(testRunItemId);
+
+        if(!data.testPlanRun().equals(testPlanRunItem.getTestPlanRun())){
+            throw new BadRequestException(String.format("TestPlan %d not in Project %s", testRunId, testPlanId));
+        }
+        return ProjectTestPlanTestPlanRunItem.builder()
+                .project(data.project())
+                .testPlan(data.testPlan())
+                .testPlanRun(data.testPlanRun())
+                .testPlanRunItem(testPlanRunItem)
+                .build();
+    }
+
+
+
     @Builder
     public record ProjectTestSuite(Project project, TestSuite testSuite){}
     @Builder
@@ -93,5 +113,7 @@ public class ValidatePathService {
     public record ProjectTestPlan(Project project, TestPlan testPlan){}
     @Builder
     public record ProjectTestPlanTestPlanRun(Project project, TestPlan testPlan, TestPlanRun testPlanRun){}
+    @Builder
+    public record ProjectTestPlanTestPlanRunItem(Project project, TestPlan testPlan, TestPlanRun testPlanRun, TestPlanRunItem testPlanRunItem){}
 
 }

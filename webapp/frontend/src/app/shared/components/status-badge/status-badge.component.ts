@@ -3,15 +3,11 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export type BadgeStatus =
-// Execution statuses
-  | 'pass'
-  | 'fail'
-  | 'blocked'
-  | 'not_run'
   // Test case statuses
   | 'draft'
   | 'active'
   | 'deprecated';
+
 
 @Component({
   selector: 'app-status-badge',
@@ -21,7 +17,7 @@ export type BadgeStatus =
   styleUrls: ['./status-badge.component.scss'],
 })
 export class StatusBadgeComponent {
-  @Input() status: BadgeStatus = 'not_run';
+  @Input() status: BadgeStatus = 'draft';//what comes here now:
 
   get badgeClass(): string {
     return this.status;
@@ -29,10 +25,6 @@ export class StatusBadgeComponent {
 
   get label(): string {
     const map: Record<BadgeStatus, string> = {
-      pass: 'PASS',
-      fail: 'FAIL',
-      blocked: 'BLOCKED',
-      not_run: 'NOT RUN',
       draft: 'DRAFT',
       active: 'ACTIVE',
       deprecated: 'DEPRECATED',

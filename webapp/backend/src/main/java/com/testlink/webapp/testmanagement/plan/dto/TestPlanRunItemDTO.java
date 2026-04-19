@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 public record TestPlanRunItemDTO(
         Long testRunItemId,
-        TestPlanRunDTO testRun,
+        TestPlanRunDTO testPlanRun,
         TestCaseDTO testCase,
         TestCaseVersionDTO testCaseVersion,
         UserSummaryDTO assignedTo,

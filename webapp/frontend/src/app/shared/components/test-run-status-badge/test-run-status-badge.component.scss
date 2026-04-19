@@ -1,0 +1,48 @@
+@use '../../styles/variables' as vars;
+@use '../../styles/mixins' as mix;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: vars.$radius-sm;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: vars.$shadow-sm;
+  transition: vars.$transition;
+  border: 1px solid transparent;
+
+  &.not_run {
+    background: vars.$gray-light;
+    color: vars.$muted;
+    border-color: vars.$border;
+  }
+
+  &.passed {
+    background: rgba(vars.$color-success, 0.12);
+    color: vars.$color-success;
+    border-color: rgba(vars.$color-success, 0.25);
+  }
+
+  &.failed {
+    background: rgba(vars.$color-danger, 0.12);
+    color: vars.$color-danger;
+    border-color: rgba(vars.$color-danger, 0.25);
+  }
+
+  &.blocked {
+    background: rgba(vars.$color-warning, 0.12);
+    color: vars.$color-warning;
+    border-color: rgba(vars.$color-warning, 0.25);
+  }
+
+  &.skipped {
+    background: rgba(vars.$accent, 0.12);
+    color: vars.$accent;
+    border-color: rgba(vars.$accent, 0.25);
+  }
+}
