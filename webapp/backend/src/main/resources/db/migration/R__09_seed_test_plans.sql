@@ -1,5 +1,5 @@
 -- ======================================================================
--- R__08_seed_test_plans.sql
+-- R__09_seed_test_plans.sql
 -- Populates test plans, runs, run items, and step results with sample data.
 -- Assumes existing data: projects (1-4), users (1-3), test_cases (1-16),
 -- and test_case_versions (test_case_id 1,11,14 have versions).

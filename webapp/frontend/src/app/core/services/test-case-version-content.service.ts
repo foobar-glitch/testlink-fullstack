@@ -16,7 +16,7 @@ export class TestCaseVersionContentService {
     versionNumber: number
   ): Observable<TestCaseVersionContent> {
     return this.http.get<TestCaseVersionContent>(
-      `${this.apiUrl}projects/project-key/${projectKey}/suite/${suiteId}/testcase-identifier/${testCaseIdentifier}/versions/${versionNumber}`,
+      `${this.apiUrl}projects/project-key/${projectKey}/suite/${suiteId}/testcase-identifier/${testCaseIdentifier}/versions/${versionNumber}/content`,
       { withCredentials: true }
     );
   }
