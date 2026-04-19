@@ -18,7 +18,7 @@ export const routes: Routes = [
         path: 'suites/:suiteId/testcases',
         loadComponent: () => import('./features/test-cases/test-case-list/test-case-list.component').then(m => m.TestCaseListComponent)
       },
-      
+
       {
         path: 'suites/:suiteId/testcases/:testCaseIdentifier/versions',
         loadComponent: () => import('./features/test-cases/test-case-version-list/test-case-version-list.component').then(m => m.TestCaseVersionListComponent)

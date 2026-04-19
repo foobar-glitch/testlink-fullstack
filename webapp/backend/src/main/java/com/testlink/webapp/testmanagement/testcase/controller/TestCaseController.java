@@ -27,9 +27,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TestCaseController {
     private final ProjectAccessService projectAccessService;
-    private final ProjectService projectService;
-
-    private final TestSuiteService testSuiteService;
     private final TestCaseService testCaseService;
     private final TestCaseMapper testCaseMapper;
 
