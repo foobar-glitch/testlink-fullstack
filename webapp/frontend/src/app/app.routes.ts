@@ -22,6 +22,15 @@ export const routes: Routes = [
         path: 'suites/:suiteId/testcases/:testCaseIdentifier/versions',
         loadComponent: () => import('./features/test-cases/test-case-version-list/test-case-version-list.component').then(m => m.TestCaseVersionListComponent)
       },
+      {
+        path: 'suites/:suiteId/testcases/:testCaseIdentifier/versions/:versionNumber/content',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/test-cases/test-case-version-content/test-case-version-content.component').then(
+            m => m.TestCaseVersionContentComponent
+          ),
+      },
+
       { path: 'testplans', loadComponent: () => import('./features/test-plans/test-plan-list/test-plan-list.component').then(m => m.TestPlanListComponent) },
       { path: 'testplans/:testPlanId/runs', loadComponent: () => import('./features/test-plans/test-plan-run-list/test-plan-run-list.component').then(m => m.TestPlanRunListComponent) },
       {

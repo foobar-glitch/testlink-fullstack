@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { TestCaseVersionService } from '../../../core/services/test-case-version.service';
@@ -27,6 +27,7 @@ export class TestCaseVersionListComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly versionService = inject(TestCaseVersionService);
   private readonly testCaseService = inject(TestCaseService);
+  private readonly router = inject(Router);
 
   // Extract from route: e.g., /testcase/ECP-1/versions
   readonly projectKey: string;
@@ -70,7 +71,16 @@ export class TestCaseVersionListComponent {
   }
 
   viewVersion(version: TestCaseVersion): void {
-    // Navigate to version detail page (to be implemented)
-    console.log('View version', version.testCaseVersionId);
+    this.router.navigate([
+      '/projects/project-key',
+      this.projectKey,
+      'suites',
+      this.suiteId,
+      'testcases',
+      this.testCaseIdentifier,
+      'versions',
+      version.versionNumber,
+      'content'
+    ]);
   }
 }

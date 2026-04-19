@@ -20,12 +20,12 @@ public class TestCase extends UserCreatedTimeStampedEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long testCaseId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "test_suite_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "test_suite_id", nullable = false)
     private TestSuite testSuite;
 
     @Column(name = "identifier_number", nullable = false)
@@ -34,7 +34,7 @@ public class TestCase extends UserCreatedTimeStampedEntity {
     @Column(name = "title", nullable = false, length = 150)
     private String title;
 
-    @Column(name = "description", length = 500)
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)

@@ -17,8 +17,8 @@ public class TestSuite extends UserCreatedTimeStampedEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long testSuiteId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,6 +28,6 @@ public class TestSuite extends UserCreatedTimeStampedEntity {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "description", length = 350)
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 }

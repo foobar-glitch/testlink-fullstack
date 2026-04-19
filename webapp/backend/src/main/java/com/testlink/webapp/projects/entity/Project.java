@@ -22,7 +22,7 @@ public class Project extends UserCreatedTimeStampedEntity {
     @Column(name = "display_name", nullable = false, length = 50)
     private String displayName;
 
-    @Column(name = "description", nullable = false, length = 500)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)

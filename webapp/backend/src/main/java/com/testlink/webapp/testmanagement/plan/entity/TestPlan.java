@@ -17,13 +17,13 @@ public class TestPlan extends UserCreatedTimeStampedEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long testPlanId;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
     @Column(name = "name", nullable = false, length = 250)
     private String name;
 
-    @Column(name = "description", length = 500)
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 }

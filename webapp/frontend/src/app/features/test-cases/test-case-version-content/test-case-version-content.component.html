@@ -1,0 +1,44 @@
+<div class="version-content-container">
+  <header class="header">
+    <div class="title-section">
+      <h2>Version Details</h2>
+      <span *ngIf="testCaseTitle$ | async as title" class="testcase-title">
+        {{ title }} – v{{ versionNumber }}
+      </span>
+    </div>
+    <button
+      class="back-btn"
+      [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases', testCaseIdentifier, 'versions']"
+    >
+      ← Back to Versions
+    </button>
+  </header>
+
+  <div *ngIf="errorMessage" class="error-state">
+    <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
+  </div>
+
+  <ng-container *ngIf="content$ | async as content; else loading">
+    <div class="content-card">
+      <h3>{{ content.title }}</h3>
+      <div class="field">
+        <label>Preconditions</label>
+        <p>{{ content.preconditions || 'None' }}</p>
+      </div>
+      <div class="field">
+        <label>Expected Result</label>
+        <p>{{ content.expectedResult || 'None' }}</p>
+      </div>
+      <div class="meta">
+        Created by {{ content.stamp.user.username }} on
+        {{ content.stamp.timeStamp.createdAt | date: 'medium' }}
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="loading-state">
+      <app-spinner label="Loading version content..."></app-spinner>
+    </div>
+  </ng-template>
+</div>

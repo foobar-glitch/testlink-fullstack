@@ -19,7 +19,7 @@ public class TestCaseVersion extends UserCreatedTimeStampedEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long testCaseVersionId;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "test_case_id", nullable = false)
     private TestCase testCase;
 

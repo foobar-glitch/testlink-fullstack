@@ -17,8 +17,8 @@ public class TestPlanRun extends UserCreatedTimeStampedEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long testPlanRunId;
 
-    @ManyToOne
-    @JoinColumn(name = "test_plan_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "test_plan_id", nullable = false)
     private TestPlan testPlan;
 
     @Column(name = "name", nullable = false, length = 250)

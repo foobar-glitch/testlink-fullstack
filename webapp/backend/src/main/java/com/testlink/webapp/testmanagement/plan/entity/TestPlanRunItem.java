@@ -25,15 +25,15 @@ public class TestPlanRunItem extends UserCreatedTimeStampedEntity {
     private Long testRunItemId;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "test_run_id")
+    @JoinColumn(name = "test_run_id", nullable = false)
     private TestPlanRun testPlanRun;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "test_case_id")
+    @JoinColumn(name = "test_case_id", nullable = false)
     private TestCase testCase;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "test_case_version_id")
+    @JoinColumn(name = "test_case_version_id", nullable = false)
     private TestCaseVersion testCaseVersion;
 
     @ManyToOne
@@ -51,6 +51,6 @@ public class TestPlanRunItem extends UserCreatedTimeStampedEntity {
     @Column(name = "executed_at")
     private LocalDateTime executedAt;
 
-    @Column(name = "notes", length = 500)
+    @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 }

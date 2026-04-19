@@ -75,6 +75,15 @@ export interface TestStep {
   expectedResult: string;
 }
 
+export interface TestCaseVersionContent {
+  testCaseVersionId: number;
+  testCaseVersion: TestCaseVersion;
+  title: string;
+  preconditions: string;
+  expectedResult: string;
+  stamp: UserCreatedTimeStamp;
+}
+
 export interface TestCaseFormData {
   title: string;
   description: string;
