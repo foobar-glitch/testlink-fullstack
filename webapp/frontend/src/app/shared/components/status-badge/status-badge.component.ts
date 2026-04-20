@@ -17,10 +17,10 @@ export type BadgeStatus =
   styleUrls: ['./status-badge.component.scss'],
 })
 export class StatusBadgeComponent {
-  @Input() status: BadgeStatus = 'draft';//what comes here now:
+  @Input() status: BadgeStatus = 'draft'; //what comes here now:
 
   get badgeClass(): string {
-    return this.status;
+    return this.status.toLowerCase(); // Always go lowercase for CSS classes
   }
 
   get label(): string {
