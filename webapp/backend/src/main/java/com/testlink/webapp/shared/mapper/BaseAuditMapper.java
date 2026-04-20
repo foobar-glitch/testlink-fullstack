@@ -17,7 +17,7 @@ import org.mapstruct.Mapping;
 )
 public abstract class BaseAuditMapper {
 
-    @Mapping(target = "user", source = "createdBy")
+    @Mapping(target = "createdBy", source = "createdBy")
     @Mapping(target = "timeStamp", source = ".")
     public abstract UserCreatedTimeStampDTO mapAudit(UserCreatedTimeStampedEntity entity);
 }

@@ -5,5 +5,5 @@ import lombok.Builder;
 
 @Builder
 public record UserCreatedTimeStampDTO(
-        UserSummaryDTO user, TimeStampDTO timeStamp
+        UserSummaryDTO createdBy, TimeStampDTO timeStamp
 ) {}

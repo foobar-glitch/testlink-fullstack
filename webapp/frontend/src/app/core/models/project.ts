@@ -1,5 +1,5 @@
 // ─── Project ─────────────────────────────────────────────────────────────────
-import { Authentication } from './authentication';
+import { UserSummary } from './authentication';
 import { UserCreatedTimeStamp } from './tablemetadata';
 
 export interface Project {
@@ -14,7 +14,7 @@ export interface Project {
 export type ProjectRole = 'admin' | 'tester' | 'viewer';
 
 export interface ProjectMembership {
-  user: Authentication;
+  user: UserSummary;
   project: Project;
   role: ProjectRole;
 }

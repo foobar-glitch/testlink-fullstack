@@ -7,16 +7,16 @@ import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.shared.mapper.BaseAuditMapper;
 import com.testlink.webapp.shared.mapper.IdMapper;
-import com.testlink.webapp.user.mapper.UserMapper;
+import com.testlink.webapp.user.mapper.UserSummaryMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class, IdMapper.class})
+@Mapper(componentModel = "spring", uses = {UserSummaryMapper.class, IdMapper.class})
 public abstract class ProjectMapper extends BaseAuditMapper {
 
-    @Mapping(target = "projectId", source = "projectId")
+    @Mapping(target = "projectId", source = "publicId")
     @Mapping(target = "projectKey", source = "projectKey")
     @Mapping(target = "displayName", source = "displayName")
     @Mapping(target = "description", source = "description")

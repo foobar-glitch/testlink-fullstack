@@ -33,7 +33,7 @@
         <p class="description">{{ membership.project.description }}</p>
 
         <div class="created">
-          Created {{ membership.project.stamp?.timeStamp?.createdAt | date:'mediumDate' }}
+          Created by {{ membership.project.stamp.createdBy.username }} on {{ membership.project.stamp?.timeStamp?.createdAt | date:'mediumDate' }}
         </div>
 
         <!-- Navigation buttons -->

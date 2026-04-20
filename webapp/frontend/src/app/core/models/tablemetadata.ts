@@ -6,6 +6,6 @@ export interface TimeStamp {
 }
 
 export interface UserCreatedTimeStamp {
-  user: UserSummary;
+  createdBy: UserSummary;
   timeStamp: TimeStamp;
 }
