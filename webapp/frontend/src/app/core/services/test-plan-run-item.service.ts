@@ -20,19 +20,17 @@ export class TestPlanRunItemService {
     );
   }
 
-  /**
-   * Get a single run item by ID.
-   * Endpoint: GET /projects/project-key/{projectKey}/testplans/{testPlanId}/testruns/{testRunId}/items/{testRunItemId}
-   */
+  // test-plan-run-item.service.ts
   getRunItemById(
     projectKey: string,
-    testPlanId: number,
-    testRunId: number,
-    testRunItemId: number
+    testPlanId: string,
+    testRunId: string,
+    itemId: string
   ): Observable<TestPlanRunItem> {
     return this.http.get<TestPlanRunItem>(
-      `${this.apiUrl}projects/project-key/${projectKey}/testplans/${testPlanId}/testruns/${testRunId}/items/${testRunItemId}`,
+      `${this.apiUrl}projects/project-key/${projectKey}/testplans/${testPlanId}/testruns/${testRunId}/items/${itemId}`,
       { withCredentials: true }
     );
   }
+
 }

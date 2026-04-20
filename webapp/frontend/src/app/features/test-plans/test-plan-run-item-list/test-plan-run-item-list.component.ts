@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { TestPlanRunItemService } from '../../../core/services/test-plan-run-item.service';
@@ -15,7 +15,13 @@ import {
 @Component({
   selector: 'app-test-plan-run-item-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, SpinnerComponent, ErrorBannerComponent, TestRunStatusBadgeComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    SpinnerComponent,
+    ErrorBannerComponent,
+    TestRunStatusBadgeComponent,
+  ],
   templateUrl: './test-plan-run-item-list.component.html',
   styleUrls: ['./test-plan-run-item-list.component.scss'],
 })
@@ -23,6 +29,7 @@ export class TestPlanRunItemListComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly runItemService = inject(TestPlanRunItemService);
   private readonly runService = inject(TestPlanRunService);
+  private readonly router = inject(Router);
 
   readonly projectKey: string;
   readonly testPlanId: string;
@@ -40,17 +47,17 @@ export class TestPlanRunItemListComponent {
     this.items$ = this.runItemService
       .getRunItems(this.projectKey, this.testPlanId, this.testRunId)
       .pipe(
-        catchError(err => {
+        catchError((err) => {
           this.errorMessage = err.message || 'Failed to load run items';
           return of([]);
-        })
+        }),
       );
 
     this.runName$ = this.runService
       .getTestRunById(this.projectKey, this.testPlanId, this.testRunId)
       .pipe(
-        map(run => run.name),
-        catchError(() => of('Test Run'))
+        map((run) => run.name),
+        catchError(() => of('Test Run')),
       );
   }
 
@@ -62,5 +69,18 @@ export class TestPlanRunItemListComponent {
   // Convert API status (e.g., "NOT_RUN") to badge status (e.g., "not_run")
   getBadgeStatus(status: TestRunStatus): string {
     return status.toLowerCase();
+  }
+
+  viewItem(item: TestPlanRunItem): void {
+    this.router.navigate([
+      '/projects/project-key',
+      this.projectKey,
+      'testplans',
+      this.testPlanId,
+      'runs',
+      this.testRunId,
+      'items',
+      item.testRunItemId,
+    ]);
   }
 }

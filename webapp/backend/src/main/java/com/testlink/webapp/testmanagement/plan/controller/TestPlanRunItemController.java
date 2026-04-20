@@ -45,7 +45,7 @@ public class TestPlanRunItemController {
             @PathVariable String projectKey,
             @PathVariable String testPlanId,
             @PathVariable String testRunId,
-            @PathVariable Long testRunItemId,
+            @PathVariable String testRunItemId,
             @AuthenticationPrincipal CustomUserDetails userDetails
             )
     {

@@ -26,15 +26,12 @@ import java.util.List;
 @RequestMapping("/projects/project-key/{projectKey}/suite/{suiteId}/testcase-identifier/{testCaseIdentifier}/versions")
 @RequiredArgsConstructor
 public class TestCaseVersionController {
-    private final ProjectService projectService;
     private final ProjectAccessService projectAccessService;
 
-    private final TestCaseService testCaseService;
     private final TestCaseVersionService testCaseVersionService;
     private final TestCaseVersionMapper testCaseVersionMapper;
 
     private final ValidatePathService validatePathService;
-    private final TestSuiteService testSuiteService;
 
     @GetMapping("")
     public ResponseEntity<List<TestCaseVersionDTO>> getVersions(

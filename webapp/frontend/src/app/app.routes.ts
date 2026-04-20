@@ -37,6 +37,11 @@ export const routes: Routes = [
         path: 'testplans/:testPlanId/runs/:testRunId/items',
         loadComponent: () => import('./features/test-plans/test-plan-run-item-list/test-plan-run-item-list.component').then(m => m.TestPlanRunItemListComponent),
       },
+      {
+        path: 'testplans/:testPlanId/runs/:testRunId/items/:itemId',
+        canActivate: [authGuard],
+        loadComponent: () => import('./features/test-plans/test-plan-run-item-detail/test-plan-run-item-detail.component').then(m => m.TestPlanRunItemDetailComponent),
+      },
 
   { path: '', redirectTo: 'suites', pathMatch: 'full' },
       { path: '', redirectTo: 'suites', pathMatch: 'full' }

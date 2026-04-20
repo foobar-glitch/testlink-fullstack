@@ -8,15 +8,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class TestPlanRunItemService {
     private final TestPlanRunItemRepository testPlanRunItemRepository;
 
-    public TestPlanRunItem findByTestPlanRunItemId(Long testPlanRunItemId){
-        return testPlanRunItemRepository.findById(
-                testPlanRunItemId).orElseThrow(
+    public TestPlanRunItem findByTestPlanRunItemId(UUID testPlanRunItemId){
+        return testPlanRunItemRepository.findTestPlanRunItemsByPublicId(testPlanRunItemId).orElseThrow(
                         () -> new ResourceNotFoundException("TestPlanRunItem", "testPlanRunItemId", testPlanRunItemId)
         );
     }

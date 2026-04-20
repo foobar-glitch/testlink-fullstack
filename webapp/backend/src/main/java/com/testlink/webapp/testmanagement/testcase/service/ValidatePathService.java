@@ -87,9 +87,9 @@ public class ValidatePathService {
                 .testPlanRun(testPlanRun).build();
     }
 
-    public ProjectTestPlanTestPlanRunItem checkTestPlanPath(String projectKey, String testPlanId, String testRunId, Long testRunItemId){
+    public ProjectTestPlanTestPlanRunItem checkTestPlanPath(String projectKey, String testPlanId, String testRunId, String testRunItemId){
         ProjectTestPlanTestPlanRun data = this.checkTestPlanPath(projectKey, testPlanId, testRunId);
-        TestPlanRunItem testPlanRunItem = testPlanRunItemService.findByTestPlanRunItemId(testRunItemId);
+        TestPlanRunItem testPlanRunItem = testPlanRunItemService.findByTestPlanRunItemId(fromBase62(testRunItemId));
 
         if(!data.testPlanRun().equals(testPlanRunItem.getTestPlanRun())){
             throw new BadRequestException(String.format("TestPlan %s not in Project %s", testRunId, testPlanId));
