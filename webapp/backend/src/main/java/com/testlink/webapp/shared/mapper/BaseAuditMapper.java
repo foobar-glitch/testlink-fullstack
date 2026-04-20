@@ -7,28 +7,17 @@ import com.testlink.webapp.shared.entity.UserCreatedTimeStampedEntity;
 import com.testlink.webapp.user.dto.UserSummaryDTO;
 import com.testlink.webapp.user.entity.User;
 import com.testlink.webapp.user.mapper.UserMapper;
+import com.testlink.webapp.user.mapper.UserSummaryMapper;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class})
+@Mapper(
+        componentModel = "spring",
+        uses = {UserSummaryMapper.class, TimeStampMapper.class}
+)
 public abstract class BaseAuditMapper {
-    
-    protected UserCreatedTimeStampDTO mapAudit(UserCreatedTimeStampedEntity entity) {
-        User createdBy = entity.getCreatedBy();
-        UserSummaryDTO userSummary = createdBy != null
-                ? UserSummaryDTO.builder()
-                  .userId(createdBy.getUserId())
-                  .username(createdBy.getUsername())
-                  .build()
-                : null;
 
-        TimeStampDTO timeStamp = TimeStampDTO.builder()
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .build();
-
-        return UserCreatedTimeStampDTO.builder()
-                .user(userSummary)
-                .timeStamp(timeStamp)
-                .build();
-    }
+    @Mapping(target = "user", source = "createdBy")
+    @Mapping(target = "timeStamp", source = ".")
+    public abstract UserCreatedTimeStampDTO mapAudit(UserCreatedTimeStampedEntity entity);
 }
