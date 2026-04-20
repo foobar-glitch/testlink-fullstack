@@ -66,20 +66,20 @@ public class ValidatePathService {
                 .build();
     }
 
-    public ProjectTestPlan checkTestPlanPath(String projectKey, Long testPlanId){
+    public ProjectTestPlan checkTestPlanPath(String projectKey, String testPlanId){
         Project project = projectService.getProjectByKey(projectKey);
-        TestPlan testPlan = testPlanService.findByTestPlanId(testPlanId);
+        TestPlan testPlan = testPlanService.findByTestPlanId(fromBase62(testPlanId));
         if(!project.equals(testPlan.getProject())){
-            throw new BadRequestException(String.format("TestPlan %d not in Project %s", testPlanId, projectKey));
+            throw new BadRequestException(String.format("TestPlan %s not in Project %s", testPlanId, projectKey));
         }
         return ProjectTestPlan.builder().project(project).testPlan(testPlan).build();
     }
 
-    public ProjectTestPlanTestPlanRun checkTestPlanPath(String projectKey, Long testPlanId, Long testRunId){
+    public ProjectTestPlanTestPlanRun checkTestPlanPath(String projectKey, String testPlanId, String testRunId){
         ProjectTestPlan data = this.checkTestPlanPath(projectKey, testPlanId);
-        TestPlanRun testPlanRun = testPlanRunService.findByTestRunId(testRunId);
+        TestPlanRun testPlanRun = testPlanRunService.findByTestRunId(fromBase62(testRunId));
         if(!data.testPlan().equals(testPlanRun.getTestPlan())){
-            throw new BadRequestException(String.format("TestPlan %d not in Project %s", testRunId, testPlanId));
+            throw new BadRequestException(String.format("TestPlan %s not in Project %s", testRunId, testPlanId));
         }
         return ProjectTestPlanTestPlanRun.builder()
                 .project(data.project())
@@ -87,12 +87,12 @@ public class ValidatePathService {
                 .testPlanRun(testPlanRun).build();
     }
 
-    public ProjectTestPlanTestPlanRunItem checkTestPlanPath(String projectKey, Long testPlanId, Long testRunId, Long testRunItemId){
+    public ProjectTestPlanTestPlanRunItem checkTestPlanPath(String projectKey, String testPlanId, String testRunId, Long testRunItemId){
         ProjectTestPlanTestPlanRun data = this.checkTestPlanPath(projectKey, testPlanId, testRunId);
         TestPlanRunItem testPlanRunItem = testPlanRunItemService.findByTestPlanRunItemId(testRunItemId);
 
         if(!data.testPlanRun().equals(testPlanRunItem.getTestPlanRun())){
-            throw new BadRequestException(String.format("TestPlan %d not in Project %s", testRunId, testPlanId));
+            throw new BadRequestException(String.format("TestPlan %s not in Project %s", testRunId, testPlanId));
         }
         return ProjectTestPlanTestPlanRunItem.builder()
                 .project(data.project())

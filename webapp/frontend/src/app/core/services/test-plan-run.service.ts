@@ -14,7 +14,7 @@ export class TestPlanRunService {
    * Get all test runs for a given test plan.
    * Endpoint: GET /projects/project-key/{projectKey}/testplans/{testPlanId}/testruns
    */
-  getTestRunsByTestPlan(projectKey: string, testPlanId: number): Observable<TestPlanRun[]> {
+  getTestRunsByTestPlan(projectKey: string, testPlanId: string): Observable<TestPlanRun[]> {
     return this.http.get<TestPlanRun[]>(
       `${this.apiUrl}projects/project-key/${projectKey}/testplans/${testPlanId}/testruns`,
       { withCredentials: true }
@@ -25,7 +25,7 @@ export class TestPlanRunService {
    * Get a single test run by ID.
    * Endpoint: GET /projects/project-key/{projectKey}/testplans/{testPlanId}/testruns/{testRunId}
    */
-  getTestRunById(projectKey: string, testPlanId: number, testRunId: number): Observable<TestPlanRun> {
+  getTestRunById(projectKey: string, testPlanId: string, testRunId: string): Observable<TestPlanRun> {
     return this.http.get<TestPlanRun>(
       `${this.apiUrl}projects/project-key/${projectKey}/testplans/${testPlanId}/testruns/${testRunId}`,
       { withCredentials: true }

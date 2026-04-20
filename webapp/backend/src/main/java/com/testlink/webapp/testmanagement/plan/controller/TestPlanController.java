@@ -39,7 +39,7 @@ public class TestPlanController {
     }
 
     @GetMapping("/{testPlanId}")
-    public ResponseEntity<TestPlanDTO> testPlanOfProjectOfId(@PathVariable String projectKey, @PathVariable Long testPlanId, @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<TestPlanDTO> testPlanOfProjectOfId(@PathVariable String projectKey, @PathVariable String testPlanId, @AuthenticationPrincipal CustomUserDetails userDetails){
         ValidatePathService.ProjectTestPlan projectTestPlan = validatePathService.checkTestPlanPath(
                 projectKey, testPlanId);
         accessService.checkAccessOfUserInProject(projectTestPlan.project(), userDetails.getUser(), ProjectRole.VIEWER);

@@ -29,14 +29,14 @@ public class TestPlanRunController {
 
 
     @GetMapping("")
-    public ResponseEntity<List<TestPlanRunDTO>> testRunsOfTestPlan(@PathVariable String projectKey, @PathVariable Long testPlanId, @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<List<TestPlanRunDTO>> testRunsOfTestPlan(@PathVariable String projectKey, @PathVariable String testPlanId, @AuthenticationPrincipal CustomUserDetails userDetails){
         ValidatePathService.ProjectTestPlan projectTestPlan = validatePathService.checkTestPlanPath(projectKey, testPlanId);
         projectAccessService.checkAccessOfUserInProject(projectTestPlan.project(), userDetails.getUser(), ProjectRole.VIEWER);
         return ResponseEntity.ok(testPlanRunMapper.toDtoList(testPlanRunService.findAllRunsOfTestPlan(projectTestPlan.testPlan())));
     }
 
     @GetMapping("/{testRunId}")
-    public ResponseEntity<TestPlanRunDTO> testRunOfId(@PathVariable String projectKey, @PathVariable Long testPlanId, @PathVariable Long testRunId, @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<TestPlanRunDTO> testRunOfId(@PathVariable String projectKey, @PathVariable String testPlanId, @PathVariable String testRunId, @AuthenticationPrincipal CustomUserDetails userDetails){
         ValidatePathService.ProjectTestPlanTestPlanRun projectTestPlanTestPlanRun = validatePathService.checkTestPlanPath(projectKey, testPlanId, testRunId);
         projectAccessService.checkAccessOfUserInProject(projectTestPlanTestPlanRun.project(), userDetails.getUser(), ProjectRole.VIEWER);
         return ResponseEntity.ok(testPlanRunMapper.toDto(projectTestPlanTestPlanRun.testPlanRun()));

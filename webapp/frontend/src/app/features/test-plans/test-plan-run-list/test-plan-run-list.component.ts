@@ -23,7 +23,7 @@ export class TestPlanRunListComponent {
   private readonly testPlanService = inject(TestPlanService);
 
   readonly projectKey: string;
-  readonly testPlanId: number;
+  readonly testPlanId: string;
 
   runs$: Observable<TestPlanRun[]>;
   testPlanName$: Observable<string>;
@@ -31,7 +31,7 @@ export class TestPlanRunListComponent {
 
   constructor() {
     this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
-    this.testPlanId = Number(this.route.snapshot.paramMap.get('testPlanId'));
+    this.testPlanId = this.route.snapshot.paramMap.get('testPlanId')!;
 
     this.runs$ = this.testPlanRunService
       .getTestRunsByTestPlan(this.projectKey, this.testPlanId)

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class TestPlanService {
         return testPlanRepository.findAllByProject(project);
     }
 
-    public TestPlan findByTestPlanId(Long testPlanId){
-        return testPlanRepository.findById(testPlanId).orElseThrow(() -> new ResourceNotFoundException("TestPlan", "testPlanId", testPlanId));
+    public TestPlan findByTestPlanId(UUID testPlanId){
+        return testPlanRepository.findTestPlansByPublicId(testPlanId).orElseThrow(() -> new ResourceNotFoundException("TestPlan", "testPlanId", testPlanId));
     }
 }

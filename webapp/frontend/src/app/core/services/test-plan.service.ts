@@ -24,7 +24,7 @@ export class TestPlanService {
    * Get a single test plan by its ID.
    * Endpoint: GET /projects/project-key/{projectKey}/testplans/{testPlanId}
    */
-  getTestPlan(projectKey: string, testPlanId: number): Observable<TestPlan> {
+  getTestPlan(projectKey: string, testPlanId: string): Observable<TestPlan> {
     return this.http.get<TestPlan>(
       `${this.apiUrl}projects/project-key/${projectKey}/testplans/${testPlanId}`,
       { withCredentials: true }

@@ -25,8 +25,8 @@ export class TestPlanRunItemListComponent {
   private readonly runService = inject(TestPlanRunService);
 
   readonly projectKey: string;
-  readonly testPlanId: number;
-  readonly testRunId: number;
+  readonly testPlanId: string;
+  readonly testRunId: string;
 
   items$: Observable<TestPlanRunItem[]>;
   runName$: Observable<string>;
@@ -34,8 +34,8 @@ export class TestPlanRunItemListComponent {
 
   constructor() {
     this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
-    this.testPlanId = Number(this.route.snapshot.paramMap.get('testPlanId'));
-    this.testRunId = Number(this.route.snapshot.paramMap.get('testRunId'));
+    this.testPlanId = this.route.snapshot.paramMap.get('testPlanId')!;
+    this.testRunId = this.route.snapshot.paramMap.get('testRunId')!;
 
     this.items$ = this.runItemService
       .getRunItems(this.projectKey, this.testPlanId, this.testRunId)

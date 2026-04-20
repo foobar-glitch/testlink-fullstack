@@ -29,8 +29,8 @@ public class TestPlanRunItemController {
     @GetMapping("")
     public ResponseEntity<List<TestPlanRunItemDTO>> testRunsOfTestPlan(
             @PathVariable String projectKey,
-            @PathVariable Long testPlanId,
-            @PathVariable Long testRunId,
+            @PathVariable String testPlanId,
+            @PathVariable String testRunId,
             @AuthenticationPrincipal CustomUserDetails userDetails){
         ValidatePathService.ProjectTestPlanTestPlanRun projectTestPlan = validatePathService.checkTestPlanPath(
                 projectKey, testPlanId, testRunId);
@@ -43,8 +43,8 @@ public class TestPlanRunItemController {
     @GetMapping("/{testRunItemId}")
     public ResponseEntity<TestPlanRunItemDTO> testRunOfIdInTestPlan(
             @PathVariable String projectKey,
-            @PathVariable Long testPlanId,
-            @PathVariable Long testRunId,
+            @PathVariable String testPlanId,
+            @PathVariable String testRunId,
             @PathVariable Long testRunItemId,
             @AuthenticationPrincipal CustomUserDetails userDetails
             )

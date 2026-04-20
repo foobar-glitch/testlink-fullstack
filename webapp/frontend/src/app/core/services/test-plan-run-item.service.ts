@@ -13,7 +13,7 @@ export class TestPlanRunItemService {
    * Get all run items for a specific test run.
    * Endpoint: GET /projects/project-key/{projectKey}/testplans/{testPlanId}/testruns/{testRunId}/items
    */
-  getRunItems(projectKey: string, testPlanId: number, testRunId: number): Observable<TestPlanRunItem[]> {
+  getRunItems(projectKey: string, testPlanId: string, testRunId: string): Observable<TestPlanRunItem[]> {
     return this.http.get<TestPlanRunItem[]>(
       `${this.apiUrl}projects/project-key/${projectKey}/testplans/${testPlanId}/testruns/${testRunId}/items`,
       { withCredentials: true }
