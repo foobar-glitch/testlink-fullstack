@@ -9,6 +9,13 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/projects/project-list/project-list.component').then(m => m.ProjectListComponent)
   },
+
+  {
+    path: 'dashboard',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+  },
   {
     path: 'projects/project-key/:projectKey',
     canActivate: [authGuard],

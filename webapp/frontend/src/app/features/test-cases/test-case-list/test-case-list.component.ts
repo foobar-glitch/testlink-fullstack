@@ -1,5 +1,5 @@
-// src/app/features/test-cases/test-case-list/test-case-list.component.ts
-import { Component, inject } from '@angular/core';
+// test-case-list.component.ts
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -24,55 +24,48 @@ import { TestCase } from '../../../core/models/testsuite';
   templateUrl: './test-case-list.component.html',
   styleUrls: ['./test-case-list.component.scss'],
 })
-export class TestCaseListComponent {
+export class TestCaseListComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly testCaseService = inject(TestCaseService);
   private readonly testSuiteService = inject(TestSuiteService);
   private readonly router = inject(Router);
 
-  readonly projectKey: string;
-  readonly suiteId: string;
+  // Optional inputs – if not provided, fall back to route params
+  @Input() projectKey?: string;
+  @Input() suiteId?: string;
 
-  testCases$: Observable<TestCase[]>;
-  suiteName$: Observable<string>;
+  testCases$: Observable<TestCase[]> = of([]);
+  suiteName$: Observable<string> = of('');
   errorMessage = '';
 
-  constructor() {
-    this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
-    this.suiteId = this.route.snapshot.paramMap.get('suiteId')!;
+  ngOnInit(): void {
+    const project = this.projectKey ?? this.route.snapshot.paramMap.get('projectKey')!;
+    const suite = this.suiteId ?? this.route.snapshot.paramMap.get('suiteId')!;
 
-    // Fetch test cases using the project key directly
-    this.testCases$ = this.testCaseService
-      .getTestCases(this.projectKey, this.suiteId)
-      .pipe(
-        catchError(err => {
-          this.errorMessage = err.message || 'Failed to load test cases';
-          return of([]);
-        })
-      );
+    this.testCases$ = this.testCaseService.getTestCases(project, suite).pipe(
+      catchError(err => {
+        this.errorMessage = err.message || 'Failed to load test cases';
+        return of([]);
+      })
+    );
 
-    // Fetch suite name using the project key
     this.suiteName$ = this.testSuiteService
-      .getTestSuiteByProjectKeyAndId(this.projectKey, this.suiteId)
+      .getTestSuiteByProjectKeyAndId(project, suite)
       .pipe(
         map(hierarchy => hierarchy.current.name),
         catchError(() => of('Test Suite'))
       );
   }
 
-  getTestCaseIdentifier(testCase: TestCase): string {
-    return `${testCase.testSuite.project.projectKey}-${testCase.identifierNumber}`;
-  }
-
   selectTestCase(testCase: TestCase): void {
-    const projectKey = testCase.testSuite.project.projectKey;
+    const project = this.projectKey ?? testCase.testSuite.project.projectKey;
     const identifier = testCase.identifierNumber;
-    const suiteId = testCase.testSuite.testSuiteId;
+    const suite = this.suiteId ?? testCase.testSuite.testSuiteId;
     this.router.navigate([
       '/projects/project-key',
-      projectKey,
+      project,
       'suites',
-      suiteId,
+      suite,
       'testcases',
       identifier,
       'versions'

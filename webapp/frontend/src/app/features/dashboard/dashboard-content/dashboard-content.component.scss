@@ -1,0 +1,7 @@
+@use '../../../shared/styles/variables' as vars;
+
+.content-panel {
+  flex: 1;
+  overflow-y: auto;
+  background: vars.$page-bg;
+}

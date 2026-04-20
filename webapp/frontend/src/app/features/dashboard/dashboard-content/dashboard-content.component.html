@@ -1,0 +1,30 @@
+<div class="content-panel">
+  <!-- Plan Overview -->
+  <ng-container *ngIf="currentView === 'plan'">
+    <ng-container *ngIf="selectedPlan$ | async as plan">
+      <app-test-plan-overview
+        [plan]="plan"
+        [projectKey]="selectedProjectKey!"
+      ></app-test-plan-overview>
+    </ng-container>
+  </ng-container>
+
+  <!-- Suite View: List of test cases -->
+  <ng-container *ngIf="currentView === 'suite' && selectedNode as suite">
+    <app-test-case-list
+      *ngIf="selectedProjectKey"
+      [projectKey]="selectedProjectKey"
+      [suiteId]="asTestSuite(suite).testSuiteId"
+    ></app-test-case-list>
+  </ng-container>
+
+  <!-- Test Case Detail -->
+  <ng-container *ngIf="currentView === 'case' && selectedNode as testCase">
+    <app-test-case-detail
+      *ngIf="selectedProjectKey"
+      [projectKey]="selectedProjectKey"
+      [suiteId]="asTestCase(testCase).testSuite.testSuiteId"
+      [testCaseIdentifier]="asTestCase(testCase).identifierNumber"
+    ></app-test-case-detail>
+  </ng-container>
+</div>
