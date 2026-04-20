@@ -3,11 +3,13 @@
 -- =========================
 CREATE TABLE project_memberships (
                                      membership_id BIGSERIAL PRIMARY KEY,
+                                     public_uuid UUID DEFAULT gen_random_uuid() NOT NULL, -- Public identifier for the membership
                                      project_id BIGINT NOT NULL,
                                      user_id BIGINT NOT NULL,
                                      role VARCHAR(20) NOT NULL,
                                      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
+                                     CONSTRAINT uq_project_memberships_public_uuid UNIQUE (public_uuid),
                                      CONSTRAINT fk_project_memberships_project
                                          FOREIGN KEY (project_id)
                                              REFERENCES projects(project_id)
@@ -26,5 +28,6 @@ COMMENT ON TABLE project_memberships IS 'Associates users with projects and thei
 COMMENT ON COLUMN project_memberships.role IS 'Project-level role: ADMIN, TESTER, or VIEWER';
 
 -- Indexes for performance
+CREATE INDEX idx_project_memberships_public_uuid ON project_memberships(public_uuid);
 CREATE INDEX idx_project_memberships_project ON project_memberships(project_id);
 CREATE INDEX idx_project_memberships_user ON project_memberships(user_id);
