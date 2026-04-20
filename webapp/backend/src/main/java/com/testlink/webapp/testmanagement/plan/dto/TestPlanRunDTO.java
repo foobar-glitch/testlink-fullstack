@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record TestPlanRunDTO(
-        Long testPlanRunId,
+        String testPlanRunId,
         TestPlanDTO testPlan,
         String name,
         String environment,

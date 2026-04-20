@@ -2,6 +2,7 @@ package com.testlink.webapp.testmanagement.suite.mapper;
 
 import com.testlink.webapp.projects.mapper.ProjectMapper;
 import com.testlink.webapp.shared.mapper.BaseAuditMapper;
+import com.testlink.webapp.shared.mapper.IdMapper;
 import com.testlink.webapp.testmanagement.suite.dto.TestSuiteItemDTO;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import org.mapstruct.Mapper;
@@ -11,11 +12,10 @@ import java.util.List;
 
 @Mapper(
         componentModel = "spring",
-        uses = {ProjectMapper.class} // reuse your existing mapper
+        uses = {ProjectMapper.class, IdMapper.class}
 )
 public abstract class TestSuiteMapper extends BaseAuditMapper {
-
-    @Mapping(target = "testSuiteId", source = "testSuiteId")
+    @Mapping(target = "testSuiteId", source = "publicId")
     @Mapping(target = "name", source = "name")
     @Mapping(target = "description", source = "description")
     @Mapping(target = "project", source = "project")

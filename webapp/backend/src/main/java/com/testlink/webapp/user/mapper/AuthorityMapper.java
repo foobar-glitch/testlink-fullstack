@@ -1,5 +1,6 @@
 package com.testlink.webapp.user.mapper;
 
+import com.testlink.webapp.shared.mapper.IdMapper;
 import com.testlink.webapp.shared.mapper.TimeStampMapper;
 import com.testlink.webapp.user.dto.AuthorityDTO;
 import com.testlink.webapp.user.entity.Authority;
@@ -10,7 +11,7 @@ import java.util.Set;
 
 @Mapper(
         componentModel = "spring",
-        uses = TimeStampMapper.class,
+        uses = {TimeStampMapper.class, IdMapper.class},
         implementationName = "AuthorityMapperImpl"
 )
 public interface AuthorityMapper {

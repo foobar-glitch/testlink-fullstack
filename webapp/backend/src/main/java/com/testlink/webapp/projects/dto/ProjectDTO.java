@@ -8,7 +8,7 @@ import lombok.Builder;
 
 @Builder
 public record ProjectDTO(
-        Long projectId,
+        String projectId,
         String projectKey,
         String displayName,
         String description,

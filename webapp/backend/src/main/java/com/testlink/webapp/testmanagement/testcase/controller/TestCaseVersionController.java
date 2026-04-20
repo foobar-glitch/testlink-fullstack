@@ -39,7 +39,7 @@ public class TestCaseVersionController {
     @GetMapping("")
     public ResponseEntity<List<TestCaseVersionDTO>> getVersions(
             @PathVariable String projectKey,
-            @PathVariable Long suiteId,
+            @PathVariable String suiteId,
             @PathVariable Long testCaseIdentifier,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
@@ -54,7 +54,7 @@ public class TestCaseVersionController {
     @GetMapping("/{versionNumber}")
     public ResponseEntity<TestCaseVersionDTO> getVersion(
             @PathVariable String projectKey,
-            @PathVariable Long suiteId,
+            @PathVariable String suiteId,
             @PathVariable Long testCaseIdentifier,
             @PathVariable Long versionNumber,
             @AuthenticationPrincipal CustomUserDetails userDetails) {

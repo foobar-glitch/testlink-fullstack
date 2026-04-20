@@ -27,7 +27,7 @@ export class TestSuiteService {
    * Fetch a single test suite hierarchy by project key and suite ID.
    * Assumes backend provides: GET /projects/project-key/{projectKey}/suites/{suiteId}
    */
-  getTestSuiteByProjectKeyAndId(projectKey: string, suiteId: number): Observable<TestSuiteHierarchy> {
+  getTestSuiteByProjectKeyAndId(projectKey: string, suiteId: string): Observable<TestSuiteHierarchy> {
     return this.http
       .get<TestSuiteHierarchyDTO>(`${this.apiUrl}projects/project-key/${projectKey}/suites/${suiteId}`, {
         withCredentials: true,

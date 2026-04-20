@@ -28,7 +28,7 @@ public class TestCaseVersionContentController {
     @GetMapping("")
     public ResponseEntity<TestCaseVersionContentDTO> getVersions(
             @PathVariable String projectKey,
-            @PathVariable Long suiteId,
+            @PathVariable String suiteId,
             @PathVariable Long testCaseIdentifier,
             @PathVariable Long version,
             @AuthenticationPrincipal CustomUserDetails userDetails) {

@@ -4,6 +4,8 @@ import com.testlink.webapp.shared.entity.UserCreatedTimeStampedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "projects")
 @Getter
@@ -15,6 +17,9 @@ public class Project extends UserCreatedTimeStampedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long projectId;
+
+    @Column(name = "public_uuid", nullable = false)
+    private UUID publicId;
 
     @Column(name = "project_key", nullable = false, length = 20, unique = true)
     private String projectKey;

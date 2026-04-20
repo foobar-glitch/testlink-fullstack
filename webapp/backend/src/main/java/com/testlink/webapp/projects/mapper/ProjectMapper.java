@@ -6,13 +6,14 @@ import com.testlink.webapp.projects.dto.ProjectMembershipDTO;
 import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.shared.mapper.BaseAuditMapper;
+import com.testlink.webapp.shared.mapper.IdMapper;
 import com.testlink.webapp.user.mapper.UserMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class})
+@Mapper(componentModel = "spring", uses = {UserMapper.class, IdMapper.class})
 public abstract class ProjectMapper extends BaseAuditMapper {
 
     @Mapping(target = "projectId", source = "projectId")

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +25,8 @@ public class TestSuiteService {
         return testSuiteRepository.findByProjectAndParentTestSuiteIsNull(project);
     }
 
-    public TestSuite findBySuiteId(Long suiteId){
-        return testSuiteRepository.findById(suiteId).orElseThrow(
+    public TestSuite findBySuiteId(UUID suiteId){
+        return testSuiteRepository.findByPublicId(suiteId).orElseThrow(
                 () -> new ResourceNotFoundException("TestSuite", "testSuiteId", suiteId)
         );
     }

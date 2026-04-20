@@ -11,7 +11,7 @@ export class TestCaseVersionContentService {
 
   getContent(
     projectKey: string,
-    suiteId: number,
+    suiteId: string,
     testCaseIdentifier: number,
     versionNumber: number
   ): Observable<TestCaseVersionContent> {

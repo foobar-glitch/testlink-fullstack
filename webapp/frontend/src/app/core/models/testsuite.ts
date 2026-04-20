@@ -8,7 +8,7 @@ import { Project } from './project';
  * those are assembled client-side into a TestSuite tree node.
  */
 export interface TestSuiteItem {
-  testSuiteId: number;
+  testSuiteId: string;
   name: string;
   description: string;
   project: Project;
@@ -50,7 +50,7 @@ export type TestCaseStatus = 'draft' | 'active' | 'deprecated';
 
 // ─── Test Case ───────────────────────────────────────────────────────────────
 export interface TestCase {
-  testCaseId: number;
+  testCaseId: string;
   testSuite: TestSuiteItem;
   identifierNumber: number;
   title: string;
@@ -62,7 +62,7 @@ export interface TestCase {
 export type TestCaseVersionStatus = 'draft' | 'active' | 'deprecated';
 
 export interface TestCaseVersion {
-  testCaseVersionId: number;
+  testCaseVersionId: string;
   testCase: TestCase;
   versionNumber: number;
   status: TestCaseVersionStatus;
@@ -76,7 +76,7 @@ export interface TestStep {
 }
 
 export interface TestCaseVersionContent {
-  testCaseVersionId: number;
+  testCaseVersionId: string;
   testCaseVersion: TestCaseVersion;
   title: string;
   preconditions: string;

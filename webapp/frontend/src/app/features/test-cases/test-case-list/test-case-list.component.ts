@@ -31,7 +31,7 @@ export class TestCaseListComponent {
   private readonly router = inject(Router);
 
   readonly projectKey: string;
-  readonly suiteId: number;
+  readonly suiteId: string;
 
   testCases$: Observable<TestCase[]>;
   suiteName$: Observable<string>;
@@ -39,7 +39,7 @@ export class TestCaseListComponent {
 
   constructor() {
     this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
-    this.suiteId = Number(this.route.snapshot.paramMap.get('suiteId'));
+    this.suiteId = this.route.snapshot.paramMap.get('suiteId')!;
 
     // Fetch test cases using the project key directly
     this.testCases$ = this.testCaseService

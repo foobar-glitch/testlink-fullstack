@@ -1,6 +1,7 @@
 package com.testlink.webapp.testmanagement.plan.mapper;
 
 import com.testlink.webapp.shared.mapper.BaseAuditMapper;
+import com.testlink.webapp.shared.mapper.IdMapper;
 import com.testlink.webapp.testmanagement.plan.dto.TestPlanRunItemDTO;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlanRunItem;
 import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseMapper;
@@ -16,12 +17,13 @@ import java.util.List;
                 TestPlanRunMapper.class,
                 TestCaseMapper.class,
                 TestCaseVersionMapper.class,
-                UserMapper.class                  // for User -> UserSummaryDTO
+                UserMapper.class,
+                IdMapper.class
         }
 )
 public abstract class TestPlanRunItemMapper extends BaseAuditMapper {
 
-    @Mapping(target = "testRunItemId", source = "testRunItemId")
+    @Mapping(target = "testRunItemId", source = "publicId")
     @Mapping(target = "testPlanRun", source = "testPlanRun")
     @Mapping(target = "testCase", source = "testCase")
     @Mapping(target = "testCaseVersion", source = "testCaseVersion")

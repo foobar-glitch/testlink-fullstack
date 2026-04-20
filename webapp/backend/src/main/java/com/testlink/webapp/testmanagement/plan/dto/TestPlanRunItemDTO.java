@@ -9,7 +9,7 @@ import com.testlink.webapp.user.dto.UserSummaryDTO;
 import java.time.LocalDateTime;
 
 public record TestPlanRunItemDTO(
-        Long testRunItemId,
+        String testRunItemId,
         TestPlanRunDTO testPlanRun,
         TestCaseDTO testCase,
         TestCaseVersionDTO testCaseVersion,

@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "project_memberships",
@@ -20,6 +21,9 @@ public class ProjectMembership {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long membershipId;
+
+    @Column(name = "public_uuid", nullable = false)
+    private UUID publicId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "project_id", nullable = false)

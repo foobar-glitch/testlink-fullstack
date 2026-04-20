@@ -4,6 +4,8 @@ import com.testlink.webapp.shared.entity.UserCreatedTimeStampedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "test_case_version_content")
 @Getter

@@ -4,6 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record UserSummaryDTO(
-        Long userId,
+        String userId,
         String username
 ) {}

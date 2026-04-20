@@ -1,6 +1,7 @@
 package com.testlink.webapp.testmanagement.testcase.mapper;
 
 import com.testlink.webapp.shared.mapper.BaseAuditMapper;
+import com.testlink.webapp.shared.mapper.IdMapper;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import org.mapstruct.Mapper;
@@ -10,10 +11,10 @@ import java.util.List;
 
 @Mapper(
         componentModel = "spring",
-        uses = {TestCaseMapper.class}
+        uses = {TestCaseMapper.class, IdMapper.class}
 )
 public abstract class TestCaseVersionMapper extends BaseAuditMapper {
-    @Mapping(target = "testCaseVersionId", source = "testCaseVersionId")
+    @Mapping(target = "testCaseVersionId", source = "publicId")
     @Mapping(target = "testCase", source = "testCase")
     @Mapping(target = "versionNumber", source = "versionNumber")
     @Mapping(target = "status", source = "status")

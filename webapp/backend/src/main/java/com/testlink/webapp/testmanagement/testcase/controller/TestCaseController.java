@@ -36,7 +36,7 @@ public class TestCaseController {
     @GetMapping("")
     public ResponseEntity<List<TestCaseDTO>> getTestCasesOfSuite(
             @PathVariable String projectKey,
-            @PathVariable Long suiteId,
+            @PathVariable String suiteId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         ValidatePathService.ProjectTestSuite projectTestSuite = validatePathService.checkTestSuitePath(projectKey, suiteId);
@@ -51,7 +51,7 @@ public class TestCaseController {
     @GetMapping("/{testCaseIdentifier}")
     public ResponseEntity<TestCaseDTO> getTestCaseOfProjectNumber(
             @PathVariable String projectKey,
-            @PathVariable Long suiteId,
+            @PathVariable String suiteId,
             @PathVariable Long testCaseIdentifier,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){

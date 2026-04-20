@@ -6,7 +6,7 @@ import lombok.Builder;
 
 @Builder
 public record TestPlanDTO(
-        Long testPlanId,
+        String testPlanId,
         ProjectDTO project,
         String name,
         String description,

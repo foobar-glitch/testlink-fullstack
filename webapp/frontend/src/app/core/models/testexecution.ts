@@ -5,7 +5,7 @@ import { Project } from './project';
 import { UserSummary } from './authentication';
 
 export interface TestPlan {
-  testPlanId: number;
+  testPlanId: string;
   project: Project;
   name: string;
   description: string;
@@ -13,7 +13,7 @@ export interface TestPlan {
 }
 
 export interface TestPlanRun {
-  testPlanRunId: number;
+  testPlanRunId: string;
   testPlan: TestPlan;
   name: string;
   environment: string;
@@ -26,7 +26,7 @@ export type ExecutionStatus = 'pass' | 'fail' | 'blocked' | 'not_run';
 export type TestRunStatus = 'NOT_RUN' | 'PASSED' | 'FAILED' | 'BLOCKED' | 'SKIPPED';
 
 export interface TestPlanRunItem {
-  testRunItemId: number;
+  testRunItemId: string;
   testPlanRun: TestPlanRun;
   testCase: TestCase;
   testCaseVersion: TestCaseVersion;

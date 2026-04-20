@@ -13,7 +13,7 @@ export class TestCaseService {
    * Get all test cases belonging to a specific test suite.
    * Endpoint: GET /projects/project-key/{projectKey}/suites/{suiteId}/cases
    */
-  getTestCases(projectKey: string, suiteId: number): Observable<TestCase[]> {
+  getTestCases(projectKey: string, suiteId: string): Observable<TestCase[]> {
     return this.http.get<TestCase[]>(
       `${this.apiUrl}projects/project-key/${projectKey}/suites/${suiteId}/testcases`,
       { withCredentials: true }
@@ -24,7 +24,7 @@ export class TestCaseService {
    * Get a single test case by its identifier.
    * Endpoint: GET /projects/project-key/{projectKey}/testcase-identifier/{testCaseIdentifier}
    */
-  getTestCase(projectKey: string, testCaseIdentifier: number, suiteId: number): Observable<TestCase> {
+  getTestCase(projectKey: string, testCaseIdentifier: number, suiteId: string): Observable<TestCase> {
     return this.http.get<TestCase>(
       `${this.apiUrl}projects/project-key/${projectKey}/suites/${suiteId}/testcases/${testCaseIdentifier}`,
       { withCredentials: true }

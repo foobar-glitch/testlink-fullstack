@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.testlink.webapp.shared.util.IdUtil.fromBase62;
+
 @RestController
 @RequestMapping("/projects")
 @RequiredArgsConstructor
@@ -58,14 +60,14 @@ public class TestSuiteController {
     @GetMapping("/project-key/{projectKey}/suites/{suiteId}")
     public ResponseEntity<TestSuiteHierarchyDTO> getTestSuite(
             @PathVariable String projectKey,
-            @PathVariable Long suiteId,
+            @PathVariable String suiteId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         Project project = projectService.getProjectByKey(projectKey);
         ProjectMembership projectMembership =  projectAccessService.checkAccessOfUserInProject(
                 project, customUserDetails.getUser(), ProjectRole.VIEWER
         );
-        TestSuite testSuite = testSuiteService.findBySuiteId(suiteId);
+        TestSuite testSuite = testSuiteService.findBySuiteId(fromBase62(suiteId));
         TestSuiteHierarchyDTO hierarchyDTO = TestSuiteHierarchyDTO.builder()
                 .current(testSuiteMapper.toDto(testSuite))
                 .parent(testSuiteMapper.toDto(testSuite.getParentTestSuite()))

@@ -17,6 +17,8 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static com.testlink.webapp.shared.util.IdUtil.fromBase62;
+
 @Service
 @RequiredArgsConstructor
 public class ValidatePathService {
@@ -28,26 +30,26 @@ public class ValidatePathService {
     private final TestPlanRunService testPlanRunService;
     private final TestPlanRunItemService testPlanRunItemService;
 
-    public ProjectTestSuite checkTestSuitePath(String projectKey, Long suiteId){
+    public ProjectTestSuite checkTestSuitePath(String projectKey, String suiteId){
         Project project = projectService.getProjectByKey(projectKey);
-        TestSuite testSuite = testSuiteService.findBySuiteId(suiteId);
+        TestSuite testSuite = testSuiteService.findBySuiteId(fromBase62(suiteId));
         if(!project.equals(testSuite.getProject())){
-            throw new BadRequestException(String.format("SuiteId %d not in ProjectKey %s", suiteId, projectKey));
+            throw new BadRequestException(String.format("SuiteId %s not in ProjectKey %s", suiteId, projectKey));
         }
         return ProjectTestSuite.builder().project(project).testSuite(testSuite).build();
     }
 
-    public ProjectTestSuiteTestCase checkTestSuitePath(String projectKey, Long suiteId, Long testCaseIdentifier){
+    public ProjectTestSuiteTestCase checkTestSuitePath(String projectKey, String suiteId, Long testCaseIdentifier){
         ProjectTestSuite data = this.checkTestSuitePath(projectKey, suiteId);
         TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(data.project(), testCaseIdentifier);
         if(!data.testSuite().equals(testCase.getTestSuite())){
-            throw new BadRequestException(String.format("TestCase %d not in SuiteId %d", testCaseIdentifier, suiteId));
+            throw new BadRequestException(String.format("TestCase %d not in SuiteId %s", testCaseIdentifier, suiteId));
         }
         return ProjectTestSuiteTestCase.builder().project(data.project()).testSuite(data.testSuite()).testCase(testCase).build();
     }
 
     //@RequestMapping("/projects/project-key/{projectKey}/suite/{suiteId}/testcase-identifier/{testCaseIdentifier}/versions/{versionId}")
-    public ProjectTestSuiteTestCaseTestVersion checkTestSuitePath(String projectKey, Long suiteId, Long testCaseIdentifier, Long versionId){
+    public ProjectTestSuiteTestCaseTestVersion checkTestSuitePath(String projectKey, String suiteId, Long testCaseIdentifier, Long versionId){
         ProjectTestSuiteTestCase data = this.checkTestSuitePath(projectKey, suiteId, testCaseIdentifier);
 
         TestCaseVersion testCaseVersion = testCaseVersionService.findByTestCaseAndVersionNumber(

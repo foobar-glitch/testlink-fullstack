@@ -3,7 +3,7 @@ import { Authentication } from './authentication';
 import { UserCreatedTimeStamp } from './tablemetadata';
 
 export interface Project {
-  projectId: number;
+  projectId: string;
   projectKey: string;
   displayName: string;
   description: string;

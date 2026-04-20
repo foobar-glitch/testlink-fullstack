@@ -6,7 +6,7 @@ import lombok.Builder;
 
 @Builder
 public record TestSuiteItemDTO(
-        Long testSuiteId,
+        String testSuiteId,
         String name,
         String description,
         ProjectDTO project,

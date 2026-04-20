@@ -5,6 +5,8 @@ import com.testlink.webapp.shared.entity.UserCreatedTimeStampedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "test_suites")
 @Getter
@@ -16,6 +18,9 @@ public class TestSuite extends UserCreatedTimeStampedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long testSuiteId;
+
+    @Column(name = "public_uuid", nullable = false)
+    private UUID publicId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "project_id", nullable = false)

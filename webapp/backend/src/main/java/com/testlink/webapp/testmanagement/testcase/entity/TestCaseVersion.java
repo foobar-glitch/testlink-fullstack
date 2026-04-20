@@ -5,6 +5,8 @@ import com.testlink.webapp.shared.entity.UserCreatedTimeStampedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "test_case_versions", uniqueConstraints = {
 @UniqueConstraint(columnNames = {"test_case_id", "version_number"})
@@ -18,6 +20,9 @@ public class TestCaseVersion extends UserCreatedTimeStampedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long testCaseVersionId;
+
+    @Column(name = "public_uuid", nullable = false)
+    private UUID publicId;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "test_case_id", nullable = false)

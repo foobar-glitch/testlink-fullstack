@@ -6,7 +6,7 @@ import lombok.Builder;
 
 @Builder
 public record TestCaseVersionDTO (
-        Long testCaseVersionId,
+        String testCaseVersionId,
         TestCaseDTO testCase,
         Long versionNumber,
         TestCaseVersionStatus status,

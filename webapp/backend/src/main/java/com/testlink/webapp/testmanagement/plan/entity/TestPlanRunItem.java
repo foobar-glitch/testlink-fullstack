@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "test_run_items",  uniqueConstraints = {
@@ -23,6 +24,9 @@ public class TestPlanRunItem extends UserCreatedTimeStampedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long testRunItemId;
+
+    @Column(name = "public_uuid", nullable = false)
+    private UUID publicId;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "test_run_id", nullable = false)

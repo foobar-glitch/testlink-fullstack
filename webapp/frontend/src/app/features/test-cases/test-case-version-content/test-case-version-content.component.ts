@@ -22,7 +22,7 @@ export class TestCaseVersionContentComponent {
   private readonly testCaseService = inject(TestCaseService);
 
   readonly projectKey: string;
-  readonly suiteId: number;
+  readonly suiteId: string;
   readonly testCaseIdentifier: number;
   readonly versionNumber: number;
 
@@ -32,7 +32,7 @@ export class TestCaseVersionContentComponent {
 
   constructor() {
     this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
-    this.suiteId = Number(this.route.snapshot.paramMap.get('suiteId'));
+    this.suiteId = this.route.snapshot.paramMap.get('suiteId')!;
     this.testCaseIdentifier = Number(this.route.snapshot.paramMap.get('testCaseIdentifier'));
     this.versionNumber = Number(this.route.snapshot.paramMap.get('versionNumber'));
 

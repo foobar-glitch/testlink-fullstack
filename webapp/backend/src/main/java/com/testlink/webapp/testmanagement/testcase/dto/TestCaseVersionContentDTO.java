@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record TestCaseVersionContentDTO(
-        Long testCaseVersionId,
+        String testCaseVersionId,
         TestCaseVersionDTO testCaseVersion,
         String title,
         String preconditions,

@@ -128,7 +128,6 @@ CREATE TABLE test_case_version_images (
 -- =========================
 CREATE TABLE test_case_version_steps (
                                          step_id BIGSERIAL PRIMARY KEY,
-                                         public_uuid UUID DEFAULT gen_random_uuid() NOT NULL,
                                          test_case_version_id BIGINT NOT NULL,
                                          step_number INT NOT NULL,
                                          step_action TEXT NOT NULL,
@@ -136,8 +135,7 @@ CREATE TABLE test_case_version_steps (
                                          execution VARCHAR(20) DEFAULT 'MANUAL',
                                          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                                          updated_at TIMESTAMPTZ,
-
-                                         CONSTRAINT uq_test_case_version_steps_public_uuid UNIQUE (public_uuid),
+    
                                          CONSTRAINT fk_version_steps_version
                                              FOREIGN KEY (test_case_version_id) REFERENCES test_case_versions(test_case_version_id) ON DELETE CASCADE,
                                          CONSTRAINT uk_version_step_number

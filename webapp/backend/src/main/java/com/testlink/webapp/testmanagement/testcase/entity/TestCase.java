@@ -6,6 +6,8 @@ import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "test_cases", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"project_id", "identifier_number"})
@@ -19,6 +21,9 @@ public class TestCase extends UserCreatedTimeStampedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long testCaseId;
+
+    @Column(name = "public_uuid", nullable = false)
+    private UUID publicId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "project_id", nullable = false)
