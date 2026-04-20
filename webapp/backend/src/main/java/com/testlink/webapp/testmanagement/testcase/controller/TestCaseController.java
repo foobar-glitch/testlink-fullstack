@@ -3,8 +3,6 @@ package com.testlink.webapp.testmanagement.testcase.controller;
 import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
-import com.testlink.webapp.projects.service.ProjectService;
-import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
 import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseMapper;

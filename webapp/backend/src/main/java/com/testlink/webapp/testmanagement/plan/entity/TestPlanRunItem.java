@@ -50,7 +50,7 @@ public class TestPlanRunItem extends UserCreatedTimeStampedEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private TestRunStatus status;
+    private TestRunStatus status = TestRunStatus.NOT_RUN;
 
     @Column(name = "executed_at")
     private LocalDateTime executedAt;

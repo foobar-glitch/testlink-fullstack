@@ -1,0 +1,70 @@
+@use '../../../shared/styles/variables' as vars;
+@use '../../../shared/styles/mixins' as mix;
+
+.result-detail-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: vars.$spacing-xl vars.$spacing-lg;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid vars.$text;
+  padding-bottom: 10px;
+  margin-bottom: vars.$spacing-xl;
+
+  h2 {
+    font-size: 22px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: vars.$text;
+  }
+}
+
+.back-btn {
+  @include mix.btn-ghost;
+}
+
+.detail-card {
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+  padding: vars.$spacing-lg;
+  box-shadow: vars.$shadow-sm;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: vars.$spacing-md;
+    border-bottom: 1px solid vars.$border;
+    padding-bottom: vars.$spacing-xs;
+  }
+
+  .info-row {
+    display: flex;
+    margin-bottom: vars.$spacing-sm;
+
+    .label {
+      width: 140px;
+      font-weight: 600;
+      color: vars.$muted;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .value {
+      flex: 1;
+      color: vars.$text;
+    }
+  }
+
+  .meta {
+    margin-top: vars.$spacing-lg;
+    padding-top: vars.$spacing-md;
+    border-top: 1px solid vars.$border;
+    font-size: 13px;
+    color: vars.$muted;
+  }
+}

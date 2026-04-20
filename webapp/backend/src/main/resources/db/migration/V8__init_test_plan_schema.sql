@@ -94,17 +94,21 @@ CREATE TABLE test_step_results (
                                    executed_at TIMESTAMPTZ,
                                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                                    updated_at TIMESTAMPTZ,
+                                   created_by BIGINT NOT NULL,
 
                                    CONSTRAINT uq_test_step_results_public_uuid UNIQUE (public_uuid),
                                    CONSTRAINT fk_step_result_run_item
                                        FOREIGN KEY (test_run_item_id) REFERENCES test_run_items(test_run_item_id) ON DELETE CASCADE,
                                    CONSTRAINT fk_step_result_step
                                        FOREIGN KEY (test_case_version_step_id) REFERENCES test_case_version_steps(step_id) ON DELETE CASCADE,
+                                   CONSTRAINT fk_step_result_created_by
+                                       FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE RESTRICT,
                                    CONSTRAINT uk_step_result_unique
                                        UNIQUE (test_run_item_id, test_case_version_step_id),
                                    CONSTRAINT chk_step_result_status
                                        CHECK (status IN ('NOT_RUN', 'PASSED', 'FAILED', 'BLOCKED', 'SKIPPED'))
 );
+
 
 -- ======================================================================
 -- INDEXES & TRIGGERS

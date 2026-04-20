@@ -1,0 +1,56 @@
+<div class="result-list-container">
+  <header class="header">
+    <div class="title-section">
+      <h2>Execution History</h2>
+      <span *ngIf="stepAction$ | async as action" class="step-action">
+        {{ action }}
+      </span>
+    </div>
+    <button
+      class="back-btn"
+      [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases', testCaseIdentifier, 'versions', versionNumber, 'content']"
+    >
+      ← Back to Steps
+    </button>
+  </header>
+
+  <div *ngIf="errorMessage" class="error-state">
+    <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
+  </div>
+
+  <ng-container *ngIf="results$ | async as results; else loading">
+    <div *ngIf="results.length > 0; else empty" class="results-table">
+      <table>
+        <thead>
+        <tr>
+          <th>Test Run</th>
+          <th>Status</th>
+          <th>Actual Result</th>
+          <th>Executed By</th>
+          <th>Executed At</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let result of results" class="clickable-row" (click)="viewResult(result)">
+          <td>{{ result.testRunItem.testPlanRun.name }}</td>
+          <td><app-test-run-status-badge [status]="result.status"></app-test-run-status-badge></td>
+          <td>{{ result.actualResult || '—' }}</td>
+          <td>{{ result.testRunItem.executedBy?.username || '—' }}</td>
+          <td>{{ result.testRunItem.executedAt | date:'medium' }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #empty>
+      <div class="empty-state">
+        <p>No execution results found for this step.</p>
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="loading-state">
+      <app-spinner label="Loading execution history..."></app-spinner>
+    </div>
+  </ng-template>
+</div>

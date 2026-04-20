@@ -1,0 +1,60 @@
+<div class="result-detail-container">
+  <header class="header">
+    <h2>Step Execution Detail</h2>
+    <button
+      class="back-btn"
+      [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases', testCaseIdentifier, 'versions', versionNumber, 'steps', stepId, 'action']"
+    >
+      ← Back to Executions
+    </button>
+  </header>
+
+  <div *ngIf="errorMessage" class="error-state">
+    <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
+  </div>
+
+  <ng-container *ngIf="result$ | async as result; else loading">
+    <div class="detail-card">
+      <h3>Execution Details</h3>
+      <div class="info-row">
+        <span class="label">Test Run</span>
+        <span class="value">{{ result.testRunItem.testPlanRun.name }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Environment</span>
+        <span class="value">{{ result.testRunItem.testPlanRun.environment || '—' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Status</span>
+        <span class="value">
+          <app-test-run-status-badge [status]="result.status"></app-test-run-status-badge>
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="label">Executed By</span>
+        <span class="value">{{ result.testRunItem.executedBy?.username || '—' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Executed At</span>
+        <span class="value">{{ result.testRunItem.executedAt | date:'medium' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Actual Result</span>
+        <span class="value">{{ result.actualResult || '—' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Notes</span>
+        <span class="value">{{ result.notes || '—' }}</span>
+      </div>
+      <div class="meta">
+        Created by {{ result.stamp.createdBy.username }} on {{ result.stamp.timeStamp.createdAt | date:'medium' }}
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="loading-state">
+      <app-spinner label="Loading execution detail..."></app-spinner>
+    </div>
+  </ng-template>
+</div>

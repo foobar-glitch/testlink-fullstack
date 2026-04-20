@@ -30,7 +30,16 @@ export const routes: Routes = [
             m => m.TestCaseVersionContentComponent
           ),
       },
-
+      {
+        path: 'suites/:suiteId/testcases/:testCaseIdentifier/versions/:versionNumber/steps/:stepId/action',
+        canActivate: [authGuard],
+        loadComponent: () => import('./features/test-cases/test-step-result-list/test-step-result-list.component').then(m => m.TestStepResultListComponent),
+      },
+      {
+        path: 'suites/:suiteId/testcases/:testCaseIdentifier/versions/:versionNumber/steps/:stepId/action/:actionId',
+        canActivate: [authGuard],
+        loadComponent: () => import('./features/test-cases/test-step-result-detail/test-step-result-detail.component').then(m => m.TestStepResultDetailComponent)
+        },
       { path: 'testplans', loadComponent: () => import('./features/test-plans/test-plan-list/test-plan-list.component').then(m => m.TestPlanListComponent) },
       { path: 'testplans/:testPlanId/runs', loadComponent: () => import('./features/test-plans/test-plan-run-list/test-plan-run-list.component').then(m => m.TestPlanRunListComponent) },
       {

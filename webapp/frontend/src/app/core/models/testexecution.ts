@@ -38,6 +38,30 @@ export interface TestPlanRunItem {
   stamp: UserCreatedTimeStamp;
 }
 
+export type TestExecution = 'MANUAL' | 'AUTOMATED';
+
+export interface TestCaseVersionStep {
+  stepId: string;                     // UUID as string
+  testCaseVersion: TestCaseVersion;
+  stepNumber: number;
+  stepAction: string;
+  expectedResult: string;
+  execution: TestExecution;
+  stamp: UserCreatedTimeStamp;
+}
+
+export type TestCaseStepStatus = 'NOT_RUN' | 'PASSED' | 'FAILED' | 'BLOCKED' | 'SKIPPED';
+
+export interface TestStepResult {
+  testStepResultId: string;
+  testRunItem: TestPlanRunItem;
+  testCaseVersionStep: TestCaseVersionStep;
+  status: TestCaseStepStatus;
+  actualResult: string;
+  notes: string;
+  stamp: UserCreatedTimeStamp;
+}
+
 //TODO RunSummary
 /*
 export interface TestRun {

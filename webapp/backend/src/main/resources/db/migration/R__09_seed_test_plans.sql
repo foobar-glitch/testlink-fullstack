@@ -210,7 +210,8 @@ INSERT INTO test_step_results (
     notes,
     executed_at,
     created_at,
-    updated_at
+    updated_at,
+    created_by
 )
 SELECT
     test_run_item_id,
@@ -220,6 +221,7 @@ SELECT
     notes,
     executed_at,
     NOW(),
-    NOW()
+    NOW(),
+    1
 FROM step_results_data
 ON CONFLICT (test_run_item_id, test_case_version_step_id) DO NOTHING;

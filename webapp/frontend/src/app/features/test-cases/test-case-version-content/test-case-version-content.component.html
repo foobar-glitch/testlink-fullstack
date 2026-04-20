@@ -33,6 +33,33 @@
         Created by {{ content.stamp.createdBy.username }} on
         {{ content.stamp.timeStamp.createdAt | date: 'medium' }}
       </div>
+      <!-- Steps section -->
+      <div class="steps-section" *ngIf="steps$ | async as steps">
+        <h3>Test Steps</h3>
+        <div *ngIf="steps.length > 0; else noSteps" class="steps-table">
+          <table>
+            <thead>
+            <tr>
+              <th>#</th>
+              <th>Action</th>
+              <th>Expected Result</th>
+              <th>Execution</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let step of steps" class="clickable-row" (click)="viewStep(step)">
+              <td>{{ step.stepNumber }}</td>
+              <td>{{ step.stepAction }}</td>
+              <td>{{ step.expectedResult }}</td>
+              <td>{{ step.execution }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noSteps>
+          <p class="no-steps">No steps defined for this version.</p>
+        </ng-template>
+      </div>
     </div>
   </ng-container>
 
