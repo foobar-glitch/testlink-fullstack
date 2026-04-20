@@ -20,8 +20,8 @@ public interface UserMapper {
 
     // Removing 'source = "publicId"' and letting MapStruct find the method
     // Or being explicit like this:
-    @Mapping(target = "publicId", source = "publicId")
-    @Mapping(target = "roles", source = "authorities")
+    @Mapping(target = "userId", source = "publicId")
+    @Mapping(target = "authorities", source = "authorities")
     @Mapping(target = "timeStamp", source = ".")
     UserDTO toDto(User user);
 }

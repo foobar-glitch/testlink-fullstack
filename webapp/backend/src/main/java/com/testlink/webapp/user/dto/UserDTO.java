@@ -5,9 +5,9 @@ import com.testlink.webapp.shared.dto.TimeStampDTO;
 import java.util.Set;
 
 public record UserDTO(
-        String publicId,
+        String userId,
         String username,
         String email,
-        Set<AuthorityDTO> roles,
+        Set<AuthorityDTO> authorities,
         TimeStampDTO timeStamp
 ) {}

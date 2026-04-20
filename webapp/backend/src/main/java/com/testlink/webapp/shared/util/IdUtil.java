@@ -28,7 +28,7 @@ public final class IdUtil {
         }
 
         // Handle the case where the UUID is all zeros (rare but possible)
-        return sb.length() == 0 ? "0" : sb.reverse().toString();
+        return sb.isEmpty() ? "0" : sb.reverse().toString();
     }
 
     /**

@@ -1,12 +1,21 @@
+import { TimeStamp } from './tablemetadata';
+
+export interface Authority {
+  authorityId: string;
+  authority: string;
+  timeStamp: TimeStamp;
+}
+
 export interface Authentication {
-  id: number;
+  userId: string;
   username: string;
   email: string;
-  roles: string[];
+  authorities: Authority[];
+  timeStamp: TimeStamp[];
 }
 
 export interface UserSummary{
-  userId: number;
+  userId: string;
   username: string
 }
 

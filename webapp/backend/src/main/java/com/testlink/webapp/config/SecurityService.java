@@ -19,7 +19,7 @@ public class SecurityService {
             UsernamePasswordAuthenticationToken newAuth = new UsernamePasswordAuthenticationToken(
                     userDetails,
                     auth.getCredentials(),
-                    userDetails.getAuthorities() // Grabs the fresh roles from the User object
+                    userDetails.getAuthorities() // Grabs the fresh authorities from the User object
             );
             SecurityContextHolder.getContext().setAuthentication(newAuth);
         }

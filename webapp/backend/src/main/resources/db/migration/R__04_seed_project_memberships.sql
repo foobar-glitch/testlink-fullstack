@@ -1,6 +1,6 @@
 -- ======================================================================
 -- R__04_seed_project_memberships.sql
--- Assigns users to projects with specific roles.
+-- Assigns users to projects with specific authorities.
 -- Assumes:
 --   - users: 1=admin, 2=tester1, 3=tester2
 --   - projects: 1=E-Commerce, 2=Mobile App, 3=API Gateway, 4=Admin Dashboard
