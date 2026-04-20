@@ -1,0 +1,149 @@
+@use 'app/shared/styles/variables' as vars;
+@use 'app/shared/styles/mixins' as mix;
+
+.version-content-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: vars.$spacing-xl vars.$spacing-lg;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid vars.$text;
+  padding-bottom: 10px;
+  margin-bottom: vars.$spacing-xl;
+
+  .title-section {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+
+    h2 {
+      font-size: 22px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: vars.$text;
+    }
+
+    .testcase-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: vars.$accent;
+    }
+  }
+}
+
+.back-btn {
+  @include mix.btn-ghost;
+}
+
+.content-card {
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+  padding: vars.$spacing-lg;
+  box-shadow: vars.$shadow-sm;
+
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: vars.$text;
+    margin-bottom: vars.$spacing-lg;
+    border-bottom: 1px solid vars.$border;
+    padding-bottom: vars.$spacing-sm;
+  }
+
+  .field {
+    margin-bottom: vars.$spacing-lg;
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: vars.$muted;
+      margin-bottom: vars.$spacing-xs;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.6;
+      color: vars.$text;
+      margin: 0;
+    }
+  }
+
+  .meta {
+    margin-top: vars.$spacing-lg;
+    padding-top: vars.$spacing-md;
+    border-top: 1px solid vars.$border;
+    font-size: 13px;
+    color: vars.$muted;
+  }
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.steps-section {
+  margin-top: vars.$spacing-lg;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: vars.$text;
+    margin-bottom: vars.$spacing-md;
+    border-bottom: 1px solid vars.$border;
+    padding-bottom: vars.$spacing-xs;
+  }
+
+  .steps-table {
+    overflow-x: auto;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+
+      th {
+        text-align: left;
+        padding: 10px 12px;
+        background: vars.$gray-light;
+        color: vars.$muted;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border-bottom: 1px solid vars.$border;
+      }
+
+      td {
+        padding: 12px;
+        border-bottom: 1px solid vars.$border;
+        color: vars.$text;
+        vertical-align: top;
+      }
+
+      .clickable-row {
+        cursor: pointer;
+        transition: background 0.15s;
+
+        &:hover {
+          background: vars.$accent-soft;
+        }
+      }
+    }
+  }
+
+  .no-steps {
+    color: vars.$muted;
+    font-style: italic;
+  }
+}

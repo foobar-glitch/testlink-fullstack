@@ -5,8 +5,8 @@ import { TestSuite, TestCase } from '../../../core/models/testsuite';
 import { TestPlan } from '../../../core/models/testexecution';
 import { TestPlanService } from '../../../core/services/test-plan.service';
 import { TestPlanOverviewComponent } from './test-plan-overview/test-plan-overview.component';
-import { TestCaseListComponent } from '../../test-cases/test-case-list/test-case-list.component';
-import { TestCaseDetailComponent } from '../../test-cases/test-case-detail/test-case-detail.component';
+import { TestCaseListComponent } from '../../test-management/test-cases/test-case-list/test-case-list.component';
+import { TestCaseDetailComponent } from '../../test-management/test-cases/test-case-detail/test-case-detail.component';
 
 @Component({
   selector: 'app-dashboard-content',

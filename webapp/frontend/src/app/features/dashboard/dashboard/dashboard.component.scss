@@ -1,0 +1,84 @@
+@use 'app/shared/styles/variables' as vars;
+@use 'app/shared/styles/mixins' as mix;
+
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: vars.$page-bg;
+}
+
+.topbar {
+  background: vars.$white;
+  border-bottom: 1px solid vars.$border;
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  box-shadow: vars.$shadow-sm;
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 16px;
+    color: vars.$text;
+
+    .logo {
+      width: 30px;
+      height: 30px;
+      background: vars.$accent;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+    }
+  }
+
+  .context-selectors {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .ctx-select {
+    padding: 7px 30px 7px 10px;
+    border: 1px solid vars.$border;
+    border-radius: vars.$radius-sm;
+    background: vars.$page-bg;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 180px;
+
+    &:hover { border-color: vars.$accent-mid; }
+    &:focus { outline: 2px solid vars.$accent-mid; }
+  }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+
+    .icon-btn {
+      @include mix.icon-btn;
+    }
+  }
+}
+
+.main-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.global-loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
