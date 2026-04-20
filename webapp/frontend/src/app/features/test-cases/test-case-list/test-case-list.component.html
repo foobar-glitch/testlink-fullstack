@@ -35,7 +35,7 @@
         <p class="description">{{ tc.description }}</p>
         <div class="meta">
           <span class="created-by">
-            Created by {{ tc.stamp.user.username }}
+            Created by {{ tc.stamp.createdBy.username }}
           </span>
           <span class="created-at">
             {{ tc.stamp.timeStamp.createdAt | date: 'mediumDate' }}

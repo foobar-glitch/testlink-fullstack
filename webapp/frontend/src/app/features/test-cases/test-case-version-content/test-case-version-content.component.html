@@ -30,7 +30,7 @@
         <p>{{ content.expectedResult || 'None' }}</p>
       </div>
       <div class="meta">
-        Created by {{ content.stamp.user.username }} on
+        Created by {{ content.stamp.createdBy.username }} on
         {{ content.stamp.timeStamp.createdAt | date: 'medium' }}
       </div>
     </div>

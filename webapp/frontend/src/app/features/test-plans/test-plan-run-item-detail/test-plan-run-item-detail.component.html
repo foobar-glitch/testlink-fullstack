@@ -83,7 +83,7 @@
 
       <!-- Metadata -->
       <div class="meta">
-        Created by {{ item.stamp.user.username }} on
+        Created by {{ item.stamp.createdBy.username }} on
         {{ item.stamp.timeStamp.createdAt | date:'medium' }}
         <span *ngIf="item.stamp.timeStamp.updatedAt">
           · Updated {{ item.stamp.timeStamp.updatedAt | date:'medium' }}

@@ -26,7 +26,7 @@
         <p class="description">{{ plan.description }}</p>
         <div class="meta">
           <span class="created-by">
-            Created by {{ plan.stamp.user.username }}
+            Created by {{ plan.stamp.createdBy.username }}
           </span>
           <span class="created-at">
             {{ plan.stamp.timeStamp.createdAt | date: 'mediumDate' }}
