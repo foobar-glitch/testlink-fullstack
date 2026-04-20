@@ -15,16 +15,36 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid vars.$border;
-  font-weight: 600;
-  color: vars.$text;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: vars.$muted;
+
+  button {
+    background: none;
+    border: none;
+    color: vars.$muted;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: vars.$radius-sm;
+    transition: vars.$transition;
+    line-height: 1;
+
+    &:hover {
+      background: vars.$accent-soft;
+      color: vars.$accent;
+    }
+  }
 }
 
 .tree-container {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 8px 4px;
 }
 
 .tree {
@@ -38,34 +58,66 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 8px;
+    padding: 6px 8px 6px 4px;
     border-radius: vars.$radius-sm;
     cursor: pointer;
     transition: background 0.15s;
+    margin-bottom: 2px;
 
     &:hover {
       background: vars.$accent-soft;
     }
 
+    &.selected {
+      background: vars.$accent-soft;
+      color: vars.$accent;
+      font-weight: 600;
+
+      .name {
+        color: vars.$accent;
+      }
+    }
+
     .toggle {
-      width: 16px;
-      text-align: center;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
       color: vars.$muted;
+      font-size: 12px;
+      transition: transform 0.2s ease;
 
       &.has-children {
         cursor: pointer;
-        &:hover { color: vars.$accent; }
+        &:hover {
+          color: vars.$accent;
+          background: vars.$accent-soft;
+          border-radius: 4px;
+        }
       }
     }
 
     .icon {
       flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: vars.$muted;
     }
 
     .name {
       flex: 1;
       font-size: 13px;
       color: vars.$text;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.4;
     }
 
     .badge {
@@ -75,16 +127,22 @@
       font-weight: 700;
       padding: 2px 6px;
       border-radius: vars.$radius-pill;
+      flex-shrink: 0;
+      min-width: 20px;
+      text-align: center;
     }
   }
 
   .tree {
-    padding-left: 20px;
+    padding-left: 22px;
+    border-left: 1px dashed vars.$border;
+    margin-left: 8px;
   }
 }
 
 .empty-tree {
-  padding: 20px;
+  padding: 24px 16px;
   text-align: center;
   color: vars.$muted;
+  font-size: 13px;
 }
