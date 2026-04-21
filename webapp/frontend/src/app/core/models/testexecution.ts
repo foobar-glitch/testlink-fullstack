@@ -41,7 +41,7 @@ export interface TestPlanRunItem {
 export type TestExecution = 'MANUAL' | 'AUTOMATED';
 
 export interface TestCaseVersionStep {
-  stepId: string;                     // UUID as string
+  stepId: string; // UUID as string
   testCaseVersion: TestCaseVersion;
   stepNumber: number;
   stepAction: string;

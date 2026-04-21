@@ -1,13 +1,10 @@
-// ─── app.component.ts ────────────────────────────────────────────────────────
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { AppHeaderComponent } from './shared/components/app-header/app-header.component';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AppHeaderComponent],
+  imports: [RouterModule],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {}

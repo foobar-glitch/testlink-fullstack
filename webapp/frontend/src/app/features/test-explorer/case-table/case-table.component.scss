@@ -1,0 +1,179 @@
+// ─── case-table.component.scss ───────────────────────────────────────────────
+@use '../../../shared/styles/variables' as vars;
+@use '../../../shared/styles/mixins' as mix;
+
+:host { display: block; }
+
+.tbl-wrapper {
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+// ── Filter bar ────────────────────────────────────────────────────────────────
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid vars.$border;
+  flex-wrap: wrap;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 160px;
+
+  svg {
+    position: absolute;
+    left: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: vars.$muted;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding: 7px 10px 7px 28px;
+    border: 1px solid vars.$border;
+    border-radius: vars.$radius-sm;
+    font-size: 13px;
+    font-family: vars.$font;
+    background: vars.$page-bg;
+    color: vars.$text;
+    transition: vars.$transition;
+
+    &::placeholder { color: vars.$muted; }
+    &:focus { outline: none; border-color: vars.$accent; background: vars.$white; }
+  }
+}
+
+.filter-select {
+  padding: 7px 24px 7px 9px;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-sm;
+  font-size: 13px;
+  font-family: vars.$font;
+  background: vars.$page-bg;
+  color: vars.$text;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23777' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  cursor: pointer;
+  transition: vars.$transition;
+
+  &:focus { outline: none; border-color: vars.$accent; }
+}
+
+.results-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: vars.$muted;
+  white-space: nowrap;
+}
+
+// ── Scroll wrapper ────────────────────────────────────────────────────────────
+.scroll-wrap {
+  overflow-x: auto;
+
+  &::-webkit-scrollbar { height: 4px; }
+  &::-webkit-scrollbar-thumb { background: vars.$border; border-radius: 2px; }
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+.data-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+
+  th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: vars.$muted;
+    background: #f8f8f8;
+    border-bottom: 2px solid vars.$border;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: vars.$transition;
+
+    &:hover { background: vars.$accent-soft; color: vars.$accent; }
+    &.sorted { color: vars.$accent; }
+  }
+
+  td {
+    padding: 11px 14px;
+    border-bottom: 1px solid vars.$border;
+    font-size: 13px;
+    color: vars.$text;
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  .clickable {
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover { background: vars.$accent-soft; }
+  }
+
+  .id-cell {
+    font-weight: 700;
+    color: vars.$accent;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .muted { color: vars.$muted; }
+
+  .sort-icon {
+    display: inline-block;
+    margin-left: 3px;
+    font-size: 10px;
+    opacity: 0.5;
+  }
+}
+
+// ── Priority pill ─────────────────────────────────────────────────────────────
+.priority-pill {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: vars.$radius-pill;
+  font-size: 11px;
+  font-weight: 700;
+
+  &.high {
+    background: rgba(#df0000, 0.1);
+    color: #b80000;
+  }
+  &.medium {
+    background: rgba(#c49a00, 0.1);
+    color: #9a7800;
+  }
+  &.low {
+    background: vars.$accent-soft;
+    color: vars.$accent-dark;
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty-state {
+  padding: 48px 20px;
+  text-align: center;
+
+  p {
+    font-size: 13px;
+    color: vars.$muted;
+  }
+}

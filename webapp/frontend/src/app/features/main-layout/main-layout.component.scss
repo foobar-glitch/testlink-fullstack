@@ -1,0 +1,316 @@
+// ─── main-layout.component.scss ──────────────────────────────────────────────
+@use '../../shared/styles/variables' as vars;
+@use '../../shared/styles/mixins' as mix;
+
+$sidebar-w: 272px;
+$topbar-h:  56px;
+
+// ── Host fills the viewport ───────────────────────────────────────────────────
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+// ── Shell grid ────────────────────────────────────────────────────────────────
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+// ── TOP BAR ───────────────────────────────────────────────────────────────────
+.topbar {
+  position: relative;
+  z-index: 200;
+  height: $topbar-h;
+  flex-shrink: 0;
+  background: vars.$white;
+  border-bottom: 1px solid vars.$border;
+  box-shadow: vars.$shadow-sm;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  min-width: calc(#{$sidebar-w} - 16px);
+  flex-shrink: 0;
+}
+
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  background: vars.$accent;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: vars.$white;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: vars.$text;
+  letter-spacing: -0.2px;
+}
+
+.brand-accent {
+  color: vars.$accent;
+}
+
+.topbar-divider {
+  width: 1px;
+  height: 28px;
+  background: vars.$border;
+  flex-shrink: 0;
+}
+
+// ── Context selectors ─────────────────────────────────────────────────────────
+.context-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctx-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: vars.$muted;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ctx-select {
+  padding: 7px 28px 7px 10px;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-sm;
+  background: vars.$page-bg;
+  color: vars.$text;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: vars.$font;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23777' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  cursor: pointer;
+  min-width: 160px;
+  transition: vars.$transition;
+
+  &:hover { border-color: vars.$accent-mid; }
+  &:focus  { outline: none; border-color: vars.$accent; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.topbar-spacer { flex: 1; }
+
+// ── Topbar action buttons ─────────────────────────────────────────────────────
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-sm;
+  background: vars.$white;
+  color: vars.$text;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: vars.$font;
+  cursor: pointer;
+  transition: vars.$transition;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: vars.$accent-mid;
+    color: vars.$accent;
+    background: vars.$accent-soft;
+  }
+
+  &.active {
+    background: vars.$accent-soft;
+    color: vars.$accent;
+    border-color: vars.$accent-mid;
+  }
+
+  &.primary {
+    background: vars.$accent;
+    color: vars.$white;
+    border-color: vars.$accent;
+
+    &:hover { background: vars.$accent-dark; }
+  }
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: vars.$accent;
+  color: vars.$white;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid vars.$accent-mid;
+  cursor: default;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  @include mix.icon-btn;
+  width: 34px;
+  height: 34px;
+  color: vars.$muted;
+
+  &:hover {
+    color: vars.$red;
+    background: rgba(vars.$red, 0.08);
+  }
+}
+
+// ── Body row ──────────────────────────────────────────────────────────────────
+.body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+.sidebar {
+  width: $sidebar-w;
+  flex-shrink: 0;
+  background: vars.$white;
+  border-right: 1px solid vars.$border;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-search {
+  padding: 10px;
+  border-bottom: 1px solid vars.$border;
+  flex-shrink: 0;
+}
+
+.search-wrap {
+  position: relative;
+
+  .search-icon {
+    position: absolute;
+    left: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: vars.$muted;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding: 8px 10px 8px 30px;
+    border: 1px solid vars.$border;
+    border-radius: vars.$radius-sm;
+    font-size: 13px;
+    font-family: vars.$font;
+    background: vars.$page-bg;
+    color: vars.$text;
+    transition: vars.$transition;
+
+    &::placeholder { color: vars.$muted; }
+    &:focus {
+      outline: none;
+      border-color: vars.$accent;
+      background: vars.$white;
+    }
+  }
+}
+
+.sidebar-tree-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 6px;
+  flex-shrink: 0;
+}
+
+.tree-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: vars.$muted;
+}
+
+.tree-actions {
+  display: flex;
+  gap: 3px;
+}
+
+.tree-btn {
+  background: none;
+  border: none;
+  color: vars.$muted;
+  cursor: pointer;
+  padding: 4px 5px;
+  border-radius: vars.$radius-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: vars.$transition;
+
+  &:hover {
+    color: vars.$accent;
+    background: vars.$accent-soft;
+  }
+}
+
+.sidebar-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2px 6px 16px;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: vars.$border; border-radius: 2px; }
+}
+
+.tree-empty, .tree-loading {
+  padding: 24px 12px;
+  text-align: center;
+
+  p {
+    font-size: 13px;
+    color: vars.$muted;
+  }
+}
+
+// ── Main content ──────────────────────────────────────────────────────────────
+.content {
+  flex: 1;
+  overflow-y: auto;
+  background: vars.$page-bg;
+
+  &.full-width { width: 100%; }
+}

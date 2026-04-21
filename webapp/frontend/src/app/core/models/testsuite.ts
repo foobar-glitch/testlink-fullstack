@@ -1,3 +1,6 @@
+// ─── testsuite.ts ─────────────────────────────────────────────────────────────
+// Extends the existing models with fields required by the test-explorer UI.
+
 import { UserCreatedTimeStamp } from './tablemetadata';
 import { Project } from './project';
 // ─── Test Suite ──────────────────────────────────────────────────────────────
@@ -32,8 +35,8 @@ export interface TestSuiteHierarchyDTO {
  * `expanded` is UI-only state.
  */
 export interface TestSuite extends TestSuiteItem {
-  children: TestSuite[];   // always populated, never undefined
-  expanded: boolean;       // UI state only
+  children: TestSuite[]; // always populated, never undefined
+  expanded: boolean; // UI state only
 }
 
 /**
@@ -47,13 +50,14 @@ export interface TestSuiteHierarchy {
 }
 
 export type TestCaseStatus = 'draft' | 'active' | 'deprecated';
-
+export type TestCasePriority = 'low' | 'medium' | 'high';
 // ─── Test Case ───────────────────────────────────────────────────────────────
 export interface TestCase {
   testCaseId: string;
   testSuite: TestSuiteItem;
   identifierNumber: number;
   title: string;
+  priority?: TestCasePriority;
   description: string;
   status: TestCaseStatus;
   stamp: UserCreatedTimeStamp;

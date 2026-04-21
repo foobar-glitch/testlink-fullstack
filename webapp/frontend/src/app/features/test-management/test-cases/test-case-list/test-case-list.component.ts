@@ -30,7 +30,6 @@ export class TestCaseListComponent implements OnInit {
   private readonly testSuiteService = inject(TestSuiteService);
   private readonly router = inject(Router);
 
-  // Optional inputs – if not provided, fall back to route params
   @Input() projectKey?: string;
   @Input() suiteId?: string;
 
@@ -40,7 +39,7 @@ export class TestCaseListComponent implements OnInit {
 
   ngOnInit(): void {
     const project = this.projectKey ?? this.route.snapshot.paramMap.get('projectKey')!;
-    const suite = this.suiteId ?? this.route.snapshot.paramMap.get('suiteId')!;
+    const suite   = this.suiteId   ?? this.route.snapshot.paramMap.get('suiteId')!;
 
     this.testCases$ = this.testCaseService.getTestCases(project, suite).pipe(
       catchError(err => {
@@ -58,16 +57,14 @@ export class TestCaseListComponent implements OnInit {
   }
 
   selectTestCase(testCase: TestCase): void {
-    const project = this.projectKey ?? testCase.testSuite.project.projectKey;
+    // Use input projectKey first, then fall back to testSuite.project (may be undefined)
+    const project    = this.projectKey ?? testCase.testSuite?.project?.projectKey ?? '';
     const identifier = testCase.identifierNumber;
-    const suite = this.suiteId ?? testCase.testSuite.testSuiteId;
+    const suite      = this.suiteId ?? testCase.testSuite.testSuiteId;
     this.router.navigate([
-      '/projects/project-key',
-      project,
-      'suites',
-      suite,
-      'testcases',
-      identifier,
+      '/projects/project-key', project,
+      'suites', suite,
+      'testcases', identifier,
       'versions'
     ]);
   }

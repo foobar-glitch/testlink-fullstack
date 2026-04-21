@@ -1,7 +1,7 @@
 <!-- app.component.html -->
-<!-- Wraps the sticky header + routed page content, same structure as the React shop's App div -->
-<app-header></app-header>
-
-<div class="content">
-  <router-outlet></router-outlet>
-</div>
+<!--
+  The app-header is intentionally removed here.
+  The new MainLayoutComponent provides its own top bar + sidebar shell
+  for all authenticated routes. The login page renders without any shell.
+-->
+<router-outlet></router-outlet>
