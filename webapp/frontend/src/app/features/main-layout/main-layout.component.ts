@@ -25,8 +25,7 @@ import { TestSuite } from '../../core/models/testsuite';
 import { TestPlan } from '../../core/models/testexecution';
 
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
-import { SuiteTreeNodeComponent } from '../test-explorer/suite-tree-node/suite-tree-node.component';
-
+import { SuiteTreeNodeComponent } from '../test-explorer/test-tree-node/suite-tree-node.component';
 /** Routes on which the left sidebar should be visible */
 const SIDEBAR_ROUTES = ['/explorer', '/dashboard'];
 
