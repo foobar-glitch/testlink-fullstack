@@ -32,10 +32,11 @@ export class SuiteTreeNodeComponent implements OnInit {
   private readonly ctx       = inject(ContextService);
   private readonly cdr       = inject(ChangeDetectorRef);
 
-  testCases$: Observable<TestCase[]> | null = null;
+  // Always an Observable (never null) — avoids the TS2769 type error with async pipe
+  testCases$: Observable<TestCase[]> = of([]);
+  private casesLoaded = false;
 
   ngOnInit(): void {
-    // Subscribe to selection changes to trigger CD
     this.treeState.selection$.subscribe(() => this.cdr.markForCheck());
   }
 
@@ -54,7 +55,6 @@ export class SuiteTreeNodeComponent implements OnInit {
   onToggle(event: Event): void {
     event.stopPropagation();
     this.treeState.toggle(this.suite.testSuiteId);
-
     if (this.treeState.isExpanded(this.suite.testSuiteId)) {
       this.loadCases();
     }
@@ -64,7 +64,6 @@ export class SuiteTreeNodeComponent implements OnInit {
   onSuiteClick(): void {
     this.treeState.toggle(this.suite.testSuiteId);
     this.treeState.selectSuite(this.suite);
-
     if (this.treeState.isExpanded(this.suite.testSuiteId)) {
       this.loadCases();
     }
@@ -77,15 +76,16 @@ export class SuiteTreeNodeComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  getCaseColor(tc: TestCase): string {
-    // TestCase doesn't carry an execution status — use neutral color
+  getCaseColor(_tc: TestCase): string {
     return '#bbb';
   }
 
   private loadCases(): void {
+    if (this.casesLoaded) return;
     const projectKey = this.ctx.snapshot.projectKey;
-    if (!projectKey || this.testCases$) return; // lazy — load once
+    if (!projectKey) return;
 
+    this.casesLoaded = true;
     this.testCases$ = this.casesSvc
       .getTestCases(projectKey, this.suite.testSuiteId)
       .pipe(catchError(() => of([])));

@@ -14,7 +14,6 @@
     </button>
   </header>
 
-  <!-- Error -->
   <div *ngIf="errorMessage" class="error-state">
     <app-error-banner
       [message]="errorMessage"
@@ -22,24 +21,21 @@
     ></app-error-banner>
   </div>
 
-  <!-- Data -->
   <ng-container *ngIf="testCases$ | async as testCases; else loading">
     <div *ngIf="testCases.length > 0; else empty" class="test-cases-grid">
       <div *ngFor="let tc of testCases" class="test-case-card" (click)="selectTestCase(tc)">
         <div class="card-header">
-          <!-- Use projectKey and identifierNumber directly from the test case -->
-          <span class="identifier">{{ tc.testSuite.project.projectKey }}-{{ tc.identifierNumber }}</span>
+          <!-- Safe navigation: project may be undefined when suite has no project context -->
+          <span class="identifier">
+            {{ tc.testSuite?.project?.projectKey ?? projectKey }}-{{ tc.identifierNumber }}
+          </span>
           <app-status-badge [status]="tc.status"></app-status-badge>
         </div>
         <h3 class="title">{{ tc.title }}</h3>
         <p class="description">{{ tc.description }}</p>
         <div class="meta">
-          <span class="created-by">
-            Created by {{ tc.stamp.createdBy.username }}
-          </span>
-          <span class="created-at">
-            {{ tc.stamp.timeStamp.createdAt | date: 'mediumDate' }}
-          </span>
+          <span class="created-by">Created by {{ tc.stamp.createdBy.username }}</span>
+          <span class="created-at">{{ tc.stamp.timeStamp.createdAt | date: 'mediumDate' }}</span>
         </div>
       </div>
     </div>
@@ -52,7 +48,6 @@
     </ng-template>
   </ng-container>
 
-  <!-- Loading -->
   <ng-template #loading>
     <div class="loading-state">
       <app-spinner label="Loading test cases..."></app-spinner>

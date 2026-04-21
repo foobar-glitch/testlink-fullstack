@@ -9,22 +9,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
-import {
-  Observable,
-  BehaviorSubject,
-  Subscription,
-  of,
-  combineLatest,
-} from 'rxjs';
-import {
-  switchMap,
-  catchError,
-  filter,
-  map,
-  distinctUntilChanged,
-  startWith,
-  tap,
-} from 'rxjs/operators';
+import { Observable, BehaviorSubject, Subscription, of } from 'rxjs';
+import { switchMap, catchError, filter, startWith } from 'rxjs/operators';
 
 import { AuthService } from '../../core/services/auth.service';
 import { ProjectService } from '../../core/services/project.service';
@@ -39,7 +25,10 @@ import { TestSuite } from '../../core/models/testsuite';
 import { TestPlan } from '../../core/models/testexecution';
 
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
-import { SuiteTreeNodeComponent } from '../test-explorer/test-tree-node/suite-tree-node.component';
+import { SuiteTreeNodeComponent } from '../test-explorer/suite-tree-node/suite-tree-node.component';
+
+/** Routes on which the left sidebar should be visible */
+const SIDEBAR_ROUTES = ['/explorer', '/dashboard'];
 
 @Component({
   selector: 'app-main-layout',
@@ -56,8 +45,8 @@ import { SuiteTreeNodeComponent } from '../test-explorer/test-tree-node/suite-tr
   styleUrls: ['./main-layout.component.scss'],
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {
-  private readonly auth    = inject(AuthService);
-  private readonly projects = inject(ProjectService);
+  private readonly auth      = inject(AuthService);
+  private readonly projects  = inject(ProjectService);
   private readonly suitesSvc = inject(TestSuiteService);
   private readonly plansSvc  = inject(TestPlanService);
   private readonly ctx       = inject(ContextService);
@@ -73,19 +62,19 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   // ── Context selectors ─────────────────────────────────────────────────
-  selectedProjectKey: string = '';
-  selectedPlanId: string     = '';
+  selectedProjectKey = '';
+  selectedPlanId     = '';
 
   memberships$: Observable<ProjectMembership[]> = of([]);
-  testPlans$: Observable<TestPlan[]>             = of([]);
+  testPlans$:   Observable<TestPlan[]>           = of([]);
 
   // ── Sidebar tree ──────────────────────────────────────────────────────
   private _suiteLoading$ = new BehaviorSubject<boolean>(false);
   suiteLoading$: Observable<boolean> = this._suiteLoading$.asObservable();
 
-  allSuites: TestSuite[]       = [];
-  filteredSuites: TestSuite[]  = [];
-  treeSearch: string           = '';
+  allSuites:      TestSuite[] = [];
+  filteredSuites: TestSuite[] = [];
+  treeSearch = '';
 
   // ── Sidebar visibility ────────────────────────────────────────────────
   showSidebar = true;
@@ -93,7 +82,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
 
   ngOnInit(): void {
-    // Track current user
+    // Track authenticated user
     this.subs.add(
       this.auth.currentUser$.subscribe(u => {
         this.currentUser = u;
@@ -101,7 +90,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       }),
     );
 
-    // Load projects when user is ready
+    // Load projects once user is ready
     this.memberships$ = this.auth.currentUser$.pipe(
       filter(u => u !== null),
       switchMap(() =>
@@ -111,26 +100,29 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     );
 
     // Restore context from session
-    const savedCtx = this.ctx.snapshot;
-    if (savedCtx.projectKey) {
-      this.selectedProjectKey = savedCtx.projectKey;
-      this.loadSuites(savedCtx.projectKey);
-      this.loadPlans(savedCtx.projectKey);
+    const saved = this.ctx.snapshot;
+    if (saved.projectKey) {
+      this.selectedProjectKey = saved.projectKey;
+      this.loadSuites(saved.projectKey);
+      this.loadPlans(saved.projectKey);
     }
-    if (savedCtx.testPlanId) {
-      this.selectedPlanId = savedCtx.testPlanId;
+    if (saved.testPlanId) {
+      this.selectedPlanId = saved.testPlanId;
     }
 
-    // Show/hide sidebar depending on route
+    // Show/hide sidebar based on route
+    const isSidebarRoute = (url: string) =>
+      SIDEBAR_ROUTES.some(r => url === r || url.startsWith(r + '?'));
+
     this.subs.add(
       this.router.events
         .pipe(filter(e => e instanceof NavigationEnd))
-        .subscribe(() => {
-          this.showSidebar = this.router.url.startsWith('/explorer');
+        .subscribe((e: any) => {
+          this.showSidebar = isSidebarRoute(e.urlAfterRedirects ?? e.url);
           this.cdr.markForCheck();
         }),
     );
-    this.showSidebar = this.router.url.startsWith('/explorer');
+    this.showSidebar = isSidebarRoute(this.router.url);
   }
 
   ngOnDestroy(): void {
@@ -160,7 +152,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   refresh(): void {
     if (this.selectedProjectKey) {
       this.loadSuites(this.selectedProjectKey);
-      if (this.selectedPlanId) this.ctx.setPlan(this.selectedPlanId);
     }
     this.router.navigate(['/explorer']);
   }
@@ -198,7 +189,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       .getTestSuitesByProjectKey(projectKey)
       .pipe(catchError(() => of([])))
       .subscribe(suites => {
-        this.allSuites     = suites;
+        this.allSuites      = suites;
         this.filteredSuites = suites;
         this._suiteLoading$.next(false);
         this.cdr.markForCheck();
@@ -213,7 +204,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
   private filterSuites(suites: TestSuite[], q: string): TestSuite[] {
     return suites.reduce<TestSuite[]>((acc, s) => {
-      const nameMatch = s.name.toLowerCase().includes(q);
+      const nameMatch    = s.name.toLowerCase().includes(q);
       const childMatches = this.filterSuites(s.children ?? [], q);
       if (nameMatch || childMatches.length) {
         acc.push({ ...s, children: childMatches.length ? childMatches : s.children });

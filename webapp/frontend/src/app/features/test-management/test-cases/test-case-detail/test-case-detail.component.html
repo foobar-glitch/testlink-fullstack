@@ -1,17 +1,18 @@
 <div class="test-case-detail-container">
   <ng-container *ngIf="testCase$ | async as testCase; else loading">
-    <!-- Header -->
     <header class="detail-header">
       <h2>{{ testCase.title }}</h2>
       <app-status-badge [status]="testCase.status"></app-status-badge>
     </header>
 
-    <!-- Metadata -->
     <div class="detail-card">
       <div class="meta-grid">
         <div class="meta-item">
           <span class="label">ID</span>
-          <span class="value identifier">{{ testCase.testSuite.project.projectKey }}-{{ testCase.identifierNumber }}</span>
+          <!-- project may be undefined if backend omits it; fall back to injected projectKey -->
+          <span class="value identifier">
+            {{ testCase.testSuite?.project?.projectKey ?? projectKey }}-{{ testCase.identifierNumber }}
+          </span>
         </div>
         <div class="meta-item">
           <span class="label">Suite</span>
@@ -43,7 +44,6 @@
       </div>
     </div>
 
-    <!-- Versions Section -->
     <div class="versions-section">
       <h3>Version History</h3>
       <ng-container *ngIf="versions$ | async as versions; else versionLoading">

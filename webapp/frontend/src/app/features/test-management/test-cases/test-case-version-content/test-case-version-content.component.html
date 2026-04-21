@@ -20,19 +20,22 @@
 
   <ng-container *ngIf="content$ | async as content; else loading">
     <div class="content-card">
-      <h3>{{ content.title }}</h3>
+      <!-- Title comes from the nested testCase, not from content itself -->
+      <h3>{{ content.testCaseVersion.testCase.title }}</h3>
+
+      <div class="field">
+        <label>Summary</label>
+        <p>{{ content.summary || 'None' }}</p>
+      </div>
       <div class="field">
         <label>Preconditions</label>
         <p>{{ content.preconditions || 'None' }}</p>
-      </div>
-      <div class="field">
-        <label>Expected Result</label>
-        <p>{{ content.expectedResult || 'None' }}</p>
       </div>
       <div class="meta">
         Created by {{ content.stamp.createdBy.username }} on
         {{ content.stamp.timeStamp.createdAt | date: 'medium' }}
       </div>
+
       <!-- Steps section -->
       <div class="steps-section" *ngIf="steps$ | async as steps">
         <h3>Test Steps</h3>
@@ -43,7 +46,7 @@
               <th>#</th>
               <th>Action</th>
               <th>Expected Result</th>
-              <th>Execution</th>
+              <th>History</th>
             </tr>
             </thead>
             <tbody>
@@ -51,7 +54,12 @@
               <td>{{ step.stepNumber }}</td>
               <td>{{ step.stepAction }}</td>
               <td>{{ step.expectedResult }}</td>
-              <td>{{ step.execution }}</td>
+              <!-- No 'execution' field on the model — link to result history instead -->
+              <td>
+                <button class="view-btn" (click)="viewStep(step); $event.stopPropagation()">
+                  View Results →
+                </button>
+              </td>
             </tr>
             </tbody>
           </table>
