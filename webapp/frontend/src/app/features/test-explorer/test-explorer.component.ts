@@ -20,8 +20,8 @@ import { TestPlanRunService } from '../../core/services/test-plan-run.service';
 import { TestPlanRunItemService } from '../../core/services/test-plan-run-item.service';
 import { ProjectService } from '../../core/services/project.service';
 
-import { TestPlan, TestPlanRunItem } from '../../core/models/testexecution';
-import { TestSuite, TestCase, TestCaseVersionStep } from '../../core/models/testsuite';
+import { TestCaseVersionStep, TestPlan, TestPlanRunItem } from '../../core/models/testexecution';
+import { TestSuite, TestCase } from '../../core/models/testsuite';
 
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';

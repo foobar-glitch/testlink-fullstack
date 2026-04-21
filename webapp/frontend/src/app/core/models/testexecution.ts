@@ -1,61 +1,103 @@
-// ─── testexecution.ts ────────────────────────────────────────────────────────
-import { UserCreatedTimeStampDTO } from './shared';
+// ─── Test Run ────────────────────────────────────────────────────────────────
 import { TestCase, TestCaseVersion } from './testsuite';
-
-// ── Test Plan ─────────────────────────────────────────────────────────────────
+import { UserCreatedTimeStamp } from './tablemetadata';
+import { Project } from './project';
+import { UserSummary } from './authentication';
 
 export interface TestPlan {
-  testPlanId:   string;
-  name:         string;
-  description?: string;
-  stamp:        UserCreatedTimeStampDTO;
+  testPlanId: string;
+  project: Project;
+  name: string;
+  description: string;
+  stamp: UserCreatedTimeStamp;
 }
-
-// ── Test Plan Run ─────────────────────────────────────────────────────────────
 
 export interface TestPlanRun {
   testPlanRunId: string;
-  name:          string;
-  build?:        string;
-  environment?:  string;
-  stamp:         UserCreatedTimeStampDTO;
+  testPlan: TestPlan;
+  name: string;
+  environment: string;
+  build: string;
+  stamp: UserCreatedTimeStamp;
 }
 
-// ── Test Plan Run Item ────────────────────────────────────────────────────────
+export type ExecutionStatus = 'pass' | 'fail' | 'blocked' | 'not_run';
 
 export type TestRunStatus = 'NOT_RUN' | 'PASSED' | 'FAILED' | 'BLOCKED' | 'SKIPPED';
 
 export interface TestPlanRunItem {
-  testRunItemId:   string;
-  status:          TestRunStatus;
-  notes?:          string;
-  testCase:        TestCase;
+  testRunItemId: string;
+  testPlanRun: TestPlanRun;
+  testCase: TestCase;
   testCaseVersion: TestCaseVersion;
-  testPlanRun:     TestPlanRun;
-  assignedTo?:     { username: string };
-  executedBy?:     { username: string };
-  executedAt?:     string;
-  stamp:           UserCreatedTimeStampDTO;
+  assignedTo: UserSummary | null;
+  executedBy: UserSummary | null;
+  status: TestRunStatus;
+  executedAt: string | null;
+  notes: string | null;
+  stamp: UserCreatedTimeStamp;
 }
 
-// ── Test Step Result ──────────────────────────────────────────────────────────
+export type TestExecution = 'MANUAL' | 'AUTOMATED';
 
-export type ExecutionStatus = 'pass' | 'fail' | 'blocked' | 'not_run';
+export interface TestCaseVersionStep {
+  stepId: string; // UUID as string
+  testCaseVersion: TestCaseVersion;
+  stepNumber: number;
+  stepAction: string;
+  expectedResult: string;
+  execution: TestExecution;
+  stamp: UserCreatedTimeStamp;
+}
+
+export type TestCaseStepStatus = 'NOT_RUN' | 'PASSED' | 'FAILED' | 'BLOCKED' | 'SKIPPED';
 
 export interface TestStepResult {
   testStepResultId: string;
-  status:           TestRunStatus;
-  actualResult?:    string;
-  notes?:           string;
-  testRunItem:      TestPlanRunItem;
-  stamp:            UserCreatedTimeStampDTO;
+  testRunItem: TestPlanRunItem;
+  testCaseVersionStep: TestCaseVersionStep;
+  status: TestCaseStepStatus;
+  actualResult: string;
+  notes: string;
+  stamp: UserCreatedTimeStamp;
 }
 
-// ── Test Case Version Step (for step-result views) ────────────────────────────
-
-export interface TestCaseVersionStep {
-  stepId:         string;
-  stepNumber:     number;
-  stepAction:     string;
-  expectedResult: string;
+//TODO RunSummary
+/*
+export interface TestRun {
+  id: number;
+  projectId: number;
+  name: string;
+  description: string;
+  suiteId: number | null;
+  suiteName: string | null;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  summary: RunSummary;
 }
+
+export interface RunSummary {
+  total: number;
+  pass: number;
+  fail: number;
+  blocked: number;
+  notRun: number;
+}
+
+export interface TestExecution {
+  id: number;
+  runId: number;
+  testCaseId: number;
+  testCase: TestCase;
+  status: ExecutionStatus;
+  notes: string;
+  executedBy: string | null;
+  executedAt: string | null;
+}
+
+export interface ExecutionUpdateRequest {
+  status: ExecutionStatus;
+  notes?: string;
+}
+*/

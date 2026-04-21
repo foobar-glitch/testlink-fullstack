@@ -64,6 +64,7 @@ export class TestPlanRunItemDetailComponent {
 
   getTestCaseIdentifier(item: TestPlanRunItem): string {
     const tc = item.testCase;
-    return `${tc.testSuite.project.projectKey}-${tc.identifierNumber}`;
+    const projectKey = tc.testSuite?.project?.projectKey ?? 'UNKNOWN';
+    return `${projectKey}-${tc.identifierNumber}`;
   }
 }

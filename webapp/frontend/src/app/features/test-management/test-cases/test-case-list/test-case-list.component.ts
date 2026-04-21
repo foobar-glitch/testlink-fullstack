@@ -43,24 +43,22 @@ export class TestCaseListComponent implements OnInit {
     const suite = this.suiteId ?? this.route.snapshot.paramMap.get('suiteId')!;
 
     this.testCases$ = this.testCaseService.getTestCases(project, suite).pipe(
-      catchError(err => {
+      catchError((err) => {
         this.errorMessage = err.message || 'Failed to load test cases';
         return of([]);
-      })
+      }),
     );
 
-    this.suiteName$ = this.testSuiteService
-      .getTestSuiteByProjectKeyAndId(project, suite)
-      .pipe(
-        map(hierarchy => hierarchy.current.name),
-        catchError(() => of('Test Suite'))
-      );
+    this.suiteName$ = this.testSuiteService.getTestSuiteByProjectKeyAndId(project, suite).pipe(
+      map((hierarchy) => hierarchy.current.name),
+      catchError(() => of('Test Suite')),
+    );
   }
 
   selectTestCase(testCase: TestCase): void {
-    const project = this.projectKey ?? testCase.testSuite.project.projectKey;
+    const project = this.projectKey ?? testCase.testSuite?.project?.projectKey ?? 'UNKNOWN';
     const identifier = testCase.identifierNumber;
-    const suite = this.suiteId ?? testCase.testSuite.testSuiteId;
+    const suite = this.suiteId ?? testCase.testSuite?.testSuiteId ?? '';
     this.router.navigate([
       '/projects/project-key',
       project,
@@ -68,7 +66,7 @@ export class TestCaseListComponent implements OnInit {
       suite,
       'testcases',
       identifier,
-      'versions'
+      'versions',
     ]);
   }
 }
