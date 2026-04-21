@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subscription, of, EMPTY } from 'rxjs';
+import { Observable, Subscription, of } from 'rxjs';
 import { switchMap, catchError, map } from 'rxjs/operators';
 
 import { ContextService } from '../../core/services/context.service';
@@ -53,33 +53,33 @@ interface PlanStats {
   styleUrls: ['./test-explorer.component.scss'],
 })
 export class TestExplorerComponent implements OnInit, OnDestroy {
-  private readonly ctx        = inject(ContextService);
-  private readonly treeState  = inject(TreeStateService);
-  private readonly plansSvc   = inject(TestPlanService);
-  private readonly casesSvc   = inject(TestCaseService);
-  private readonly stepsSvc   = inject(TestCaseVersionStepService);
-  private readonly runSvc     = inject(TestPlanRunService);
+  private readonly ctx = inject(ContextService);
+  private readonly treeState = inject(TreeStateService);
+  private readonly plansSvc = inject(TestPlanService);
+  private readonly casesSvc = inject(TestCaseService);
+  private readonly stepsSvc = inject(TestCaseVersionStepService);
+  private readonly runSvc = inject(TestPlanRunService);
   private readonly runItemSvc = inject(TestPlanRunItemService);
-  private readonly projSvc    = inject(ProjectService);
-  private readonly router     = inject(Router);
-  private readonly route      = inject(ActivatedRoute);
-  private readonly cdr        = inject(ChangeDetectorRef);
+  private readonly projSvc = inject(ProjectService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   // ── Context ───────────────────────────────────────────────────────────
   projectKey: string | null = null;
-  planId: string | null     = null;
-  planName                  = '';
-  parentSuiteName           = '';
+  planId: string | null = null;
+  planName = '';
+  parentSuiteName = '';
 
   // ── Selection ─────────────────────────────────────────────────────────
   selection: TreeSelection = { type: 'none' };
 
   // ── Data streams ──────────────────────────────────────────────────────
-  projectName$: Observable<string>       = of('');
+  projectName$: Observable<string> = of('');
   testPlan$: Observable<TestPlan | null> = of(null);
-  planStats$: Observable<PlanStats>      = of({ total: 0, passed: 0, failed: 0, blocked: 0, notRun: 0 });
+  planStats$: Observable<PlanStats> = of({ total: 0, passed: 0, failed: 0, blocked: 0, notRun: 0 });
   runItems$: Observable<TestPlanRunItem[]> = of([]);
-  allCases$: Observable<TestCase[]>      = of([]);
+  allCases$: Observable<TestCase[]> = of([]);
   suiteTestCases$: Observable<TestCase[]> = of([]);
   caseSteps$: Observable<TestCaseVersionStep[]> = of([]);
 
@@ -93,11 +93,11 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     // Restore context
     const saved = this.ctx.snapshot;
     this.projectKey = saved.projectKey;
-    this.planId     = saved.testPlanId;
+    this.planId = saved.testPlanId;
 
     if (this.projectKey) {
       this.projectName$ = this.projSvc.getProjectByKey(this.projectKey).pipe(
-        map(p => p.displayName),
+        map((p) => p.displayName),
         catchError(() => of(this.projectKey!)),
       );
     }
@@ -108,7 +108,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
     // React to tree selection changes
     this.subs.add(
-      this.treeState.selection$.subscribe(sel => {
+      this.treeState.selection$.subscribe((sel) => {
         this.selection = sel;
         this.onSelectionChange(sel);
         this.cdr.markForCheck();
@@ -117,15 +117,15 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
     // React to context changes (project/plan swapped in topbar)
     this.subs.add(
-      this.ctx.ctx$.subscribe(c => {
-        const pkChanged  = c.projectKey  !== this.projectKey;
+      this.ctx.ctx$.subscribe((c) => {
+        const pkChanged = c.projectKey !== this.projectKey;
         const pidChanged = c.testPlanId !== this.planId;
-        this.projectKey  = c.projectKey;
-        this.planId      = c.testPlanId;
+        this.projectKey = c.projectKey;
+        this.planId = c.testPlanId;
 
         if (this.projectKey) {
           this.projectName$ = this.projSvc.getProjectByKey(this.projectKey).pipe(
-            map(p => p.displayName),
+            map((p) => p.displayName),
             catchError(() => of(this.projectKey!)),
           );
         }
@@ -140,7 +140,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
     // Handle ?view=execution query param from topbar button
     this.subs.add(
-      this.route.queryParams.subscribe(params => {
+      this.route.queryParams.subscribe((params) => {
         if (params['view'] === 'execution') {
           this.overviewTab = 'runs';
         }
@@ -165,43 +165,28 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
   // ── Plan data ─────────────────────────────────────────────────────────
   private loadPlanData(projectKey: string, planId: string): void {
-    this.testPlan$ = this.plansSvc.getTestPlan(projectKey, planId).pipe(
-      catchError(() => of(null)),
-    );
+    this.testPlan$ = this.plansSvc.getTestPlan(projectKey, planId).pipe(catchError(() => of(null)));
 
-    // Use test plan name for breadcrumb/header
     this.subs.add(
-      this.testPlan$.subscribe(plan => {
+      this.testPlan$.subscribe((plan) => {
         this.planName = plan?.name ?? '';
         this.cdr.markForCheck();
       }),
     );
 
-    // Stats: derive from run items (fallback mock when backend has no aggregate endpoint)
     this.runItems$ = this.plansSvc.getTestPlansByProjectKey(projectKey).pipe(
-      switchMap(plans => {
-        // Try loading runs for the selected plan
-        return this.runSvc.getTestRunsByTestPlan(projectKey, planId).pipe(
-          catchError(() => of([])),
-        );
-      }),
-      // For now flatten first run's items as a proxy
-      switchMap(runs => {
+      switchMap(() => this.runSvc.getTestRunsByTestPlan(projectKey, planId)),
+      switchMap((runs) => {
         if (!runs.length) return of([]);
-        return this.runItemSvc.getRunItems(projectKey, planId, runs[0].testPlanRunId).pipe(
-          catchError(() => of([])),
-        );
+        return this.runItemSvc.getRunItems(projectKey, planId, runs[0].testPlanRunId);
       }),
-    );
-
-    this.planStats$ = this.runItems$.pipe(
-      map(items => this.computeStats(items)),
-    );
-
-    // All cases: aggregate from all suites (lazy — do only when tab is active)
-    this.allCases$ = this.casesSvc.getTestCases(projectKey, '').pipe(
       catchError(() => of([])),
     );
+
+    this.planStats$ = this.runItems$.pipe(map((items) => this.computeStats(items)));
+
+    // allCases$: aggregate from all suites – keep lazy
+    this.allCases$ = this.casesSvc.getTestCases(projectKey, '').pipe(catchError(() => of([])));
   }
 
   private loadSuiteCases(suite: TestSuite): void {
@@ -215,7 +200,6 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   private loadCaseSteps(tc: TestCase): void {
     const pk = this.projectKey;
     if (!pk) return;
-    // Load latest version steps
     this.caseSteps$ = this.stepsSvc
       .getSteps(pk, tc.testSuite?.testSuiteId ?? '', tc.identifierNumber, 1)
       .pipe(catchError(() => of([])));
@@ -223,11 +207,11 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
   // ── Stat helper ───────────────────────────────────────────────────────
   private computeStats(items: TestPlanRunItem[]): PlanStats {
-    const total   = items.length;
-    const passed  = items.filter(i => i.status === 'PASSED').length;
-    const failed  = items.filter(i => i.status === 'FAILED').length;
-    const blocked = items.filter(i => i.status === 'BLOCKED').length;
-    const notRun  = items.filter(i => i.status === 'NOT_RUN').length;
+    const total = items.length;
+    const passed = items.filter((i) => i.status === 'PASSED').length;
+    const failed = items.filter((i) => i.status === 'FAILED').length;
+    const blocked = items.filter((i) => i.status === 'BLOCKED').length;
+    const notRun = items.filter((i) => i.status === 'NOT_RUN').length;
     return { total, passed, failed, blocked, notRun };
   }
 
@@ -244,7 +228,14 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   backToSuite(): void {
     const sel = this.selection;
     if (sel.type === 'case' && sel.testCase.testSuite) {
-      this.treeState.selectSuite(sel.testCase.testSuite);
+      const suiteId = sel.testCase.testSuite.testSuiteId;
+      const fullSuite = this.treeState.findSuiteById(suiteId);
+      if (fullSuite) {
+        this.treeState.selectSuite(fullSuite);
+      } else {
+        // Fallback: tree not loaded or suite not found
+        this.treeState.clearSelection();
+      }
     } else {
       this.treeState.clearSelection();
     }
@@ -261,7 +252,11 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   goToRuns(): void {
     if (this.projectKey && this.planId) {
       this.router.navigate([
-        '/projects/project-key', this.projectKey, 'testplans', this.planId, 'runs',
+        '/projects/project-key',
+        this.projectKey,
+        'testplans',
+        this.planId,
+        'runs',
       ]);
     }
   }
@@ -271,9 +266,13 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     if (sel.type === 'case' && this.projectKey) {
       const tc = sel.testCase;
       this.router.navigate([
-        '/projects/project-key', this.projectKey,
-        'suites', tc.testSuite?.testSuiteId,
-        'testcases', tc.identifierNumber, 'versions',
+        '/projects/project-key',
+        this.projectKey,
+        'suites',
+        tc.testSuite?.testSuiteId,
+        'testcases',
+        tc.identifierNumber,
+        'versions',
       ]);
     }
   }

@@ -7,8 +7,9 @@ import { TestCaseVersionContentService } from '../../../../core/services/test-ca
 import { TestCaseService } from '../../../../core/services/test-case.service';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
-import { TestCaseVersionContent, TestCaseVersionStep } from '../../../../core/models/testsuite';
+import { TestCaseVersionContent } from '../../../../core/models/testsuite';
 import { TestCaseVersionStepService } from '../../../../core/services/test-case-version-step.service';
+import { TestCaseVersionStep } from '../../../../core/models/testexecution';
 
 @Component({
   selector: 'app-test-case-version-content',

@@ -87,7 +87,7 @@ export class CaseTableComponent implements OnChanges {
         case 'status':
           av = a.status; bv = b.status; break;
         case 'priority':
-          av = a.priority ?? ''; bv = b.priority ?? ''; break;
+         av = a.priority ?? ''; bv = b.priority ?? ''; break;
       }
       const cmp = av.localeCompare(bv);
       return this.sortDir === 'asc' ? cmp : -cmp;

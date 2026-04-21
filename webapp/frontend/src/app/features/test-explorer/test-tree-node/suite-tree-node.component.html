@@ -52,28 +52,58 @@
   ></app-suite-tree-node>
 </div>
 
-<!-- Test cases within this suite (shown when suite is selected) -->
-<div class="cases-list" *ngIf="isOpen && testCases$ | async as cases">
-  <div
-    *ngFor="let tc of cases"
-    class="case-row"
-    [class.selected]="isCaseSelected(tc)"
-    [style.padding-left.px]="26 + depth * 14"
-    (click)="onCaseClick($event, tc)"
-  >
-    <svg
-      class="case-icon"
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      [attr.stroke]="getCaseColor(tc)"
-      stroke-width="2.5"
+<!-- Test cases within this suite (shown when suite is open) -->
+<div class="cases-list" *ngIf="isOpen">
+  <ng-container *ngIf="testCases$ | async as cases">
+    <div
+      *ngFor="let tc of cases"
+      class="case-row"
+      [class.selected]="isCaseSelected(tc)"
+      [style.padding-left.px]="26 + depth * 14"
+      (click)="onCaseClick($event, tc)"
     >
-      <rect x="3" y="3" width="18" height="18" rx="3"/>
-      <path [attr.d]="'m9 12 2 2 4-4'" [attr.stroke]="getCaseColor(tc)"/>
-    </svg>
-    <span class="case-name">{{ tc.title }}</span>
-    <span class="case-id">{{ tc.testSuite?.project?.projectKey }}-{{ tc.identifierNumber }}</span>
-  </div>
+      <svg
+        class="case-icon"
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        [attr.stroke]="getCaseColor(tc)"
+        stroke-width="2.5"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+        <path d="m9 12 2 2 4-4" [attr.stroke]="getCaseColor(tc)"/>
+      </svg>
+      <span class="case-name">{{ tc.title }}</span>
+      <span class="case-id">{{ tc.testSuite?.project?.projectKey }}-{{ tc.identifierNumber }}</span>
+    </div>
+  </ng-container>
 </div>
+
+<!-- Test cases within this suite (shown when suite is open) -->
+<ng-container *ngIf="isOpen">
+  <div class="cases-list" *ngIf="testCases$ | async as cases">
+    <div
+      *ngFor="let tc of cases"
+      class="case-row"
+      [class.selected]="isCaseSelected(tc)"
+      [style.padding-left.px]="26 + depth * 14"
+      (click)="onCaseClick($event, tc)"
+    >
+      <svg
+        class="case-icon"
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        [attr.stroke]="getCaseColor(tc)"
+        stroke-width="2.5"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+        <path d="m9 12 2 2 4-4" [attr.stroke]="getCaseColor(tc)"/>
+      </svg>
+      <span class="case-name">{{ tc.title }}</span>
+      <span class="case-id">{{ tc.testSuite?.project?.projectKey }}-{{ tc.identifierNumber }}</span>
+    </div>
+  </div>
+</ng-container>
