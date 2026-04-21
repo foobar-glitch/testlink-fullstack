@@ -29,15 +29,6 @@ export const routes: Routes = [
           ),
       },
 
-      // ── Dashboard (your new component) ───────────────────────────────────
-      {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./features/dashboard/dashboard/dashboard.component').then(
-            m => m.DashboardComponent,
-          ),
-      },
-
       // ── Projects ─────────────────────────────────────────────────────────
       {
         path: 'projects',
