@@ -3,6 +3,7 @@
 
 import { UserCreatedTimeStamp } from './tablemetadata';
 import { Project } from './project';
+import { TestRunStatus } from './testexecution';
 // ─── Test Suite ──────────────────────────────────────────────────────────────
 
 /**
@@ -65,9 +66,20 @@ export interface TestCase {
 
 export type TestCaseVersionStatus = 'draft' | 'active' | 'deprecated';
 
+export interface TestCaseVersionStats {
+  totalExecutions: number;
+  lastExecutionStatus: TestRunStatus | null;
+  lastExecutedAt: string | null;
+  passedCount: number;
+  failedCount: number;
+  blockedCount: number;
+  avgExecutionTimeMs: number | null;
+}
+
 export interface TestCaseVersion {
   testCaseVersionId: string;
   testCase: TestCase;
+  priority: TestCasePriority;
   versionNumber: number;
   status: TestCaseVersionStatus;
   stam: UserCreatedTimeStamp;

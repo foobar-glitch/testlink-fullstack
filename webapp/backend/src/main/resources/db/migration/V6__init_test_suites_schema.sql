@@ -63,6 +63,7 @@ CREATE TABLE test_case_versions (
                                     test_case_id BIGINT NOT NULL,
                                     version_number INT NOT NULL,
                                     status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
+                                    priority VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
                                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                                     updated_at TIMESTAMPTZ,
                                     created_by BIGINT NOT NULL,
@@ -75,7 +76,9 @@ CREATE TABLE test_case_versions (
                                     CONSTRAINT uk_test_case_version
                                         UNIQUE (test_case_id, version_number),
                                     CONSTRAINT chk_version_status
-                                        CHECK (status IN ('DRAFT', 'ACTIVE', 'DEPRECATED'))
+                                        CHECK (status IN ('DRAFT', 'ACTIVE', 'DEPRECATED')),
+                                    CONSTRAINT chk_version_priority
+                                        CHECK (priority IN ('LOW', 'MEDIUM', 'HIGH'))
 );
 
 -- =========================
@@ -165,3 +168,6 @@ CREATE TRIGGER trg_test_case_versions_updated_at BEFORE UPDATE ON test_case_vers
 CREATE TRIGGER trg_test_case_version_content_updated_at BEFORE UPDATE ON test_case_version_content FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_test_case_version_images_updated_at BEFORE UPDATE ON test_case_version_images FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_test_case_version_steps_updated_at BEFORE UPDATE ON test_case_version_steps FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+
+

@@ -5,8 +5,10 @@ import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionDTO;
+import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionStatsDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseVersionMapper;
+import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseVersionStatsMapper;
 import com.testlink.webapp.testmanagement.testcase.service.TestCaseService;
 import com.testlink.webapp.testmanagement.testcase.service.TestCaseVersionService;
 import com.testlink.webapp.testmanagement.testcase.service.ValidatePathService;
@@ -30,6 +32,7 @@ public class TestCaseVersionController {
 
     private final TestCaseVersionService testCaseVersionService;
     private final TestCaseVersionMapper testCaseVersionMapper;
+    private final TestCaseVersionStatsMapper testCaseVersionStatsMapper;
 
     private final ValidatePathService validatePathService;
 
@@ -62,6 +65,21 @@ public class TestCaseVersionController {
 
         return ResponseEntity.ok(testCaseVersionMapper.toDto(projectTestSuiteTestCaseTestVersion.testCaseVersion()));
     }
+
+    @GetMapping("/{versionNumber}/stats")
+    public ResponseEntity<TestCaseVersionStatsDTO> getStatsOfVersion(
+            @PathVariable String projectKey,
+            @PathVariable String suiteId,
+            @PathVariable Long testCaseIdentifier,
+            @PathVariable Long versionNumber,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        User user = userDetails.getUser();
+        ValidatePathService.ProjectTestSuiteTestCaseTestVersion projectTestSuiteTestCaseTestVersion = validatePathService.checkTestSuitePath(projectKey, suiteId, testCaseIdentifier, versionNumber);
+        projectAccessService.checkAccessOfUserInProject(projectTestSuiteTestCaseTestVersion.project(), user, ProjectRole.VIEWER);
+        return ResponseEntity.ok(testCaseVersionStatsMapper.toDto(testCaseVersionService.findTestCaseVersionStatsByTestCaseVersion(projectTestSuiteTestCaseTestVersion.testCaseVersion())));
+    }
+
 }
 
 

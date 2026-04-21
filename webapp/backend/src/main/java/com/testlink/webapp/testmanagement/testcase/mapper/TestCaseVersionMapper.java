@@ -15,9 +15,6 @@ import java.util.List;
 )
 public abstract class TestCaseVersionMapper extends BaseAuditMapper {
     @Mapping(target = "testCaseVersionId", source = "publicId")
-    @Mapping(target = "testCase", source = "testCase")
-    @Mapping(target = "versionNumber", source = "versionNumber")
-    @Mapping(target = "status", source = "status")
     @Mapping(target = "stamp", expression = "java(mapAudit(testCaseVersion))")
     public abstract TestCaseVersionDTO toDto(TestCaseVersion testCaseVersion);
     public abstract List<TestCaseVersionDTO> toDtoList(List<TestCaseVersion> testCaseVersions);
