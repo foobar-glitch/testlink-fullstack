@@ -1,0 +1,71 @@
+<div class="tbl-wrapper">
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Search test case…"
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="applyFilters()"
+      />
+    </div>
+
+    <select class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()">
+      <option value="">All Statuses</option>
+      <option value="PASSED">Passed</option>
+      <option value="FAILED">Failed</option>
+      <option value="BLOCKED">Blocked</option>
+      <option value="NOT_RUN">Not Run</option>
+    </select>
+
+    <span class="results-count">{{ filtered.length }} result{{ filtered.length !== 1 ? 's' : '' }}</span>
+  </div>
+
+  <!-- Table -->
+  <div class="scroll-wrap">
+    <table class="data-tbl" *ngIf="filtered.length; else empty">
+      <thead>
+        <tr>
+          <th (click)="sort('testCase')" [class.sorted]="sortCol==='testCase'">
+            Test Case <span class="sort-icon">{{ getSortIcon('testCase') }}</span>
+          </th>
+          <th>Suite</th>
+          <th (click)="sort('assignedTo')" [class.sorted]="sortCol==='assignedTo'">
+            Assigned To <span class="sort-icon">{{ getSortIcon('assignedTo') }}</span>
+          </th>
+          <th (click)="sort('status')" [class.sorted]="sortCol==='status'">
+            Status <span class="sort-icon">{{ getSortIcon('status') }}</span>
+          </th>
+          <th (click)="sort('executedAt')" [class.sorted]="sortCol==='executedAt'">
+            Executed At <span class="sort-icon">{{ getSortIcon('executedAt') }}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of filtered"
+          class="clickable"
+          (click)="itemSelected.emit(item)"
+        >
+          <td>
+            <span class="tc-id">{{ getIdentifier(item) }}</span>
+            {{ item.testCase?.title }}
+          </td>
+          <td class="muted">{{ item.testCase?.testSuite?.name || '—' }}</td>
+          <td class="muted">{{ item.assignedTo?.username || '—' }}</td>
+          <td><app-test-run-status-badge [status]="item.status"></app-test-run-status-badge></td>
+          <td class="muted">{{ item.executedAt | date:'mediumDate' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #empty>
+      <div class="empty-state">
+        <p>No execution results found.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

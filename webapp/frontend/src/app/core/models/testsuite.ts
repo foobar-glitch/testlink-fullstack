@@ -1,94 +1,80 @@
-import { UserCreatedTimeStamp } from './tablemetadata';
-import { Project } from './project';
-// ─── Test Suite ──────────────────────────────────────────────────────────────
+// ─── testsuite.ts ─────────────────────────────────────────────────────────────
+// Extends the existing models with fields required by the test-explorer UI.
 
-/**
- * TestSuiteItem mirrors the backend's TestSuiteItemDTO exactly.
- * It intentionally has NO `children` or `expanded` field —
- * those are assembled client-side into a TestSuite tree node.
- */
+import { UserCreatedTimeStampDTO } from './shared';
+
 export interface TestSuiteItem {
   testSuiteId: string;
   name: string;
-  description: string;
-  project: Project;
-  stamp: UserCreatedTimeStamp;
+  description?: string;
 }
 
-/**
- * TestSuiteHierarchyDTO shape returned by the backend.
- * `parent` is null for root suites.
- * `children` is a flat list of direct children (TestSuiteItem, not yet tree nodes).
- */
 export interface TestSuiteHierarchyDTO {
   current: TestSuiteItem;
   parent: TestSuiteItem | null;
   children: TestSuiteItem[];
 }
 
-/**
- * TestSuite is the client-side tree node, built from TestSuiteHierarchyDTO.
- * `children` is always present after buildTree (never undefined).
- * `expanded` is UI-only state.
- */
-export interface TestSuite extends TestSuiteItem {
-  children: TestSuite[];   // always populated, never undefined
-  expanded: boolean;       // UI state only
-}
-
-/**
- * TestSuiteHierarchy is the enriched client-side version used by detail views.
- * All three fields use the full TestSuite tree node type.
- */
 export interface TestSuiteHierarchy {
   current: TestSuite;
   parent: TestSuite | null;
   children: TestSuite[];
 }
 
-export type TestCaseStatus = 'draft' | 'active' | 'deprecated';
-
-// ─── Test Case ───────────────────────────────────────────────────────────────
-export interface TestCase {
-  testCaseId: string;
-  testSuite: TestSuiteItem;
-  identifierNumber: number;
-  title: string;
-  description: string;
-  status: TestCaseStatus;
-  stamp: UserCreatedTimeStamp;
+export interface TestSuite extends TestSuiteItem {
+  project?: {
+    projectKey: string;
+    displayName: string;
+  };
+  children: TestSuite[];
+  expanded: boolean;
 }
 
-export type TestCaseVersionStatus = 'draft' | 'active' | 'deprecated';
+// ── Test Case ─────────────────────────────────────────────────────────────────
+
+export type TestCaseStatus = 'draft' | 'active' | 'deprecated';
+export type TestCasePriority = 'high' | 'medium' | 'low';
+
+export interface TestCase {
+  testCaseId:        string;
+  identifierNumber:  number;
+  title:             string;
+  description?:      string;
+  status:            TestCaseStatus;
+  priority?:         TestCasePriority;
+  testSuite:         TestSuite & {
+    project?: { projectKey: string; displayName: string };
+  };
+  stamp:             UserCreatedTimeStampDTO;
+}
+
+// ── Test Case Version ─────────────────────────────────────────────────────────
 
 export interface TestCaseVersion {
   testCaseVersionId: string;
-  testCase: TestCase;
-  versionNumber: number;
-  status: TestCaseVersionStatus;
-  stam: UserCreatedTimeStamp;
+  versionNumber:     number;
+  status:            TestCaseStatus;
+  testCase:          TestCase;
+  stamp:             UserCreatedTimeStampDTO;
 }
 
-export interface TestStep {
-  order: number;
-  action: string;
-  expectedResult: string;
-}
+// ── Test Case Version Content ─────────────────────────────────────────────────
 
 export interface TestCaseVersionContent {
-  testCaseVersionId: string;
+  contentId:  string;
+  summary?:   string;
+  preconditions?: string;
   testCaseVersion: TestCaseVersion;
-  title: string;
-  preconditions: string;
-  expectedResult: string;
-  stamp: UserCreatedTimeStamp;
+  stamp:      UserCreatedTimeStampDTO;
 }
 
-export interface TestCaseFormData {
-  title: string;
-  description: string;
-  steps: TestStep[];
+// ── Test Case Version Step ────────────────────────────────────────────────────
+
+export interface TestCaseVersionStep {
+  stepId:         string;
+  stepNumber:     number;
+  stepAction:     string;
   expectedResult: string;
-  priority: 'low' | 'medium' | 'high';
-  suiteId: number;
+  testCaseVersionContent: TestCaseVersionContent;
+  stamp:          UserCreatedTimeStampDTO;
 }

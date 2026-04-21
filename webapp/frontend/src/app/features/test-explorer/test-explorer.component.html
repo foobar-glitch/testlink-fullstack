@@ -1,0 +1,265 @@
+<div class="explorer">
+
+  <!-- ── NO PROJECT SELECTED ─────────────────────────────────────────── -->
+  <div class="welcome" *ngIf="!projectKey">
+    <div class="welcome-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="1.5">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>
+    </div>
+    <h2>Welcome to TestFlow</h2>
+    <p>Select a <strong>project</strong> and <strong>test plan</strong> from the top bar to get started.</p>
+  </div>
+
+  <!-- ── CONTENT: project selected ──────────────────────────────────── -->
+  <ng-container *ngIf="projectKey">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <span class="crumb link" (click)="clearSelection()">{{ projectName$ | async }}</span>
+      <span class="sep">›</span>
+      <ng-container *ngIf="selection.type !== 'none'">
+        <span class="crumb link" (click)="clearSelection()">{{ planName }}</span>
+        <span class="sep">›</span>
+      </ng-container>
+      <ng-container *ngIf="selection.type === 'suite'">
+        <span class="crumb current">{{ selection.suite.name }}</span>
+      </ng-container>
+      <ng-container *ngIf="selection.type === 'case'">
+        <span class="crumb link" (click)="backToSuite()">{{ parentSuiteName }}</span>
+        <span class="sep">›</span>
+        <span class="crumb current">
+          {{ selection.testCase.testSuite?.project?.projectKey }}-{{ selection.testCase.identifierNumber }}
+        </span>
+      </ng-container>
+      <ng-container *ngIf="selection.type === 'none'">
+        <span class="crumb current">{{ planName || 'Overview' }}</span>
+      </ng-container>
+    </nav>
+
+    <!-- ── A) PLAN OVERVIEW (nothing selected) ──────────────────────── -->
+    <ng-container *ngIf="selection.type === 'none'">
+
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">{{ planName || 'Test Plan Overview' }}</h1>
+          <p class="panel-subtitle">
+            {{ (testPlan$ | async)?.description || 'Select a test plan to view execution progress.' }}
+          </p>
+        </div>
+        <div class="panel-actions">
+          <button class="action-btn ghost" (click)="goToRuns()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            View Runs
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-grid" *ngIf="planStats$ | async as stats; else statsLoading">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-value">{{ stats.total }}</div>
+          <div class="stat-sub">test cases</div>
+        </div>
+        <div class="stat-card pass">
+          <div class="stat-label">Passed</div>
+          <div class="stat-value">{{ stats.passed }}</div>
+          <div class="stat-sub">{{ pct(stats.passed, stats.total) }}%</div>
+        </div>
+        <div class="stat-card fail">
+          <div class="stat-label">Failed</div>
+          <div class="stat-value">{{ stats.failed }}</div>
+          <div class="stat-sub">{{ pct(stats.failed, stats.total) }}%</div>
+        </div>
+        <div class="stat-card block">
+          <div class="stat-label">Blocked</div>
+          <div class="stat-value">{{ stats.blocked }}</div>
+          <div class="stat-sub">{{ pct(stats.blocked, stats.total) }}%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Not Run</div>
+          <div class="stat-value">{{ stats.notRun }}</div>
+          <div class="stat-sub">{{ pct(stats.notRun, stats.total) }}%</div>
+        </div>
+      </div>
+      <ng-template #statsLoading>
+        <div class="stats-placeholder">
+          <app-spinner label="Loading stats…"></app-spinner>
+        </div>
+      </ng-template>
+
+      <!-- Progress bar -->
+      <div class="progress-card" *ngIf="planStats$ | async as stats">
+        <div class="progress-label">Execution Progress</div>
+        <div class="progress-track">
+          <div class="pb pass" [style.width.%]="pct(stats.passed, stats.total)"></div>
+          <div class="pb fail" [style.width.%]="pct(stats.failed, stats.total)"></div>
+          <div class="pb block" [style.width.%]="pct(stats.blocked, stats.total)"></div>
+          <div class="pb notrun" [style.width.%]="pct(stats.notRun, stats.total)"></div>
+        </div>
+        <div class="progress-legend">
+          <span class="leg pass">Passed {{ pct(stats.passed, stats.total) }}%</span>
+          <span class="leg fail">Failed {{ pct(stats.failed, stats.total) }}%</span>
+          <span class="leg block">Blocked {{ pct(stats.blocked, stats.total) }}%</span>
+          <span class="leg notrun">Not Run {{ pct(stats.notRun, stats.total) }}%</span>
+        </div>
+      </div>
+
+      <!-- Tabs: Recent runs / All cases -->
+      <div class="tabs">
+        <button class="tab" [class.active]="overviewTab==='runs'" (click)="overviewTab='runs'">Recent Runs</button>
+        <button class="tab" [class.active]="overviewTab==='cases'" (click)="overviewTab='cases'">All Test Cases</button>
+      </div>
+
+      <!-- Recent runs table -->
+      <ng-container *ngIf="overviewTab==='runs'">
+        <ng-container *ngIf="runItems$ | async as items; else runLoading">
+          <app-execution-table [items]="items"></app-execution-table>
+        </ng-container>
+        <ng-template #runLoading><app-spinner label="Loading runs…"></app-spinner></ng-template>
+      </ng-container>
+
+      <!-- All test cases table -->
+      <ng-container *ngIf="overviewTab==='cases'">
+        <ng-container *ngIf="allCases$ | async as cases; else casesLoading">
+          <app-case-table [cases]="cases" (caseSelected)="onCaseSelectedFromTable($event)"></app-case-table>
+        </ng-container>
+        <ng-template #casesLoading><app-spinner label="Loading cases…"></app-spinner></ng-template>
+      </ng-container>
+
+    </ng-container>
+
+    <!-- ── B) SUITE OVERVIEW ────────────────────────────────────────── -->
+    <ng-container *ngIf="selection.type === 'suite'">
+
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">{{ selection.suite.name }}</h1>
+          <p class="panel-subtitle">
+            {{ selection.suite.children?.length || 0 }} sub-suites ·
+            {{ (suiteTestCases$ | async)?.length || 0 }} test cases
+          </p>
+        </div>
+      </div>
+
+      <!-- Sub-suites chips -->
+      <div class="sub-suite-row" *ngIf="selection.suite.children?.length">
+        <span class="sub-label">Sub-suites:</span>
+        <button
+          class="suite-chip"
+          *ngFor="let child of selection.suite.children"
+          (click)="selectSuiteFromChip(child)"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+          {{ child.name }}
+        </button>
+      </div>
+
+      <ng-container *ngIf="suiteTestCases$ | async as cases; else casesTblLoading">
+        <app-case-table [cases]="cases" (caseSelected)="onCaseSelectedFromTable($event)"></app-case-table>
+      </ng-container>
+      <ng-template #casesTblLoading><app-spinner label="Loading test cases…"></app-spinner></ng-template>
+
+    </ng-container>
+
+    <!-- ── C) TEST CASE DETAIL ──────────────────────────────────────── -->
+    <ng-container *ngIf="selection.type === 'case'">
+
+      <div class="panel-header">
+        <div style="flex:1">
+          <div class="case-title-row">
+            <h1 class="panel-title">{{ selection.testCase.title }}</h1>
+            <app-status-badge [status]="selection.testCase.status"></app-status-badge>
+          </div>
+          <p class="panel-subtitle">
+            <span class="case-id-pill">
+              {{ selection.testCase.testSuite?.project?.projectKey }}-{{ selection.testCase.identifierNumber }}
+            </span>
+            · Created by {{ selection.testCase.stamp?.createdBy?.username }}
+            · {{ selection.testCase.stamp?.timeStamp?.createdAt | date:'mediumDate' }}
+          </p>
+        </div>
+        <div class="panel-actions">
+          <button class="action-btn ghost" (click)="goToVersions()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Versions
+          </button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab" [class.active]="caseTab==='details'" (click)="caseTab='details'">Details</button>
+        <button class="tab" [class.active]="caseTab==='steps'" (click)="caseTab='steps'">Steps</button>
+        <button class="tab" [class.active]="caseTab==='history'" (click)="caseTab='history'">Execution History</button>
+      </div>
+
+      <!-- Details tab -->
+      <div class="detail-card" *ngIf="caseTab==='details'">
+        <div class="detail-section">
+          <div class="detail-section-title">Summary</div>
+          <p class="detail-summary">{{ selection.testCase.description || '—' }}</p>
+        </div>
+        <div class="detail-meta-grid">
+          <div class="meta-row">
+            <span class="meta-label">Priority</span>
+            <span class="meta-value">{{ selection.testCase.priority | titlecase }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Status</span>
+            <span class="meta-value">
+              <app-status-badge [status]="selection.testCase.status"></app-status-badge>
+            </span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Suite</span>
+            <span class="meta-value">{{ selection.testCase.testSuite?.name }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Identifier</span>
+            <span class="meta-value accent">
+              {{ selection.testCase.testSuite?.project?.projectKey }}-{{ selection.testCase.identifierNumber }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Steps tab -->
+      <div class="detail-card" *ngIf="caseTab==='steps'">
+        <ng-container *ngIf="caseSteps$ | async as steps; else stepsLoading">
+          <div *ngIf="steps.length; else noSteps" class="steps-list">
+            <div class="step-item" *ngFor="let step of steps; let i = index">
+              <div class="step-header">
+                <div class="step-num">{{ i + 1 }}</div>
+                <div class="step-action">{{ step.stepAction }}</div>
+              </div>
+              <div class="step-expected">→ {{ step.expectedResult }}</div>
+            </div>
+          </div>
+          <ng-template #noSteps>
+            <p class="empty-msg">No steps defined for this test case.</p>
+          </ng-template>
+        </ng-container>
+        <ng-template #stepsLoading><app-spinner label="Loading steps…"></app-spinner></ng-template>
+      </div>
+
+      <!-- History tab -->
+      <div *ngIf="caseTab==='history'">
+        <ng-container *ngIf="runItems$ | async as items; else historyLoading">
+          <app-execution-table [items]="items"></app-execution-table>
+        </ng-container>
+        <ng-template #historyLoading><app-spinner label="Loading history…"></app-spinner></ng-template>
+      </div>
+
+    </ng-container>
+
+  </ng-container>
+
+</div>

@@ -1,0 +1,165 @@
+<div class="shell">
+
+  <!-- ── TOP BAR ────────────────────────────────────────────────────────── -->
+  <header class="topbar">
+
+    <!-- Brand -->
+    <a class="brand" routerLink="/explorer">
+      <div class="brand-mark">TF</div>
+      <span class="brand-name">Test<span class="brand-accent">Flow</span></span>
+    </a>
+
+    <div class="topbar-divider"></div>
+
+    <!-- Context selectors -->
+    <div class="context-group">
+      <span class="ctx-label">Project</span>
+      <select
+        class="ctx-select"
+        [value]="selectedProjectKey"
+        (change)="onProjectChange($event)"
+      >
+        <option value="" disabled>Select project…</option>
+        <option
+          *ngFor="let m of memberships$ | async"
+          [value]="m.project.projectKey"
+        >
+          {{ m.project.displayName }}
+        </option>
+      </select>
+
+      <div class="topbar-divider"></div>
+
+      <span class="ctx-label">Test Plan</span>
+      <select
+        class="ctx-select"
+        [value]="selectedPlanId"
+        (change)="onPlanChange($event)"
+        [disabled]="!selectedProjectKey"
+      >
+        <option value="" disabled>Select plan…</option>
+        <option
+          *ngFor="let plan of testPlans$ | async"
+          [value]="plan.testPlanId"
+        >
+          {{ plan.name }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Spacer -->
+    <div class="topbar-spacer"></div>
+
+    <!-- Actions -->
+    <div class="topbar-actions">
+      <button class="topbar-btn" (click)="refresh()" title="Refresh">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+          <path d="M21 3v5h-5"/>
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+          <path d="M8 16H3v5"/>
+        </svg>
+        Refresh
+      </button>
+
+      <button
+        class="topbar-btn"
+        routerLink="/explorer"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        title="Test Explorer"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        </svg>
+        Explorer
+      </button>
+
+      <button class="topbar-btn primary" (click)="goToExecution()" title="Execution view">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        Execution
+      </button>
+
+      <div class="user-avatar" [title]="currentUser?.username ?? ''">
+        {{ initials }}
+      </div>
+
+      <button class="icon-btn" title="Logout" (click)="logout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── BODY (sidebar + content) ──────────────────────────────────────── -->
+  <div class="body">
+
+    <!-- Sidebar — only shown on explorer route -->
+    <aside class="sidebar" *ngIf="showSidebar">
+
+      <div class="sidebar-search">
+        <div class="search-wrap">
+          <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search test cases…"
+            [(ngModel)]="treeSearch"
+            (ngModelChange)="onSearchChange($event)"
+          />
+        </div>
+      </div>
+
+      <div class="sidebar-tree-header">
+        <span class="tree-label">Test Suites</span>
+        <div class="tree-actions">
+          <button class="tree-btn" (click)="expandAll()" title="Expand all">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+          </button>
+          <button class="tree-btn" (click)="collapseAll()" title="Collapse all">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M4 14h6v6M14 4h6v6M4 20l7-7M20 4l-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-tree" *ngIf="!(suiteLoading$ | async); else treeLoading">
+        <ng-container *ngIf="filteredSuites.length > 0; else noSuites">
+          <app-suite-tree-node
+            *ngFor="let suite of filteredSuites"
+            [suite]="suite"
+            [depth]="0"
+          ></app-suite-tree-node>
+        </ng-container>
+        <ng-template #noSuites>
+          <div class="tree-empty">
+            <p>{{ selectedProjectKey ? 'No suites found' : 'Select a project to browse suites' }}</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <ng-template #treeLoading>
+        <div class="tree-loading">
+          <app-spinner label="Loading suites…"></app-spinner>
+        </div>
+      </ng-template>
+
+    </aside>
+
+    <!-- Main content area -->
+    <main class="content" [class.full-width]="!showSidebar">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+</div>
