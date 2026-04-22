@@ -8,7 +8,6 @@
 -- -----------------------------------------------------------------------------
 CREATE TABLE test_case_version_stats (
     test_case_version_id BIGINT PRIMARY KEY,
-    public_uuid UUID DEFAULT gen_random_uuid() NOT NULL,
     total_executions INT NOT NULL DEFAULT 0,
     last_execution_status VARCHAR(20),
     last_executed_at TIMESTAMPTZ,
@@ -16,7 +15,6 @@ CREATE TABLE test_case_version_stats (
     failed_count INT NOT NULL DEFAULT 0,
     blocked_count INT NOT NULL DEFAULT 0,
 
-    CONSTRAINT uq_test_case_version_stats_public_uuid UNIQUE (public_uuid),
     CONSTRAINT fk_stats_version
         FOREIGN KEY (test_case_version_id) REFERENCES test_case_versions(test_case_version_id) ON DELETE CASCADE,
     CONSTRAINT chk_last_execution_status CHECK (last_execution_status IN ('NOT_RUN', 'PASSED', 'FAILED', 'BLOCKED', 'SKIPPED'))
