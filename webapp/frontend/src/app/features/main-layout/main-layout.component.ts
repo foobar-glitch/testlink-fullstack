@@ -8,9 +8,9 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { Router, RouterModule, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { Observable, BehaviorSubject, Subscription, of } from 'rxjs';
-import { switchMap, catchError, filter, startWith } from 'rxjs/operators';
+import { switchMap, catchError, filter, startWith, take } from 'rxjs/operators';
 
 import { AuthService } from '../../core/services/auth.service';
 import { ProjectService } from '../../core/services/project.service';
@@ -53,6 +53,8 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   private readonly router    = inject(Router);
   private readonly cdr       = inject(ChangeDetectorRef);
 
+  private readonly route = inject(ActivatedRoute);
+
   // ── Auth ──────────────────────────────────────────────────────────────
   currentUser: Authentication | null = null;
 
@@ -83,30 +85,50 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.showSidebar = true;
 
+    // Subscribe to user
     this.subs.add(
       this.auth.currentUser$.subscribe(u => {
         this.currentUser = u;
         this.cdr.markForCheck();
-      }),
+      })
     );
 
+    // Load projects
     this.memberships$ = this.auth.currentUser$.pipe(
       filter(u => u !== null),
-      switchMap(() =>
-        this.projects.getProjectMemberships().pipe(catchError(() => of([]))),
-      ),
-      startWith([]),
+      switchMap(() => this.projects.getProjectMemberships().pipe(catchError(() => of([])))),
+      startWith([])
     );
 
-    const saved = this.ctx.snapshot;
-    if (saved.projectKey) {
-      this.selectedProjectKey = saved.projectKey;
-      this.loadSuites(saved.projectKey);
-      this.loadPlans(saved.projectKey);
-    }
-    if (saved.testPlanId) {
-      this.selectedPlanId = saved.testPlanId;
-    }
+    // Initialize context from query params
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
+      const projectKey = params['project'];
+      const planId = params['plan'];
+      if (projectKey) {
+        this.selectedProjectKey = projectKey;
+        this.ctx.setProject(projectKey);
+        this.loadSuites(projectKey);
+        this.loadPlans(projectKey);
+      }
+      if (planId) {
+        this.selectedPlanId = planId;
+        this.ctx.setPlan(planId);
+      }
+      // If no params, fall back to session storage
+      if (!projectKey && !planId) {
+        const saved = this.ctx.snapshot;
+        if (saved.projectKey) {
+          this.selectedProjectKey = saved.projectKey;
+          this.loadSuites(saved.projectKey);
+          this.loadPlans(saved.projectKey);
+        }
+        if (saved.testPlanId) {
+          this.selectedPlanId = saved.testPlanId;
+        }
+      }
+    });
+
+    // Optionally sync query params when context changes from elsewhere (if needed)
   }
 
   ngOnDestroy(): void {
@@ -117,12 +139,18 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   onProjectChange(event: Event): void {
     const key = (event.target as HTMLSelectElement).value;
     this.selectedProjectKey = key;
-    this.selectedPlanId     = '';
+    this.selectedPlanId = '';
     this.ctx.setProject(key);
     this.treeState.clearSelection();
     this.loadSuites(key);
     this.loadPlans(key);
-    this.router.navigate(['/explorer']);
+
+    // Update URL query params
+    this.router.navigate([], {
+      queryParams: { project: key, plan: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
 
   onPlanChange(event: Event): void {
@@ -130,7 +158,12 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.selectedPlanId = id;
     this.ctx.setPlan(id);
     this.treeState.clearSelection();
-    this.router.navigate(['/explorer']);
+
+    this.router.navigate([], {
+      queryParams: { plan: id },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
 
   refresh(): void {

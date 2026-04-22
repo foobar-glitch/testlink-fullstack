@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -33,47 +33,47 @@ import { TestCaseVersionStepService } from '../../../../core/services/test-case-
   templateUrl: './test-case-version-content.component.html',
   styleUrls: ['./test-case-version-content.component.scss'],
 })
-export class TestCaseVersionContentComponent {
-  private readonly route           = inject(ActivatedRoute);
-  private readonly contentService  = inject(TestCaseVersionContentService);
-  private readonly versionService  = inject(TestCaseVersionService);
+export class TestCaseVersionContentComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly contentService = inject(TestCaseVersionContentService);
+  private readonly versionService = inject(TestCaseVersionService);
   private readonly testCaseService = inject(TestCaseService);
-  private readonly stepService     = inject(TestCaseVersionStepService);
-  private readonly router          = inject(Router);
+  private readonly stepService = inject(TestCaseVersionStepService);
+  private readonly router = inject(Router);
 
-  readonly projectKey:          string;
-  readonly suiteId:             string;
-  readonly testCaseIdentifier:  number;
-  readonly versionNumber:       number;
+  // Inputs (used when embedded in TestExplorer)
+  @Input() projectKey?: string;
+  @Input() suiteId?: string;
+  @Input() testCaseIdentifier?: number;
+  @Input() versionNumber?: number;
 
-  content$:       Observable<TestCaseVersionContent>;
-  testCaseTitle$: Observable<string>;
-  steps$:         Observable<TestCaseVersionStep[]>;
-  /** Stats loaded from the new /stats endpoint */
-  stats$:         Observable<TestCaseVersionStats>;
+  content$!: Observable<TestCaseVersionContent>;
+  testCaseTitle$!: Observable<string>;
+  steps$!: Observable<TestCaseVersionStep[]>;
+  stats$!: Observable<TestCaseVersionStats>;
   errorMessage = '';
 
-  constructor() {
-    this.projectKey         = this.route.snapshot.paramMap.get('projectKey')!;
-    this.suiteId            = this.route.snapshot.paramMap.get('suiteId')!;
-    this.testCaseIdentifier = Number(this.route.snapshot.paramMap.get('testCaseIdentifier'));
-    this.versionNumber      = Number(this.route.snapshot.paramMap.get('versionNumber'));
+  ngOnInit(): void {
+    // Prefer inputs, fallback to route parameters
+    const projectKey = this.projectKey ?? this.route.snapshot.paramMap.get('projectKey')!;
+    const suiteId = this.suiteId ?? this.route.snapshot.paramMap.get('suiteId')!;
+    const testCaseIdentifier = this.testCaseIdentifier ?? Number(this.route.snapshot.paramMap.get('testCaseIdentifier'));
+    const versionNumber = this.versionNumber ?? Number(this.route.snapshot.paramMap.get('versionNumber'));
 
     this.content$ = this.contentService
-      .getContent(this.projectKey, this.suiteId, this.testCaseIdentifier, this.versionNumber)
+      .getContent(projectKey, suiteId, testCaseIdentifier, versionNumber)
       .pipe(catchError(err => { this.errorMessage = err.message || 'Failed to load content'; return of(null as any); }));
 
     this.testCaseTitle$ = this.testCaseService
-      .getTestCase(this.projectKey, this.testCaseIdentifier, this.suiteId)
+      .getTestCase(projectKey, testCaseIdentifier, suiteId)
       .pipe(map(tc => tc?.title || 'Test Case'), catchError(() => of('Test Case')));
 
     this.steps$ = this.stepService
-      .getSteps(this.projectKey, this.suiteId, this.testCaseIdentifier, this.versionNumber)
+      .getSteps(projectKey, suiteId, testCaseIdentifier, versionNumber)
       .pipe(catchError(() => of([])));
 
-    // New stats endpoint
     this.stats$ = this.versionService
-      .getVersionStats(this.projectKey, this.suiteId, this.testCaseIdentifier, this.versionNumber)
+      .getVersionStats(projectKey, suiteId, testCaseIdentifier, versionNumber)
       .pipe(catchError(() => of<TestCaseVersionStats>({
         totalExecutions: 0,
         lastExecutionStatus: null,
@@ -100,10 +100,10 @@ export class TestCaseVersionContentComponent {
 
   viewStep(step: TestCaseVersionStep): void {
     this.router.navigate([
-      '/projects/project-key', this.projectKey,
-      'suite', this.suiteId,
-      'testcase-identifier', this.testCaseIdentifier,
-      'versions', this.versionNumber,
+      '/projects/project-key', this.projectKey ?? this.route.snapshot.paramMap.get('projectKey'),
+      'suite', this.suiteId ?? this.route.snapshot.paramMap.get('suiteId'),
+      'testcase-identifier', this.testCaseIdentifier ?? this.route.snapshot.paramMap.get('testCaseIdentifier'),
+      'versions', this.versionNumber ?? this.route.snapshot.paramMap.get('versionNumber'),
       'content', 'steps', step.stepId, 'action',
     ]);
   }
