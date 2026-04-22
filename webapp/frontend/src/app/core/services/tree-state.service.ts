@@ -1,25 +1,16 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { TestCase, TestSuite } from '../models/testsuite';
+import { TestSuite } from '../models/testsuite';
 import { filter } from 'rxjs/operators';
-
-export type TreeSelection =
-  | { type: 'none' }
-  | { type: 'suite'; suite: TestSuite }
-  | { type: 'case'; testCase: TestCase };
 
 @Injectable({ providedIn: 'root' })
 export class TreeStateService {
-  private _selection$ = new BehaviorSubject<TreeSelection>({ type: 'none' });
-  readonly selection$ = this._selection$.asObservable();
-
   private expandedIds = new Set<string>();
 
   private treeDataSubject = new BehaviorSubject<TestSuite[]>([]);
   readonly treeData$ = this.treeDataSubject.asObservable();
 
   setTreeData(data: TestSuite[]): void {
-    this.treeData = data;
     this.treeDataSubject.next(data);
   }
 
@@ -27,9 +18,9 @@ export class TreeStateService {
     return this.treeData$.pipe(filter(data => data.length > 0));
   }
 
-  // Store the full tree for lookups
-  private treeData: TestSuite[] = [];
-
+  get treeData(): TestSuite[] {
+    return this.treeDataSubject.value;
+  }
 
   findSuiteById(id: string): TestSuite | undefined {
     return this.findRecursive(this.treeData, id);
@@ -58,34 +49,16 @@ export class TreeStateService {
     }
   }
 
+  expand(id: string): void {
+    this.expandedIds.add(id);
+  }
+
   expandAll(suites: TestSuite[]): void {
     this.collectIds(suites).forEach((id) => this.expandedIds.add(id));
   }
 
   collapseAll(): void {
     this.expandedIds.clear();
-  }
-
-  selectSuite(suite: TestSuite): void {
-    this._selection$.next({ type: 'suite', suite });
-  }
-
-  selectCase(testCase: TestCase): void {
-    this._selection$.next({ type: 'case', testCase });
-  }
-
-  clearSelection(): void {
-    this._selection$.next({ type: 'none' });
-  }
-
-  isSelectedSuite(id: string): boolean {
-    const s = this._selection$.value;
-    return s.type === 'suite' && s.suite.testSuiteId === id;
-  }
-
-  isSelectedCase(id: string): boolean {
-    const s = this._selection$.value;
-    return s.type === 'case' && String(s.testCase.identifierNumber) === id;
   }
 
   private collectIds(suites: TestSuite[]): string[] {
@@ -95,5 +68,24 @@ export class TreeStateService {
       if (s.children?.length) ids.push(...this.collectIds(s.children));
     }
     return ids;
+  }
+
+  /** Expand path to a specific suite ID */
+  expandPathTo(targetId: string): void {
+    const path = this.findPathTo(this.treeData, targetId);
+    path.forEach(id => this.expandedIds.add(id));
+  }
+
+  private findPathTo(suites: TestSuite[], targetId: string, currentPath: string[] = []): string[] {
+    for (const s of suites) {
+      if (s.testSuiteId === targetId) {
+        return [...currentPath, s.testSuiteId];
+      }
+      if (s.children?.length) {
+        const found = this.findPathTo(s.children, targetId, [...currentPath, s.testSuiteId]);
+        if (found.length) return found;
+      }
+    }
+    return [];
   }
 }

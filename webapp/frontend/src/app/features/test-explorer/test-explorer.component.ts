@@ -9,7 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, Subscription, of, combineLatest } from 'rxjs';
-import { map, catchError, filter, take, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { map, catchError, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 import { ContextService } from '../../core/services/context.service';
 import { TreeStateService } from '../../core/services/tree-state.service';
@@ -20,8 +20,7 @@ import { TestPlanRunItemService } from '../../core/services/test-plan-run-item.s
 import { ProjectService } from '../../core/services/project.service';
 
 import { TestPlan, TestPlanRun, TestPlanRunItem } from '../../core/models/testexecution';
-import { TestCase, TestSuite } from '../../core/models/testsuite';
-import { TreeSelection } from '../../core/services/tree-state.service';
+import { TestCase } from '../../core/models/testsuite';
 
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
@@ -71,7 +70,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  // ── State derived from query parameters (all strings, except version which we convert to number) ──
+  // State derived from query parameters
   readonly projectKey$ = this.route.queryParams.pipe(
     map(params => params['project'] || null),
     distinctUntilChanged()
@@ -85,7 +84,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     distinctUntilChanged()
   );
   readonly testCaseId$ = this.route.queryParams.pipe(
-    map(params => params['testcase'] || null), // keep as string
+    map(params => params['testcase'] || null),
     distinctUntilChanged()
   );
   readonly versionNumber$ = this.route.queryParams.pipe(
@@ -101,21 +100,18 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     distinctUntilChanged()
   );
 
-  // ── Data streams ──────────────────────────────────────────────────────────
+  // Data streams
   projectName$: Observable<string> = of('');
   testPlan$: Observable<TestPlan | null> = of(null);
   planStats$: Observable<PlanStats> = of({ total: 0, passed: 0, failed: 0, blocked: 0, notRun: 0 });
   runItems$: Observable<TestPlanRunItem[]> = of([]);
   filteredRunItems$: Observable<TestPlanRunItem[]> = of([]);
   testRuns$: Observable<TestPlanRun[]> = of([]);
-  selectedRunName$ = of('All Runs');
   suiteName$ = of<string | null>(null);
   selectedCaseLabel$ = of<string | null>(null);
-  allCases$: Observable<TestCase[]> = of([]);
 
   planName = '';
   private subs = new Subscription();
-  private isSyncingFromUrl = false;
 
   ngOnInit(): void {
     // Keep ContextService in sync with query params
@@ -149,26 +145,14 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Sync tree selection with query params (suite/testcase)
+    // Expand tree path to selected suite when suiteId changes
     this.subs.add(
-      combineLatest([this.suiteId$, this.testCaseId$]).subscribe(([suiteId, testCaseId]) => {
-        this.syncTreeFromParams(suiteId, testCaseId);
-      })
-    );
-
-    // Sync query params from tree selection changes
-    this.subs.add(
-      this.treeState.selection$.subscribe((selection) => this.syncParamsFromTreeSelection(selection))
-    );
-
-    // Handle ?view=execution query param (legacy)
-    this.subs.add(
-      this.route.queryParams.subscribe(params => {
-        if (params['view'] === 'execution') {
-          this.setTab('run-items');
-        }
-        if (params['tab'] === 'runs') {
-          this.setTab('run-items');
+      this.suiteId$.subscribe(suiteId => {
+        if (suiteId) {
+          this.treeState.waitForTree().subscribe(() => {
+            this.treeState.expandPathTo(suiteId);
+            this.cdr.markForCheck();
+          });
         }
       })
     );
@@ -178,7 +162,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  // ── Navigation helpers ────────────────────────────────────────────────────
+  // Navigation helpers
   setTab(tab: string): void {
     this.router.navigate([], {
       queryParams: { tab },
@@ -187,9 +171,9 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  selectRun(testRunId: string): void {
+  clearSelection(): void {
     this.router.navigate([], {
-      queryParams: { testRunId, tab: 'run-items' },
+      queryParams: { suite: null, testcase: null, version: null, tab: 'overview' },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
@@ -203,58 +187,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  private syncTreeFromParams(suiteId: string | null, testCaseId: string | null): void {
-    if (!suiteId) {
-      this.treeState.clearSelection();
-      return;
-    }
-    this.isSyncingFromUrl = true;
-    this.treeState.waitForTree().pipe(
-      filter(tree => tree.length > 0),
-      take(1)
-    ).subscribe(() => {
-      const suite = this.treeState.findSuiteById(suiteId);
-      if (suite) {
-        this.treeState.selectSuite(suite);
-        if (!this.treeState.isExpanded(suite.testSuiteId)) {
-          this.treeState.toggle(suite.testSuiteId);
-        }
-        // testCaseId highlighting is handled by the template via isCaseSelected
-      }
-      this.isSyncingFromUrl = false;
-      this.cdr.markForCheck();
-    });
-  }
-
-  private syncParamsFromTreeSelection(selection: TreeSelection): void {
-    if (this.isSyncingFromUrl) return;
-    if (selection.type === 'none') return;
-
-    if (selection.type === 'suite') {
-      this.router.navigate([], {
-        queryParams: {
-          suite: selection.suite.testSuiteId,
-          testcase: null,
-          tab: 'cases'
-        },
-        queryParamsHandling: 'merge',
-        replaceUrl: true
-      });
-      return;
-    }
-
-    this.router.navigate([], {
-      queryParams: {
-        suite: selection.testCase.testSuite.testSuiteId,
-        testcase: selection.testCase.identifierNumber,
-        tab: 'details'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  // ── Plan data ─────────────────────────────────────────────────────────────
+  // Plan data loading
   private loadPlanData(projectKey: string, planId: string): void {
     this.testPlan$ = this.plansSvc.getTestPlan(projectKey, planId).pipe(catchError(() => of(null)));
     this.subs.add(
@@ -266,29 +199,23 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
     this.testRuns$ = this.runSvc.getTestRunsByTestPlan(projectKey, planId).pipe(catchError(() => of([])));
 
+    // Auto-select first run if none selected
     this.subs.add(
       combineLatest([this.testRuns$, this.testRunId$]).subscribe(([runs, selectedRunId]) => {
-        if (!runs.length || selectedRunId) return;
-        this.router.navigate([], {
-          queryParams: { testRunId: runs[0].testPlanRunId },
-          queryParamsHandling: 'merge',
-          replaceUrl: true
-        });
-      })
-    );
-
-    this.selectedRunName$ = combineLatest([this.testRuns$, this.testRunId$]).pipe(
-      map(([runs, selectedRunId]) => {
-        if (!runs.length) return 'No runs';
-        const selected = runs.find((run: TestPlanRun) => run.testPlanRunId === selectedRunId) ?? runs[0];
-        return selected?.name ?? 'Unnamed run';
+        if (runs.length && !selectedRunId) {
+          this.router.navigate([], {
+            queryParams: { testRunId: runs[0].testPlanRunId },
+            queryParamsHandling: 'merge',
+            replaceUrl: true
+          });
+        }
       })
     );
 
     this.runItems$ = combineLatest([this.testRuns$, this.testRunId$]).pipe(
       switchMap(([runs, selectedRunId]) => {
         if (!runs.length) return of([]);
-        const selected = runs.find((run: TestPlanRun) => run.testPlanRunId === selectedRunId) ?? runs[0];
+        const selected = runs.find(run => run.testPlanRunId === selectedRunId) ?? runs[0];
         if (!selected) return of([]);
         return this.runItemSvc.getRunItems(projectKey, selected.testPlanRunId);
       }),
@@ -324,7 +251,6 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     );
 
     this.planStats$ = this.runItems$.pipe(map(items => this.computeStats(items)));
-    this.allCases$ = this.casesSvc.getTestCases(projectKey, '').pipe(catchError(() => of([])));
   }
 
   private computeStats(items: TestPlanRunItem[]): PlanStats {
@@ -339,13 +265,5 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   pct(n: number, total: number): number {
     if (!total) return 0;
     return Math.round((n / total) * 100);
-  }
-
-  // ── UI actions ────────────────────────────────────────────────────────────
-  clearSelection(): void {
-    this.router.navigate([], {
-      queryParams: { suite: null, testcase: null, version: null, tab: 'overview' },
-      queryParamsHandling: 'merge'
-    });
   }
 }
