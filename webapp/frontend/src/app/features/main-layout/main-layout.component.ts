@@ -134,8 +134,15 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.loadSuites(key);
     this.loadPlans(key);
 
+    // Only clear plan, suite, testcase, version - keep everything else
     this.router.navigate([], {
-      queryParams: { project: key, plan: null, suite: null, testcase: null },
+      queryParams: {
+        project: key,
+        plan: null,
+        suite: null,
+        testcase: null,
+        version: null
+      },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
@@ -146,8 +153,20 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.selectedPlanId = id;
     this.ctx.setPlan(id);
 
+    // Get current query params to preserve them
+    const currentParams = this.route.snapshot.queryParams;
+
+    // Only update plan - preserve suite, testcase, version, tab, testRunId, etc.
     this.router.navigate([], {
-      queryParams: { plan: id, suite: null, testcase: null },
+      queryParams: {
+        plan: id,
+        // Explicitly preserve these if they exist
+        ...(currentParams['suite'] && { suite: currentParams['suite'] }),
+        ...(currentParams['testcase'] && { testcase: currentParams['testcase'] }),
+        ...(currentParams['version'] && { version: currentParams['version'] }),
+        ...(currentParams['tab'] && { tab: currentParams['tab'] }),
+        ...(currentParams['testRunId'] && { testRunId: currentParams['testRunId'] })
+      },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
