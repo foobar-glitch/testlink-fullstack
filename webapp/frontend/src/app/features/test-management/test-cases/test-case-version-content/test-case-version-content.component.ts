@@ -42,9 +42,9 @@ export class TestCaseVersionContentComponent implements OnInit {
   private readonly stepService = inject(TestCaseVersionStepService);
 
   // Context values extracted from query params
-  private projectKey!: string;
-  private testCaseIdentifier!: number;
-  private versionNumber!: number;
+  projectKey!: string;
+  testCaseIdentifier!: number;
+  versionNumber!: number;
 
   content$!: Observable<TestCaseVersionContent>;
   testCaseTitle$!: Observable<string>;

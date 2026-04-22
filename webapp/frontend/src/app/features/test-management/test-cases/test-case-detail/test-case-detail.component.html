@@ -1,11 +1,16 @@
 <div class="test-case-detail-container">
   <ng-container *ngIf="testCase$ | async as testCase; else loading">
 
-    <!-- Header -->
+    <!-- Header with back button -->
     <header class="detail-header">
-      <div class="header-main">
-        <h2>{{ testCase.title }}</h2>
-        <app-status-badge [status]="testCase.status"></app-status-badge>
+      <div class="header-left">
+        <button class="back-btn" (click)="backToTestCases()">
+          ← Back to Test Cases
+        </button>
+        <div class="header-main">
+          <h2>{{ testCase.title }}</h2>
+          <app-status-badge [status]="testCase.status"></app-status-badge>
+        </div>
       </div>
       <div class="header-sub">
         <span class="identifier">
@@ -47,8 +52,7 @@
     <div class="versions-section">
       <div class="section-header">
         <h3>Version History</h3>
-        <button class="view-all-btn"
-                [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases', testCaseIdentifier, 'versions']">
+        <button class="view-all-btn" (click)="viewAllVersions()">
           View all →
         </button>
       </div>
@@ -71,7 +75,6 @@
                 <span class="version-num">v{{ version.versionNumber }}</span>
               </td>
               <td>
-                <!-- Priority is on the VERSION, not the test case -->
                 <app-priority-badge [priority]="version.priority"></app-priority-badge>
               </td>
               <td><app-status-badge [status]="version.status"></app-status-badge></td>

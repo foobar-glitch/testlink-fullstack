@@ -36,8 +36,8 @@ export class TestCaseVersionListComponent implements OnInit {
   private readonly testCaseService = inject(TestCaseService);
 
   // Context values extracted from query params
-  private projectKey!: string;
-  private testCaseIdentifier!: number;
+  projectKey!: string;
+  testCaseIdentifier!: number;
 
   versions$!: Observable<TestCaseVersion[]>;
   testCaseTitle$!: Observable<string>;
@@ -69,7 +69,7 @@ export class TestCaseVersionListComponent implements OnInit {
         const project = params['project'];
         const testcase = params['testcase'];
         if (!project || !testcase) return of('Test Case');
-        return this.testCaseService.getTestCase(project, +testcase, '').pipe(
+        return this.testCaseService.getTestCase(project, +testcase).pipe(
           map(tc => tc?.title || 'Test Case'),
           catchError(() => of('Test Case'))
         );

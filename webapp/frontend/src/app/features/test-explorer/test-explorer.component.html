@@ -107,33 +107,18 @@
       </ng-container>
 
       <!-- Test Cases Tab -->
-      <ng-container *ngIf="(activeTab$ | async) === 'cases' && (suiteId$ | async) as suiteId">
-        <app-test-case-list [projectKey]="projectKey" [suiteId]="suiteId"></app-test-case-list>
+      <ng-container *ngIf="(activeTab$ | async) === 'cases'">
+        <app-test-case-list></app-test-case-list>
       </ng-container>
 
       <!-- Test Case Details Tab -->
-      <ng-container *ngIf="(activeTab$ | async) === 'details' && (suiteId$ | async) as suiteId">
-        <ng-container *ngIf="(testCaseId$ | async) as testCaseId">
-          <app-test-case-detail
-            [projectKey]="projectKey"
-            [suiteId]="suiteId"
-            [testCaseIdentifier]="+testCaseId">
-          </app-test-case-detail>
-        </ng-container>
+      <ng-container *ngIf="(activeTab$ | async) === 'details'">
+        <app-test-case-detail></app-test-case-detail>
       </ng-container>
 
       <!-- Steps Tab -->
-      <ng-container *ngIf="(activeTab$ | async) === 'steps' && (suiteId$ | async) as suiteId">
-        <ng-container *ngIf="(testCaseId$ | async) as testCaseId">
-          <ng-container *ngIf="(versionNumber$ | async) as version">
-            <app-test-case-version-content
-              [projectKey]="projectKey"
-              [suiteId]="suiteId"
-              [testCaseIdentifier]="+testCaseId"
-              [versionNumber]="version">
-            </app-test-case-version-content>
-          </ng-container>
-        </ng-container>
+      <ng-container *ngIf="(activeTab$ | async) === 'steps'">
+        <app-test-case-version-content></app-test-case-version-content>
       </ng-container>
 
     </ng-container>

@@ -20,7 +20,7 @@ import { TestPlanRunItemService } from '../../core/services/test-plan-run-item.s
 import { ProjectService } from '../../core/services/project.service';
 
 import { TestPlan, TestPlanRunItem } from '../../core/models/testexecution';
-import { TestSuite } from '../../core/models/testsuite';
+import { TestCase, TestSuite } from '../../core/models/testsuite';
 
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
@@ -101,7 +101,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   testPlan$: Observable<TestPlan | null> = of(null);
   planStats$: Observable<PlanStats> = of({ total: 0, passed: 0, failed: 0, blocked: 0, notRun: 0 });
   runItems$: Observable<TestPlanRunItem[]> = of([]);
-  allCases$: Observable<import('../../core/models/testsuite').TestCase[]> = of([]);
+  allCases$: Observable<TestCase[]> = of([]);
 
   planName = '';
   private subs = new Subscription();

@@ -145,3 +145,26 @@
   align-items: center;
   min-height: 200px;
 }
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.back-btn {
+  background: none;
+  border: 1px solid #e8e8e8;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #6c63ff;
+    color: #6c63ff;
+    background: #f0eeff;
+  }
+}
