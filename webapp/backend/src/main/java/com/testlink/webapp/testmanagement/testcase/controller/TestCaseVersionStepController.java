@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/test-steps/")
+@RequestMapping("/test-steps")
 @RequiredArgsConstructor
 public class TestCaseVersionStepController {
     private final TestCaseVersionStepService testCaseVersionStepService;
