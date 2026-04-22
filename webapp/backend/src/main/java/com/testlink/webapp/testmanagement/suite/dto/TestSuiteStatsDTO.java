@@ -15,5 +15,4 @@ public record TestSuiteStatsDTO(
         Integer notRunCount,
         //Integer avgExecutionTimeMs
         LocalDateTime startsUpdatedAt
-) {
-}
+) {}

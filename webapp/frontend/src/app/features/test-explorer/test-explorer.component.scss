@@ -44,6 +44,89 @@
   }
 }
 
+// ── Small welcome (for overview tab without suite) ───────────────────────────
+.welcome-small {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 12px;
+  text-align: center;
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+  padding: 48px 24px;
+
+  .welcome-icon-small {
+    width: 60px;
+    height: 60px;
+    background: vars.$accent-soft;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: vars.$text;
+  }
+
+  p {
+    font-size: 13px;
+    color: vars.$muted;
+    max-width: 280px;
+  }
+}
+
+// ── Suite Stats Summary (in Overview tab) ────────────────────────────────────
+.suite-stats-summary {
+  display: flex;
+  gap: 24px;
+  padding: 16px 20px;
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: vars.$text;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: vars.$muted;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    &.pass .stat-value { color: vars.$color-success; }
+    &.fail .stat-value { color: vars.$color-danger; }
+    &.block .stat-value { color: vars.$color-warning; }
+  }
+}
+
+// ── Loading states ───────────────────────────────────────────────────────────
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
 // ── Breadcrumb ────────────────────────────────────────────────────────────────
 .breadcrumb {
   display: flex;
@@ -505,43 +588,4 @@
   font-size: 13px;
   color: vars.$muted;
   padding: 16px 0;
-}
-// Add to the end of the file
-
-// ── Small welcome (for overview tab without suite) ───────────────────────────
-.welcome-small {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  gap: 12px;
-  text-align: center;
-  background: vars.$white;
-  border: 1px solid vars.$border;
-  border-radius: vars.$radius-md;
-  padding: 48px 24px;
-
-  .welcome-icon-small {
-    width: 60px;
-    height: 60px;
-    background: vars.$accent-soft;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 8px;
-  }
-
-  h3 {
-    font-size: 18px;
-    font-weight: 800;
-    color: vars.$text;
-  }
-
-  p {
-    font-size: 13px;
-    color: vars.$muted;
-    max-width: 280px;
-  }
 }

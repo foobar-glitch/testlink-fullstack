@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap, take } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { TestCaseVersionContentService } from '../../../../core/services/test-case-version-content.service';
 import { TestCaseVersionService } from '../../../../core/services/test-case-version.service';
@@ -43,6 +43,7 @@ export class TestCaseVersionContentComponent implements OnInit {
 
   // Context values extracted from query params
   projectKey!: string;
+  suiteId!: string;
   testCaseIdentifier!: number;
   versionNumber!: number;
 
@@ -52,15 +53,29 @@ export class TestCaseVersionContentComponent implements OnInit {
   stats$!: Observable<TestCaseVersionStats>;
   errorMessage = '';
 
+  // Default empty stats matching the interface
+  private readonly EMPTY_STATS: TestCaseVersionStats = {
+    totalExecutions: 0,
+    lastExecutionStatus: null,
+    lastExecutedAt: null,
+    passedCount: 0,
+    failedCount: 0,
+    blockedCount: 0,
+    notRunCount: 0,
+    avgExecutionTimeMs: null,
+  };
+
   ngOnInit(): void {
     // Use query params exclusively
     this.content$ = this.route.queryParams.pipe(
       switchMap(params => {
         const project = params['project'];
+        const suite = params['suite'];
         const testcase = params['testcase'];
         const version = params['version'];
         if (!project || !testcase || !version) return of(null as any);
         this.projectKey = project;
+        this.suiteId = suite || '';
         this.testCaseIdentifier = +testcase;
         this.versionNumber = +version;
         return this.contentService.getContent(project, +testcase, +version).pipe(
@@ -102,26 +117,10 @@ export class TestCaseVersionContentComponent implements OnInit {
         const testcase = params['testcase'];
         const version = params['version'];
         if (!project || !testcase || !version) {
-          return of<TestCaseVersionStats>({
-            totalExecutions: 0,
-            lastExecutionStatus: null,
-            lastExecutedAt: null,
-            passedCount: 0,
-            failedCount: 0,
-            blockedCount: 0,
-            avgExecutionTimeMs: null,
-          });
+          return of(this.EMPTY_STATS);
         }
         return this.versionService.getVersionStats(project, +testcase, +version).pipe(
-          catchError(() => of<TestCaseVersionStats>({
-            totalExecutions: 0,
-            lastExecutionStatus: null,
-            lastExecutedAt: null,
-            passedCount: 0,
-            failedCount: 0,
-            blockedCount: 0,
-            avgExecutionTimeMs: null,
-          }))
+          catchError(() => of(this.EMPTY_STATS))
         );
       })
     );
@@ -132,39 +131,46 @@ export class TestCaseVersionContentComponent implements OnInit {
     return Math.round((n / total) * 100);
   }
 
-  notRunCount(stats: TestCaseVersionStats): number {
-    return stats.totalExecutions - stats.passedCount - stats.failedCount - stats.blockedCount;
-  }
-
   barTitle(stats: TestCaseVersionStats): string {
-    return `Passed: ${stats.passedCount} · Failed: ${stats.failedCount} · Blocked: ${stats.blockedCount} · Not Run: ${this.notRunCount(stats)}`;
+    return `Passed: ${stats.passedCount} · Failed: ${stats.failedCount} · Blocked: ${stats.blockedCount} · Not Run: ${stats.notRunCount}`;
   }
 
   viewStep(step: TestCaseVersionStep): void {
-    const queryParams = {
-      project: this.projectKey,
-      tab: 'step-results',
-      stepId: step.stepId
-    };
-    this.router.navigate(['/explorer'], { queryParams });
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testcase: this.testCaseIdentifier,
+        version: this.versionNumber,
+        stepId: step.stepId,
+        tab: 'step-results'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
   backToVersions(): void {
-    const queryParams = {
-      project: this.projectKey,
-      testcase: this.testCaseIdentifier,
-      tab: 'versions'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testcase: this.testCaseIdentifier,
+        tab: 'versions'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
   viewAllRuns(): void {
-    const queryParams = {
-      project: this.projectKey,
-      testcase: this.testCaseIdentifier,
-      version: this.versionNumber,
-      tab: 'runs'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testcase: this.testCaseIdentifier,
+        version: this.versionNumber,
+        tab: 'runs'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 }

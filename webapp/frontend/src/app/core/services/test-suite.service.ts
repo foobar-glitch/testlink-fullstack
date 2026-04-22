@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { TestSuite, TestSuiteHierarchy, TestSuiteHierarchyDTO, TestSuiteItem } from '../models/testsuite';
+import { TestSuite, TestSuiteHierarchy, TestSuiteHierarchyDTO, TestSuiteItem, TestSuiteStats } from '../models/testsuite';
 
 @Injectable({ providedIn: 'root' })
 export class TestSuiteService {
@@ -67,5 +67,21 @@ export class TestSuiteService {
       children: [],
       expanded: false,
     };
+  }
+
+
+  /**
+   * Get statistics for a specific test suite.
+   * Endpoint: GET /projects/view/stats?projectKey={projectKey}&suiteId={suiteId}
+   */
+  getTestSuiteStats(projectKey: string, suiteId: string): Observable<TestSuiteStats> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('suiteId', suiteId);
+
+    return this.http.get<TestSuiteStats>(`${this.apiUrl}projects/view/stats`, {
+      withCredentials: true,
+      params
+    });
   }
 }

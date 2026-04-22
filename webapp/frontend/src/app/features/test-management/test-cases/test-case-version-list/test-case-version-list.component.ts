@@ -38,6 +38,7 @@ export class TestCaseVersionListComponent implements OnInit {
   // Context values extracted from query params
   projectKey!: string;
   testCaseIdentifier!: number;
+  suiteId!: string;
 
   versions$!: Observable<TestCaseVersion[]>;
   testCaseTitle$!: Observable<string>;
@@ -46,15 +47,29 @@ export class TestCaseVersionListComponent implements OnInit {
   // Cache stats observables keyed by versionNumber to avoid re-fetching on CD
   private statsCache = new Map<number, Observable<TestCaseVersionStats>>();
 
+  // Default empty stats matching the interface
+  private readonly EMPTY_STATS: TestCaseVersionStats = {
+    totalExecutions: 0,
+    lastExecutionStatus: null,
+    lastExecutedAt: null,
+    passedCount: 0,
+    failedCount: 0,
+    blockedCount: 0,
+    notRunCount: 0,
+    avgExecutionTimeMs: null,
+  };
+
   ngOnInit(): void {
     // Use query params exclusively
     this.versions$ = this.route.queryParams.pipe(
       switchMap(params => {
         const project = params['project'];
         const testcase = params['testcase'];
+        const suite = params['suite'];
         if (!project || !testcase) return of([]);
         this.projectKey = project;
         this.testCaseIdentifier = +testcase;
+        this.suiteId = suite || '';
         return this.versionService.getVersionsByTestCase(project, +testcase).pipe(
           catchError(err => {
             this.errorMessage = err.message || 'Failed to load versions';
@@ -82,15 +97,9 @@ export class TestCaseVersionListComponent implements OnInit {
     if (!this.statsCache.has(version.versionNumber)) {
       const stats$ = this.versionService
         .getVersionStats(this.projectKey, this.testCaseIdentifier, version.versionNumber)
-        .pipe(catchError(() => of<TestCaseVersionStats>({
-          totalExecutions: 0,
-          lastExecutionStatus: null,
-          lastExecutedAt: null,
-          passedCount: 0,
-          failedCount: 0,
-          blockedCount: 0,
-          avgExecutionTimeMs: null,
-        })));
+        .pipe(
+          catchError(() => of(this.EMPTY_STATS))
+        );
       this.statsCache.set(version.versionNumber, stats$);
     }
     return this.statsCache.get(version.versionNumber)!;
@@ -98,6 +107,7 @@ export class TestCaseVersionListComponent implements OnInit {
 
   /** Find the highest version number to mark it as "Latest". */
   latestVersionNumber(versions: TestCaseVersion[]): number {
+    if (!versions.length) return 0;
     return Math.max(...versions.map(v => v.versionNumber));
   }
 
@@ -112,26 +122,32 @@ export class TestCaseVersionListComponent implements OnInit {
       `Passed: ${stats.passedCount}`,
       `Failed: ${stats.failedCount}`,
       `Blocked: ${stats.blockedCount}`,
-      `Not Run: ${stats.totalExecutions - stats.passedCount - stats.failedCount - stats.blockedCount}`,
+      `Not Run: ${stats.notRunCount}`,
     ].join(' · ');
   }
 
   viewVersion(version: TestCaseVersion): void {
-    const queryParams = {
-      project: this.projectKey,
-      testcase: this.testCaseIdentifier,
-      version: version.versionNumber,
-      tab: 'steps'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testcase: this.testCaseIdentifier,
+        version: version.versionNumber,
+        tab: 'steps'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
   backToTestCase(): void {
-    const queryParams = {
-      project: this.projectKey,
-      testcase: this.testCaseIdentifier,
-      tab: 'details'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testcase: this.testCaseIdentifier,
+        tab: 'details'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 }

@@ -60,6 +60,10 @@
               <span class="stat-val">{{ stats.blockedCount }}</span>
               <span class="stat-lbl">Blocked</span>
             </div>
+            <div class="stat-item" *ngIf="stats.totalExecutions > 0">
+              <span class="stat-val">{{ stats.notRunCount }}</span>
+              <span class="stat-lbl">Not Run</span>
+            </div>
             <div class="stat-divider" *ngIf="stats.totalExecutions > 0"></div>
             <div class="stat-item last" *ngIf="stats.lastExecutionStatus">
               <app-test-run-status-badge [status]="stats.lastExecutionStatus"></app-test-run-status-badge>
@@ -77,15 +81,13 @@
             </div>
           </ng-template>
 
-          <!-- Mini progress bar -->
+          <!-- Mini progress bar - UPDATED to use stats.notRunCount -->
           <ng-container *ngIf="getStats(version) | async as stats">
             <div class="mini-bar" *ngIf="stats.totalExecutions > 0" [title]="barTitle(stats)">
-              <div class="bar-pass"  [style.width.%]="pct(stats.passedCount,  stats.totalExecutions)"></div>
-              <div class="bar-fail"  [style.width.%]="pct(stats.failedCount,  stats.totalExecutions)"></div>
-              <div class="bar-block" [style.width.%]="pct(stats.blockedCount, stats.totalExecutions)"></div>
-              <div class="bar-notrun"
-                   [style.width.%]="pct(stats.totalExecutions - stats.passedCount - stats.failedCount - stats.blockedCount, stats.totalExecutions)">
-              </div>
+              <div class="bar-pass"   [style.width.%]="pct(stats.passedCount, stats.totalExecutions)"></div>
+              <div class="bar-fail"   [style.width.%]="pct(stats.failedCount, stats.totalExecutions)"></div>
+              <div class="bar-block"  [style.width.%]="pct(stats.blockedCount, stats.totalExecutions)"></div>
+              <div class="bar-notrun" [style.width.%]="pct(stats.notRunCount, stats.totalExecutions)"></div>
             </div>
           </ng-container>
 

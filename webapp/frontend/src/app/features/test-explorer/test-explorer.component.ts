@@ -17,14 +17,15 @@ import { TestPlanService } from '../../core/services/test-plan.service';
 import { TestPlanRunService } from '../../core/services/test-plan-run.service';
 import { TestPlanRunItemService } from '../../core/services/test-plan-run-item.service';
 import { ProjectService } from '../../core/services/project.service';
+import { TestSuiteService } from '../../core/services/test-suite.service';
 
 import { TestPlan, TestPlanRun, TestPlanRunItem } from '../../core/models/testexecution';
 
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
+import { TestRunStatusBadgeComponent } from '../../shared/components/test-run-status-badge/test-run-status-badge.component';
 import { CaseTableComponent } from './case-table/case-table.component';
 import { ExecutionTableComponent } from './execution-table/execution-table.component';
-import { TestCaseListComponent } from '../test-management/test-cases/test-case-list/test-case-list.component';
 import { TestCaseDetailComponent } from '../test-management/test-cases/test-case-detail/test-case-detail.component';
 import { TestCaseVersionContentComponent } from '../test-management/test-cases/test-case-version-content/test-case-version-content.component';
 import { TestCaseVersionListComponent } from '../test-management/test-cases/test-case-version-list/test-case-version-list.component';
@@ -32,16 +33,8 @@ import { TestCaseVersionRunsComponent } from '../test-management/test-cases/test
 import { TestCaseVersionRunDetailComponent } from '../test-management/test-cases/test-case-version-run-detail/test-case-version-run-detail.component';
 import { TestStepResultListComponent } from '../test-management/test-cases/test-step-result-list/test-step-result-list.component';
 import { TestStepResultDetailComponent } from '../test-management/test-cases/test-step-result-detail/test-step-result-detail.component';
-import { TestCase } from '../../core/models/testsuite';
+import { TestCase, TestSuiteStats } from '../../core/models/testsuite';
 import { TestCaseService } from '../../core/services/test-case.service';
-
-interface PlanStats {
-  total: number;
-  passed: number;
-  failed: number;
-  blocked: number;
-  notRun: number;
-}
 
 type ExplorerTab =
   | 'overview'
@@ -64,9 +57,9 @@ type ExplorerTab =
     RouterModule,
     SpinnerComponent,
     StatusBadgeComponent,
+    TestRunStatusBadgeComponent,
     CaseTableComponent,
     ExecutionTableComponent,
-    TestCaseListComponent,
     TestCaseDetailComponent,
     TestCaseVersionContentComponent,
     TestCaseVersionListComponent,
@@ -84,6 +77,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   private readonly plansSvc = inject(TestPlanService);
   private readonly runSvc = inject(TestPlanRunService);
   private readonly casesSvc = inject(TestCaseService);
+  private readonly suitesSvc = inject(TestSuiteService);
   private readonly runItemSvc = inject(TestPlanRunItemService);
   private readonly projSvc = inject(ProjectService);
   private readonly router = inject(Router);
@@ -91,10 +85,9 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   private readonly cdr = inject(ChangeDetectorRef);
 
   testCasesForSuite$: Observable<TestCase[]> = of([]);
+  suiteStats$: Observable<TestSuiteStats | null> = of(null);
 
-
-
-  // ── State derived from query parameters (READ ONLY) ─────────────────────────
+  // State derived from query parameters (READ ONLY)
   readonly projectKey$ = this.route.queryParams.pipe(
     map(params => params['project'] || null),
     distinctUntilChanged()
@@ -136,10 +129,9 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     distinctUntilChanged()
   );
 
-  // ── Data streams ──────────────────────────────────────────────────────────
+  // Data streams
   projectName$: Observable<string> = of('');
   testPlan$: Observable<TestPlan | null> = of(null);
-  planStats$: Observable<PlanStats> = of({ total: 0, passed: 0, failed: 0, blocked: 0, notRun: 0 });
   runItems$: Observable<TestPlanRunItem[]> = of([]);
   filteredRunItems$: Observable<TestPlanRunItem[]> = of([]);
   testRuns$: Observable<TestPlanRun[]> = of([]);
@@ -158,12 +150,15 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Load suite data when suite changes
     this.subs.add(
       combineLatest([this.projectKey$, this.suiteId$]).subscribe(([projectKey, suiteId]) => {
         if (projectKey && suiteId) {
           this.loadTestCasesForSuite(projectKey, suiteId);
+          this.loadSuiteStats(projectKey, suiteId);
         } else {
           this.testCasesForSuite$ = of([]);
+          this.suiteStats$ = of(null);
         }
       })
     );
@@ -208,41 +203,13 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  // ── PRIMARY NAVIGATION: Suite-based (folder structure) ─────────────────────
-
-  /** Navigate to a suite - this is the main navigation action from the tree */
-  navigateToSuite(suiteId: string): void {
-    this.router.navigate([], {
-      queryParams: {
-        suite: suiteId,
-        testcase: null,
-        version: null,
-        tab: 'cases'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
+  // Percentage helper
+  pct(n: number, total: number): number {
+    if (!total) return 0;
+    return Math.round((n / total) * 100);
   }
 
-
-
-  /** Navigate to a test case within a suite */
-  navigateToTestCase(suiteId: string, testCaseId: string | number): void {
-    this.router.navigate([], {
-      queryParams: {
-        suite: suiteId,
-        testcase: String(testCaseId),
-        version: null,
-        tab: 'details'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-
-
-  // ── Plan data loading ─────────────────────────────────────────────────────
+  // Plan data loading
   private loadPlanData(projectKey: string, planId: string): void {
     this.testPlan$ = this.plansSvc.getTestPlan(projectKey, planId).pipe(catchError(() => of(null)));
     this.subs.add(
@@ -254,7 +221,6 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
     this.testRuns$ = this.runSvc.getTestRunsByTestPlan(projectKey, planId).pipe(catchError(() => of([])));
 
-    // Auto-select first run if none selected
     this.subs.add(
       combineLatest([this.testRuns$, this.testRunId$]).subscribe(([runs, selectedRunId]) => {
         if (runs.length && !selectedRunId) {
@@ -304,25 +270,28 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
         return `${sample.testCase.testSuite?.project?.projectKey ?? ''}-${sample.testCase.identifierNumber}`;
       })
     );
-
-    this.planStats$ = this.runItems$.pipe(map(items => this.computeStats(items)));
   }
 
-  private computeStats(items: TestPlanRunItem[]): PlanStats {
-    const total = items.length;
-    const passed = items.filter(i => i.status === 'PASSED').length;
-    const failed = items.filter(i => i.status === 'FAILED').length;
-    const blocked = items.filter(i => i.status === 'BLOCKED').length;
-    const notRun = items.filter(i => i.status === 'NOT_RUN').length;
-    return { total, passed, failed, blocked, notRun };
+  private loadTestCasesForSuite(projectKey: string, suiteId: string): void {
+    this.testCasesForSuite$ = this.casesSvc
+      .getTestCases(projectKey, suiteId)
+      .pipe(catchError(() => of([])));
   }
 
-  pct(n: number, total: number): number {
-    if (!total) return 0;
-    return Math.round((n / total) * 100);
+  private loadSuiteStats(projectKey: string, suiteId: string): void {
+    this.suiteStats$ = this.suitesSvc
+      .getTestSuiteStats(projectKey, suiteId)
+      .pipe(catchError(() => of(null)));
   }
 
-  /** Build query params preserving project and plan context */
+  onCaseSelected(testCase: TestCase): void {
+    const suiteId = this.route.snapshot.queryParams['suite'];
+    if (suiteId) {
+      this.navigateToTestCaseDetails(suiteId, testCase.identifierNumber);
+    }
+  }
+
+  // Navigation methods
   private buildQueryParams(overrides: Partial<{
     suite: string | null;
     testcase: string | null;
@@ -341,7 +310,6 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       plan: params['plan'] || this.ctx.snapshot.testPlanId,
     };
 
-    // Only add optional params if they have a value (keeps URL clean)
     if (overrides.suite !== undefined) result['suite'] = overrides.suite;
     else if (params['suite']) result['suite'] = params['suite'];
 
@@ -369,220 +337,125 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     return result;
   }
 
-
-
-
-  // ────────────────────────────────────────────────────────────────────────────
-// Navigation Methods (each has ONE clear purpose, all use buildQueryParams)
-// ────────────────────────────────────────────────────────────────────────────
-
-  /** Navigate to plan overview (top level - clears suite/testcase/version) */
   navigateToPlanOverview(): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        suite: null,
-        testcase: null,
-        version: null,
-        tab: 'overview'
-      }),
+      queryParams: this.buildQueryParams({ suite: null, testcase: null, version: null, tab: 'overview' }),
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  /** Navigate to suite overview (shows test cases for suite) */
   navigateToSuiteOverview(suiteId: string): void {
     this.router.navigate([], {
+      queryParams: this.buildQueryParams({ suite: suiteId, testcase: null, version: null, tab: 'overview' }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  navigateToStats(): void {
+    const snapshot = this.route.snapshot;
+    this.router.navigate([], {
       queryParams: this.buildQueryParams({
-        suite: suiteId,
-        testcase: null,
-        version: null,
-        tab: 'overview'
+        suite: snapshot.queryParams['suite'] || null,
+        testcase: snapshot.queryParams['testcase'] || null,
+        version: snapshot.queryParams['version'] ? Number(snapshot.queryParams['version']) : null,
+        tab: 'stats'
       }),
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  /** Navigate to test case details (alias for navigateToTestCaseDetails) */
+  navigateToTestCaseDetails(suiteId: string, testCaseId: string | number): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({ suite: suiteId, testcase: String(testCaseId), version: null, tab: 'details' }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
   navigateToDetails(suiteId: string, testCaseId: string | number): void {
     this.navigateToTestCaseDetails(suiteId, testCaseId);
   }
 
-  /** Navigate to test case details */
-  navigateToTestCaseDetails(suiteId: string, testCaseId: string | number): void {
-    this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        suite: suiteId,
-        testcase: String(testCaseId),
-        version: null,
-        tab: 'details'
-      }),
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  /** Navigate to versions list for current test case */
   navigateToVersions(): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        version: null,
-        tab: 'versions'
-      }),
+      queryParams: this.buildQueryParams({ version: null, tab: 'versions' }),
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  /** Navigate to steps for a specific version */
   navigateToSteps(versionNumber: number): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        version: versionNumber,
-        tab: 'steps'
-      }),
+      queryParams: this.buildQueryParams({ version: versionNumber, tab: 'steps' }),
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  /** Navigate to steps for a version (alias - more explicit name) */
   navigateToVersionSteps(versionNumber: number): void {
     this.navigateToSteps(versionNumber);
   }
 
-  /** Navigate to runs for a version (execution history) */
   navigateToRuns(): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        tab: 'runs'
-      }),
+      queryParams: this.buildQueryParams({ tab: 'runs' }),
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  /** Navigate to runs for a version (alias - more explicit name) */
   navigateToVersionRuns(): void {
     this.navigateToRuns();
   }
 
-  /** Navigate to run items (execution view for test run) */
   navigateToRunItems(): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        tab: 'run-items'
-      }),
+      queryParams: this.buildQueryParams({ tab: 'run-items' }),
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  /** Navigate to a specific run detail */
   navigateToRunDetail(runItemId: string): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        runItemId,
-        tab: 'run-detail'
-      }),
+      queryParams: this.buildQueryParams({ runItemId, tab: 'run-detail' }),
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  /** Navigate to step results (execution history for a step) */
   navigateToStepResults(stepId: string): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        stepId,
-        tab: 'step-results'
-      }),
+      queryParams: this.buildQueryParams({ stepId, tab: 'step-results' }),
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  /** Navigate to step result detail (single execution result) */
   navigateToStepResultDetail(actionId: string): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        actionId,
-        tab: 'step-result-detail'
-      }),
+      queryParams: this.buildQueryParams({ actionId, tab: 'step-result-detail' }),
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  /** Navigate to stats view (shows plan statistics and runs) - preserves current suite/test case selection */
-  navigateToStats(): void {
-    // Get current values from the route snapshot
-    const currentSuiteId = this.route.snapshot.queryParams['suite'] || null;
-    const currentTestCaseId = this.route.snapshot.queryParams['testcase'] || null;
-    const currentVersion = this.route.snapshot.queryParams['version'] || null;
-
-    this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        suite: currentSuiteId,
-        testcase: currentTestCaseId,
-        version: currentVersion ? Number(currentVersion) : null,
-        tab: 'stats' as ExplorerTab
-      }),
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-// ────────────────────────────────────────────────────────────────────────────
-// Secondary Context (preserves navigation state)
-// ────────────────────────────────────────────────────────────────────────────
-
-  /** Select a test run - filters execution data but preserves suite navigation */
   selectTestRun(testRunId: string): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        testRunId
-      }),
+      queryParams: this.buildQueryParams({ testRunId }),
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  /** Clear suite/testcase filter from run items view */
   clearRunFilter(): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        suite: null,
-        testcase: null
-      }),
+      queryParams: this.buildQueryParams({ suite: null, testcase: null }),
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
-
-
-// ────────────────────────────────────────────────────────────────────────────
-// Event Handlers
-// ────────────────────────────────────────────────────────────────────────────
-
-  /** Handle case selection from the case table */
-  onCaseSelected(testCase: TestCase): void {
-    const suiteId = this.route.snapshot.queryParams['suite'];
-    if (suiteId) {
-      this.navigateToTestCaseDetails(suiteId, testCase.identifierNumber);
-    }
-  }
-
-// ────────────────────────────────────────────────────────────────────────────
-// Data Loading
-// ────────────────────────────────────────────────────────────────────────────
-
-  /** Load test cases for a specific suite */
-  private loadTestCasesForSuite(projectKey: string, suiteId: string): void {
-    this.testCasesForSuite$ = this.casesSvc
-      .getTestCases(projectKey, suiteId)
-      .pipe(catchError(() => of([])));
-  }
-
 }
