@@ -14,13 +14,11 @@ import { map, catchError, distinctUntilChanged, switchMap } from 'rxjs/operators
 import { ContextService } from '../../core/services/context.service';
 import { TreeStateService } from '../../core/services/tree-state.service';
 import { TestPlanService } from '../../core/services/test-plan.service';
-import { TestCaseService } from '../../core/services/test-case.service';
 import { TestPlanRunService } from '../../core/services/test-plan-run.service';
 import { TestPlanRunItemService } from '../../core/services/test-plan-run-item.service';
 import { ProjectService } from '../../core/services/project.service';
 
 import { TestPlan, TestPlanRun, TestPlanRunItem } from '../../core/models/testexecution';
-import { TestCase } from '../../core/models/testsuite';
 
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
@@ -193,16 +191,16 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  // ── Navigation helpers (write to URL with explicit tab) ────────────────────
+  // ── PRIMARY NAVIGATION: Suite-based (folder structure) ─────────────────────
 
-  /** Navigate to overview tab */
-  navigateToOverview(): void {
+  /** Navigate to a suite - this is the main navigation action from the tree */
+  navigateToSuite(suiteId: string): void {
     this.router.navigate([], {
       queryParams: {
-        suite: null,
+        suite: suiteId,
         testcase: null,
         version: null,
-        tab: 'overview'
+        tab: 'cases'
       },
       queryParamsHandling: 'merge',
       replaceUrl: true
@@ -223,8 +221,8 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Navigate to details tab for a test case */
-  navigateToDetails(suiteId: string, testCaseId: string | number): void {
+  /** Navigate to a test case within a suite */
+  navigateToTestCase(suiteId: string, testCaseId: string | number): void {
     this.router.navigate([], {
       queryParams: {
         suite: suiteId,
@@ -237,7 +235,12 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Navigate to steps tab for a specific version */
+  /** Navigate to details tab for a test case */
+  navigateToDetails(suiteId: string, testCaseId: string | number): void {
+    this.navigateToTestCase(suiteId, testCaseId);
+  }
+
+  /** Navigate to a specific version's steps */
   navigateToSteps(versionNumber: number): void {
     this.router.navigate([], {
       queryParams: {
@@ -249,7 +252,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Navigate to versions tab */
+  /** Navigate to versions list */
   navigateToVersions(): void {
     this.router.navigate([], {
       queryParams: {
@@ -261,7 +264,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Navigate to runs tab */
+  /** Navigate to runs for a version */
   navigateToRuns(): void {
     this.router.navigate([], {
       queryParams: {
@@ -272,24 +275,24 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Navigate to run detail */
-  navigateToRunDetail(runId: string): void {
+  /** Navigate to run items (execution view) */
+  navigateToRunItems(): void {
     this.router.navigate([], {
       queryParams: {
-        runId,
-        tab: 'run-detail'
+        tab: 'run-items'
       },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  /** Navigate to run items tab */
-  navigateToRunItems(testRunId?: string): void {
-    const params: any = { tab: 'run-items' };
-    if (testRunId) params.testRunId = testRunId;
+  /** Navigate to a specific run detail */
+  navigateToRunDetail(runItemId: string): void {
     this.router.navigate([], {
-      queryParams: params,
+      queryParams: {
+        runItemId,
+        tab: 'run-detail'
+      },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
@@ -319,7 +322,32 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Clear run filter */
+  /** Go back to overview (clear suite/testcase selection) */
+  navigateToOverview(): void {
+    this.router.navigate([], {
+      queryParams: {
+        suite: null,
+        testcase: null,
+        version: null,
+        tab: 'overview'
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  // ── SECONDARY CONTEXT: Test Run selection (filters data only) ──────────────
+
+  /** Select a test run - this filters execution data but preserves suite navigation */
+  selectTestRun(testRunId: string): void {
+    this.router.navigate([], {
+      queryParams: { testRunId },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Clear suite/testcase filter from run items view */
   clearRunFilter(): void {
     this.router.navigate([], {
       queryParams: {
