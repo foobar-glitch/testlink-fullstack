@@ -9,16 +9,6 @@ export const routes: Routes = [
       import('./features/auth/login/login.component').then(m => m.LoginComponent),
   },
 
-  // ── Projects (standalone page, NO shell) ───────────────────────────────────
-  {
-    path: 'projects',
-    loadComponent: () =>
-      import('./features/projects/project-list/project-list.component').then(
-        m => m.ProjectListComponent,
-      ),
-    canActivate: [authGuard],
-  },
-
   // ── Authenticated shell (topbar + sidebar + router-outlet) ─────────────────
   {
     path: '',
