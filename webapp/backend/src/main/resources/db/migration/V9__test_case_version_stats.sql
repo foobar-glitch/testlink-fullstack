@@ -105,3 +105,34 @@ CREATE TRIGGER trg_update_version_stats
     ON test_run_items
     FOR EACH ROW
     EXECUTE FUNCTION update_test_case_version_stats();
+	
+	
+CREATE OR REPLACE FUNCTION update_run_item_status_from_steps()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_overall_status VARCHAR(20);
+BEGIN
+    -- Determine overall status based on step results for this run item
+    SELECT CASE
+        WHEN COUNT(*) FILTER (WHERE status = 'FAILED') > 0 THEN 'FAILED'
+        WHEN COUNT(*) FILTER (WHERE status = 'BLOCKED') > 0 THEN 'BLOCKED'
+        WHEN COUNT(*) FILTER (WHERE status = 'PASSED') = COUNT(*) THEN 'PASSED'
+        ELSE 'NOT_RUN'
+    END INTO v_overall_status
+    FROM test_step_results
+    WHERE test_run_item_id = NEW.test_run_item_id;
+
+    UPDATE test_run_items
+    SET status = v_overall_status
+    WHERE test_run_item_id = NEW.test_run_item_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_update_run_item_after_step
+    AFTER INSERT OR UPDATE OF status OR DELETE
+    ON test_step_results
+    FOR EACH ROW
+    EXECUTE FUNCTION update_run_item_status_from_steps();
+

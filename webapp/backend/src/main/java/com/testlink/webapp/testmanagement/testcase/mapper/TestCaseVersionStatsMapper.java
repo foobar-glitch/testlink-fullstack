@@ -11,7 +11,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public abstract class TestCaseVersionStatsMapper {
 
-    @Mapping(target = "avgExecutionTimeMs", source = "avgExecutionTimeMs")
     public abstract TestCaseVersionStatsDTO toDto(TestCaseVersionStats stats);
 
     public abstract List<TestCaseVersionStatsDTO> toDtoList(List<TestCaseVersionStats> statsList);

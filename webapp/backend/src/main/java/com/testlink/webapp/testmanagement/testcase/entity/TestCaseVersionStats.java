@@ -42,6 +42,6 @@ public class TestCaseVersionStats {
     @Column(name = "blocked_count")
     private Integer blockedCount = 0;
 
-    @Column(name = "avg_execution_time_ms")
-    private Long avgExecutionTimeMs;
+    //@Column(name = "avg_execution_time_ms")
+    //private Long avgExecutionTimeMs;
 }
