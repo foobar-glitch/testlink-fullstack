@@ -31,7 +31,8 @@ public class TestSuiteController {
 
     @GetMapping("")
     public ResponseEntity<List<TestSuiteHierarchyDTO>> getTestSuitesOfProductKey(
-            @RequestParam String projectKey, @AuthenticationPrincipal CustomUserDetails customUserDetails){
+            @RequestParam String projectKey,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails){
         Project project = projectService.getProjectByKey(projectKey);
         projectAccessService.checkAccessOfUserInProject(
                 project, customUserDetails.getUser(), ProjectRole.VIEWER
@@ -55,7 +56,7 @@ public class TestSuiteController {
     }
 
 
-    @GetMapping("/suites")
+    @GetMapping("/view")
     public ResponseEntity<TestSuiteHierarchyDTO> getTestSuite(
             @RequestParam String projectKey,
             @RequestParam String suiteId,

@@ -1,9 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TestPlanRun } from '../models/testexecution';
-
 
 @Injectable({ providedIn: 'root' })
 export class TestPlanRunService {
@@ -12,23 +11,29 @@ export class TestPlanRunService {
 
   /**
    * Get all test runs for a given test plan.
-   * Endpoint: GET /projects/project-key/{projectKey}/testplans/{testPlanId}/testruns
+   * Endpoint: GET /testruns?projectKey={projectKey}&testPlanId={testPlanId}
    */
   getTestRunsByTestPlan(projectKey: string, testPlanId: string): Observable<TestPlanRun[]> {
-    return this.http.get<TestPlanRun[]>(
-      `${this.apiUrl}projects/project-key/${projectKey}/testplans/${testPlanId}/testruns`,
-      { withCredentials: true }
-    );
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId);
+    return this.http.get<TestPlanRun[]>(`${this.apiUrl}testruns`, {
+      withCredentials: true,
+      params
+    });
   }
 
   /**
-   * Get a single test run by ID.
-   * Endpoint: GET /projects/project-key/{projectKey}/testplans/{testPlanId}/testruns/{testRunId}
+   * Get a single test run by its ID.
+   * Endpoint: GET /testruns/view?projectKey={projectKey}&testRunId={testRunId}
    */
-  getTestRunById(projectKey: string, testPlanId: string, testRunId: string): Observable<TestPlanRun> {
-    return this.http.get<TestPlanRun>(
-      `${this.apiUrl}projects/project-key/${projectKey}/testplans/${testPlanId}/testruns/${testRunId}`,
-      { withCredentials: true }
-    );
+  getTestRunById(projectKey: string, testRunId: string): Observable<TestPlanRun> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('testRunId', testRunId);
+    return this.http.get<TestPlanRun>(`${this.apiUrl}testruns/view`, {
+      withCredentials: true,
+      params
+    });
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TestPlanRunItem } from '../models/testexecution';
@@ -11,26 +11,29 @@ export class TestPlanRunItemService {
 
   /**
    * Get all run items for a specific test run.
-   * Endpoint: GET /projects/project-key/{projectKey}/testplans/{testPlanId}/testruns/{testRunId}/items
+   * Endpoint: GET /test-run-items?projectKey={projectKey}&testRunId={testRunId}
    */
-  getRunItems(projectKey: string, testPlanId: string, testRunId: string): Observable<TestPlanRunItem[]> {
-    return this.http.get<TestPlanRunItem[]>(
-      `${this.apiUrl}projects/project-key/${projectKey}/testplans/${testPlanId}/testruns/${testRunId}/items`,
-      { withCredentials: true }
-    );
+  getRunItems(projectKey: string, testRunId: string): Observable<TestPlanRunItem[]> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('testRunId', testRunId);
+    return this.http.get<TestPlanRunItem[]>(`${this.apiUrl}test-run-items`, {
+      withCredentials: true,
+      params
+    });
   }
 
-  // test-plan-run-item.service.ts
-  getRunItemById(
-    projectKey: string,
-    testPlanId: string,
-    testRunId: string,
-    itemId: string
-  ): Observable<TestPlanRunItem> {
-    return this.http.get<TestPlanRunItem>(
-      `${this.apiUrl}projects/project-key/${projectKey}/testplans/${testPlanId}/testruns/${testRunId}/items/${itemId}`,
-      { withCredentials: true }
-    );
+  /**
+   * Get a single run item by its ID.
+   * Endpoint: GET /test-run-items/view?projectKey={projectKey}&testRunItemId={itemId}
+   */
+  getRunItemById(projectKey: string, itemId: string): Observable<TestPlanRunItem> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('testRunItemId', itemId);
+    return this.http.get<TestPlanRunItem>(`${this.apiUrl}test-run-items/view`, {
+      withCredentials: true,
+      params
+    });
   }
-
 }
