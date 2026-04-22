@@ -110,15 +110,9 @@
         </ng-container>
 
         <!-- ───────────────────────────────────────────────────────────────── -->
-        <!-- VERSION LEVEL TABS (version selected)                            -->
+        <!-- VERSION LEVEL TABS (version selected - these should be the ONLY tabs) -->
         <!-- ───────────────────────────────────────────────────────────────── -->
         <ng-container *ngIf="ctx.versionNumber">
-          <button class="tab" [class.active]="ctx.activeTab === 'details'" (click)="navigateToDetails(ctx.suiteId, ctx.testCaseId)">
-            Details
-          </button>
-          <button class="tab" [class.active]="ctx.activeTab === 'versions'" (click)="navigateToVersions()">
-            Versions
-          </button>
           <button class="tab" [class.active]="ctx.activeTab === 'steps'" (click)="navigateToVersionSteps(ctx.versionNumber)">
             Steps
           </button>
@@ -128,7 +122,7 @@
         </ng-container>
 
       </div>
-
+      
       <!-- OVERVIEW TAB -->
       <ng-container *ngIf="ctx.activeTab === 'overview'">
         <ng-container *ngIf="ctx.suiteId; else noSuiteSelected">
