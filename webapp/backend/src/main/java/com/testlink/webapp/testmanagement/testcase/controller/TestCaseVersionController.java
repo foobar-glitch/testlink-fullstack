@@ -93,7 +93,7 @@ public class TestCaseVersionController {
         return ResponseEntity.ok(testPlanRunItemMapper.toDtoList(testPlanRunItemService.findAllRunItemsOfTestCaseVersion(testCaseVersion)));
     }
 
-    @GetMapping("/runs/run")
+    @GetMapping("/runs/view")
     public ResponseEntity<TestPlanRunItemDTO> getRunOfVersionOfId(
             @RequestParam String projectKey,
             @RequestParam String runId,
