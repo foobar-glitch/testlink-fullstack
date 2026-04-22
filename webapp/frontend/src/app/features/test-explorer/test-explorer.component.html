@@ -24,16 +24,22 @@
 
       <!-- Breadcrumb -->
       <nav class="breadcrumb">
-        <span class="crumb link" (click)="clearSelection()">{{ projectName$ | async }}</span>
+        <span class="crumb link" (click)="navigateToOverview()">{{ projectName$ | async }}</span>
         <span class="sep">›</span>
-        <span class="crumb link" (click)="setTab('overview')">{{ planName || 'Overview' }}</span>
-        <ng-container *ngIf="suiteName$ | async as suiteName">
-          <span class="sep">›</span>
-          <span class="crumb link" (click)="setTab('cases')">{{ suiteName }}</span>
+        <span class="crumb link" (click)="navigateToOverview()">{{ planName || 'Overview' }}</span>
+        <ng-container *ngIf="suiteId$ | async as suiteId">
+          <ng-container *ngIf="suiteName$ | async as suiteName">
+            <span class="sep">›</span>
+            <span class="crumb link" (click)="navigateToCases(suiteId)">{{ suiteName }}</span>
+          </ng-container>
         </ng-container>
-        <ng-container *ngIf="selectedCaseLabel$ | async as caseLabel">
-          <span class="sep">›</span>
-          <span class="crumb link" (click)="setTab('details')">{{ caseLabel }}</span>
+        <ng-container *ngIf="testCaseId$ | async as testCaseId">
+          <ng-container *ngIf="suiteId$ | async as suiteIdForCase">
+            <ng-container *ngIf="selectedCaseLabel$ | async as caseLabel">
+              <span class="sep">›</span>
+              <span class="crumb link" (click)="navigateToDetails(suiteIdForCase, testCaseId)">{{ caseLabel }}</span>
+            </ng-container>
+          </ng-container>
         </ng-container>
         <ng-container *ngIf="versionNumber$ | async as versionNumber">
           <span class="sep">›</span>
@@ -43,11 +49,59 @@
 
       <!-- Tab bar -->
       <div class="tabs">
-        <button class="tab" [class.active]="(activeTab$ | async) === 'overview'" (click)="setTab('overview')">Overview</button>
-        <button class="tab" *ngIf="(suiteId$ | async)" [class.active]="(activeTab$ | async) === 'cases'" (click)="setTab('cases')">Test Cases</button>
-        <button class="tab" *ngIf="(testRunId$ | async)" [class.active]="(activeTab$ | async) === 'run-items'" (click)="setTab('run-items')">Run Items</button>
-        <button class="tab" *ngIf="(testCaseId$ | async)" [class.active]="(activeTab$ | async) === 'details'" (click)="setTab('details')">Details</button>
-        <button class="tab" *ngIf="(testCaseId$ | async) && (versionNumber$ | async)" [class.active]="(activeTab$ | async) === 'steps'" (click)="setTab('steps')">Steps</button>
+        <button
+          class="tab"
+          [class.active]="(activeTab$ | async) === 'overview'"
+          (click)="navigateToOverview()"
+        >Overview</button>
+
+        <ng-container *ngIf="suiteId$ | async as suiteId">
+          <button
+            class="tab"
+            [class.active]="(activeTab$ | async) === 'cases'"
+            (click)="navigateToCases(suiteId)"
+          >Test Cases</button>
+        </ng-container>
+
+        <button
+          class="tab"
+          *ngIf="(testRunId$ | async)"
+          [class.active]="(activeTab$ | async) === 'run-items'"
+          (click)="navigateToRunItems()"
+        >Run Items</button>
+
+        <ng-container *ngIf="testCaseId$ | async as testCaseId">
+          <ng-container *ngIf="suiteId$ | async as suiteIdForTab">
+            <button
+              class="tab"
+              [class.active]="(activeTab$ | async) === 'details'"
+              (click)="navigateToDetails(suiteIdForTab, testCaseId)"
+            >Details</button>
+          </ng-container>
+        </ng-container>
+
+        <button
+          class="tab"
+          *ngIf="(testCaseId$ | async)"
+          [class.active]="(activeTab$ | async) === 'versions'"
+          (click)="navigateToVersions()"
+        >Versions</button>
+
+        <ng-container *ngIf="versionNumber$ | async as versionNumber">
+          <button
+            class="tab"
+            *ngIf="(testCaseId$ | async)"
+            [class.active]="(activeTab$ | async) === 'steps'"
+            (click)="navigateToSteps(versionNumber)"
+          >Steps</button>
+
+          <button
+            class="tab"
+            *ngIf="(testCaseId$ | async)"
+            [class.active]="(activeTab$ | async) === 'runs'"
+            (click)="navigateToRuns()"
+          >Runs</button>
+        </ng-container>
       </div>
 
       <!-- Overview Tab -->
@@ -116,11 +170,25 @@
         <div class="filter-bar">
           <div class="filter-text">
             <span class="muted">Showing:</span>
-            <span class="filter-chip" *ngIf="(testCaseId$ | async) && (selectedCaseLabel$ | async) as caseLabel">Test Case: {{ caseLabel }}</span>
-            <span class="filter-chip" *ngIf="!(testCaseId$ | async) && (suiteName$ | async) as suiteName">Suite: {{ suiteName }}</span>
-            <span class="filter-chip neutral" *ngIf="!(testCaseId$ | async) && !(suiteId$ | async)">All runs</span>
+            <ng-container *ngIf="testCaseId$ | async as testCaseId">
+              <span class="filter-chip" *ngIf="selectedCaseLabel$ | async as caseLabel">
+                Test Case: {{ caseLabel }}
+              </span>
+            </ng-container>
+            <ng-container *ngIf="!(testCaseId$ | async)">
+              <span class="filter-chip" *ngIf="suiteName$ | async as suiteName">
+                Suite: {{ suiteName }}
+              </span>
+            </ng-container>
+            <span class="filter-chip neutral" *ngIf="!(testCaseId$ | async) && !(suiteId$ | async)">
+              All runs
+            </span>
           </div>
-          <button class="clear-btn" *ngIf="(suiteId$ | async) || (testCaseId$ | async)" (click)="clearRunFilter()">Clear filter</button>
+          <button
+            class="clear-btn"
+            *ngIf="(suiteId$ | async) || (testCaseId$ | async)"
+            (click)="clearRunFilter()"
+          >Clear filter</button>
         </div>
         <ng-container *ngIf="filteredRunItems$ | async as items; else loading">
           <app-execution-table [items]="items"></app-execution-table>
@@ -137,9 +205,34 @@
         <app-test-case-detail></app-test-case-detail>
       </ng-container>
 
+      <!-- Versions Tab -->
+      <ng-container *ngIf="(activeTab$ | async) === 'versions'">
+        <app-test-case-version-list></app-test-case-version-list>
+      </ng-container>
+
       <!-- Steps Tab -->
       <ng-container *ngIf="(activeTab$ | async) === 'steps'">
         <app-test-case-version-content></app-test-case-version-content>
+      </ng-container>
+
+      <!-- Runs Tab -->
+      <ng-container *ngIf="(activeTab$ | async) === 'runs'">
+        <app-test-case-version-runs></app-test-case-version-runs>
+      </ng-container>
+
+      <!-- Run Detail Tab -->
+      <ng-container *ngIf="(activeTab$ | async) === 'run-detail'">
+        <app-test-case-version-run-detail></app-test-case-version-run-detail>
+      </ng-container>
+
+      <!-- Step Results Tab -->
+      <ng-container *ngIf="(activeTab$ | async) === 'step-results'">
+        <app-test-step-result-list></app-test-step-result-list>
+      </ng-container>
+
+      <!-- Step Result Detail Tab -->
+      <ng-container *ngIf="(activeTab$ | async) === 'step-result-detail'">
+        <app-test-step-result-detail></app-test-step-result-detail>
       </ng-container>
 
     </ng-container>

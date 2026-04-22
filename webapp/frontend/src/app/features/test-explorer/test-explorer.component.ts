@@ -29,7 +29,11 @@ import { ExecutionTableComponent } from './execution-table/execution-table.compo
 import { TestCaseListComponent } from '../test-management/test-cases/test-case-list/test-case-list.component';
 import { TestCaseDetailComponent } from '../test-management/test-cases/test-case-detail/test-case-detail.component';
 import { TestCaseVersionContentComponent } from '../test-management/test-cases/test-case-version-content/test-case-version-content.component';
+import { TestCaseVersionListComponent } from '../test-management/test-cases/test-case-version-list/test-case-version-list.component';
 import { TestCaseVersionRunsComponent } from '../test-management/test-cases/test-case-version-runs/test-case-version-runs.component';
+import { TestCaseVersionRunDetailComponent } from '../test-management/test-cases/test-case-version-run-detail/test-case-version-run-detail.component';
+import { TestStepResultListComponent } from '../test-management/test-cases/test-step-result-list/test-step-result-list.component';
+import { TestStepResultDetailComponent } from '../test-management/test-cases/test-step-result-detail/test-step-result-detail.component';
 
 interface PlanStats {
   total: number;
@@ -38,6 +42,18 @@ interface PlanStats {
   blocked: number;
   notRun: number;
 }
+
+type ExplorerTab =
+  | 'overview'
+  | 'cases'
+  | 'details'
+  | 'steps'
+  | 'versions'
+  | 'runs'
+  | 'run-detail'
+  | 'run-items'
+  | 'step-results'
+  | 'step-result-detail';
 
 @Component({
   selector: 'app-test-explorer',
@@ -53,7 +69,11 @@ interface PlanStats {
     TestCaseListComponent,
     TestCaseDetailComponent,
     TestCaseVersionContentComponent,
+    TestCaseVersionListComponent,
     TestCaseVersionRunsComponent,
+    TestCaseVersionRunDetailComponent,
+    TestStepResultListComponent,
+    TestStepResultDetailComponent,
   ],
   templateUrl: './test-explorer.component.html',
   styleUrls: ['./test-explorer.component.scss'],
@@ -62,7 +82,6 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   private readonly ctx = inject(ContextService);
   private readonly treeState = inject(TreeStateService);
   private readonly plansSvc = inject(TestPlanService);
-  private readonly casesSvc = inject(TestCaseService);
   private readonly runSvc = inject(TestPlanRunService);
   private readonly runItemSvc = inject(TestPlanRunItemService);
   private readonly projSvc = inject(ProjectService);
@@ -70,7 +89,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  // State derived from query parameters
+  // ── State derived from query parameters (READ ONLY) ─────────────────────────
   readonly projectKey$ = this.route.queryParams.pipe(
     map(params => params['project'] || null),
     distinctUntilChanged()
@@ -92,15 +111,27 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     distinctUntilChanged()
   );
   readonly activeTab$ = this.route.queryParams.pipe(
-    map(params => params['tab'] || 'overview'),
+    map(params => (params['tab'] || 'overview') as ExplorerTab),
     distinctUntilChanged()
   );
   readonly testRunId$ = this.route.queryParams.pipe(
     map(params => params['testRunId'] || null),
     distinctUntilChanged()
   );
+  readonly runItemId$ = this.route.queryParams.pipe(
+    map(params => params['runItemId'] || null),
+    distinctUntilChanged()
+  );
+  readonly stepId$ = this.route.queryParams.pipe(
+    map(params => params['stepId'] || null),
+    distinctUntilChanged()
+  );
+  readonly actionId$ = this.route.queryParams.pipe(
+    map(params => params['actionId'] || null),
+    distinctUntilChanged()
+  );
 
-  // Data streams
+  // ── Data streams ──────────────────────────────────────────────────────────
   projectName$: Observable<string> = of('');
   testPlan$: Observable<TestPlan | null> = of(null);
   planStats$: Observable<PlanStats> = of({ total: 0, passed: 0, failed: 0, blocked: 0, notRun: 0 });
@@ -162,32 +193,145 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  // Navigation helpers
-  setTab(tab: string): void {
+  // ── Navigation helpers (write to URL with explicit tab) ────────────────────
+
+  /** Navigate to overview tab */
+  navigateToOverview(): void {
     this.router.navigate([], {
-      queryParams: { tab },
+      queryParams: {
+        suite: null,
+        testcase: null,
+        version: null,
+        tab: 'overview'
+      },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  clearSelection(): void {
+  /** Navigate to cases tab for a suite */
+  navigateToCases(suiteId: string): void {
     this.router.navigate([], {
-      queryParams: { suite: null, testcase: null, version: null, tab: 'overview' },
+      queryParams: {
+        suite: suiteId,
+        testcase: null,
+        version: null,
+        tab: 'cases'
+      },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
+  /** Navigate to details tab for a test case */
+  navigateToDetails(suiteId: string, testCaseId: string | number): void {
+    this.router.navigate([], {
+      queryParams: {
+        suite: suiteId,
+        testcase: String(testCaseId),
+        version: null,
+        tab: 'details'
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to steps tab for a specific version */
+  navigateToSteps(versionNumber: number): void {
+    this.router.navigate([], {
+      queryParams: {
+        version: versionNumber,
+        tab: 'steps'
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to versions tab */
+  navigateToVersions(): void {
+    this.router.navigate([], {
+      queryParams: {
+        version: null,
+        tab: 'versions'
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to runs tab */
+  navigateToRuns(): void {
+    this.router.navigate([], {
+      queryParams: {
+        tab: 'runs'
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to run detail */
+  navigateToRunDetail(runId: string): void {
+    this.router.navigate([], {
+      queryParams: {
+        runId,
+        tab: 'run-detail'
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to run items tab */
+  navigateToRunItems(testRunId?: string): void {
+    const params: any = { tab: 'run-items' };
+    if (testRunId) params.testRunId = testRunId;
+    this.router.navigate([], {
+      queryParams: params,
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to step results */
+  navigateToStepResults(stepId: string): void {
+    this.router.navigate([], {
+      queryParams: {
+        stepId,
+        tab: 'step-results'
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to step result detail */
+  navigateToStepResultDetail(actionId: string): void {
+    this.router.navigate([], {
+      queryParams: {
+        actionId,
+        tab: 'step-result-detail'
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Clear run filter */
   clearRunFilter(): void {
     this.router.navigate([], {
-      queryParams: { suite: null, testcase: null },
+      queryParams: {
+        suite: null,
+        testcase: null
+      },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  // Plan data loading
+  // ── Plan data loading ─────────────────────────────────────────────────────
   private loadPlanData(projectKey: string, planId: string): void {
     this.testPlan$ = this.plansSvc.getTestPlan(projectKey, planId).pipe(catchError(() => of(null)));
     this.subs.add(

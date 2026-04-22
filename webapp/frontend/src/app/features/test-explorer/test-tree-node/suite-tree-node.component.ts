@@ -40,12 +40,11 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
   private casesLoaded = false;
   private paramsSub?: Subscription;
 
-  // Selection state derived from URL
+  // Selection state derived from URL (READ ONLY)
   selectedSuiteId: string | null = null;
   selectedCaseId: string | null = null;
 
   ngOnInit(): void {
-    // Subscribe to query params for selection state
     this.paramsSub = this.route.queryParams.subscribe(params => {
       this.selectedSuiteId = params['suite'] || null;
       this.selectedCaseId = params['testcase'] || null;
@@ -79,13 +78,12 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
   }
 
   onSuiteClick(): void {
-    // Toggle expansion
     this.treeState.toggle(this.suite.testSuiteId);
     if (this.treeState.isExpanded(this.suite.testSuiteId)) {
       this.loadCases();
     }
 
-    // Update URL - this drives selection state
+    // Navigate with explicit tab = 'cases'
     this.router.navigate([], {
       queryParams: {
         suite: this.suite.testSuiteId,
@@ -103,7 +101,7 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
   onCaseClick(event: Event, tc: TestCase): void {
     event.stopPropagation();
 
-    // Update URL - this drives selection state
+    // Navigate with explicit tab = 'details'
     this.router.navigate([], {
       queryParams: {
         suite: this.suite.testSuiteId,
