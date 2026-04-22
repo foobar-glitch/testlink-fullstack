@@ -98,22 +98,24 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  // In suite-tree-node.component.ts
   onCaseClick(event: Event, tc: TestCase): void {
     event.stopPropagation();
 
-    // Navigate with explicit tab = 'details'
+    const projectKey = this.ctx.snapshot.projectKey;
+    const planId = this.ctx.snapshot.testPlanId;
+
     this.router.navigate([], {
       queryParams: {
+        project: projectKey,        // ADD THIS
+        plan: planId,               // ADD THIS
         suite: this.suite.testSuiteId,
         testcase: tc.identifierNumber,
-        version: null,
         tab: 'details',
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
-
-    this.cdr.markForCheck();
   }
 
   getCaseColor(_tc: TestCase): string {

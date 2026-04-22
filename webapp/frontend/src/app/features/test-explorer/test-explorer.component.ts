@@ -207,19 +207,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Navigate to cases tab for a suite */
-  navigateToCases(suiteId: string): void {
-    this.router.navigate([], {
-      queryParams: {
-        suite: suiteId,
-        testcase: null,
-        version: null,
-        tab: 'cases'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
+
 
   /** Navigate to a test case within a suite */
   navigateToTestCase(suiteId: string, testCaseId: string | number): void {
@@ -235,10 +223,6 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Navigate to details tab for a test case */
-  navigateToDetails(suiteId: string, testCaseId: string | number): void {
-    this.navigateToTestCase(suiteId, testCaseId);
-  }
 
   /** Navigate to a specific version's steps */
   navigateToSteps(versionNumber: number): void {
@@ -316,20 +300,6 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       queryParams: {
         actionId,
         tab: 'step-result-detail'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  /** Go back to overview (clear suite/testcase selection) */
-  navigateToOverview(): void {
-    this.router.navigate([], {
-      queryParams: {
-        suite: null,
-        testcase: null,
-        version: null,
-        tab: 'overview'
       },
       queryParamsHandling: 'merge',
       replaceUrl: true
@@ -437,5 +407,89 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   pct(n: number, total: number): number {
     if (!total) return 0;
     return Math.round((n / total) * 100);
+  }
+
+  /** Build query params preserving project and plan context */
+  private buildQueryParams(overrides: Partial<{
+    suite: string | null;
+    testcase: string | null;
+    version: number | null;
+    tab: ExplorerTab;
+    testRunId: string | null;
+    runItemId: string | null;
+    stepId: string | null;
+    actionId: string | null;
+  }>): { [key: string]: any } {
+    const snapshot = this.route.snapshot;
+    const params = snapshot.queryParams;
+
+    const result: { [key: string]: any } = {
+      project: params['project'] || this.ctx.snapshot.projectKey,
+      plan: params['plan'] || this.ctx.snapshot.testPlanId,
+    };
+
+    // Only add optional params if they have a value (keeps URL clean)
+    if (overrides.suite !== undefined) result['suite'] = overrides.suite;
+    else if (params['suite']) result['suite'] = params['suite'];
+
+    if (overrides.testcase !== undefined) result['testcase'] = overrides.testcase;
+    else if (params['testcase']) result['testcase'] = params['testcase'];
+
+    if (overrides.version !== undefined) result['version'] = overrides.version;
+    else if (params['version']) result['version'] = params['version'];
+
+    if (overrides.tab !== undefined) result['tab'] = overrides.tab;
+    else if (params['tab']) result['tab'] = params['tab'];
+
+    if (overrides.testRunId !== undefined) result['testRunId'] = overrides.testRunId;
+    else if (params['testRunId']) result['testRunId'] = params['testRunId'];
+
+    if (overrides.runItemId !== undefined) result['runItemId'] = overrides.runItemId;
+    else if (params['runItemId']) result['runItemId'] = params['runItemId'];
+
+    if (overrides.stepId !== undefined) result['stepId'] = overrides.stepId;
+    else if (params['stepId']) result['stepId'] = params['stepId'];
+
+    if (overrides.actionId !== undefined) result['actionId'] = overrides.actionId;
+    else if (params['actionId']) result['actionId'] = params['actionId'];
+
+    return result;
+  }
+
+// Now all navigation methods are clean and safe:
+  navigateToOverview(): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        suite: null,
+        testcase: null,
+        version: null,
+        tab: 'overview'
+      }),
+      replaceUrl: true
+    });
+  }
+
+  navigateToCases(suiteId: string): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        suite: suiteId,
+        testcase: null,
+        version: null,
+        tab: 'cases'
+      }),
+      replaceUrl: true
+    });
+  }
+
+  navigateToDetails(suiteId: string, testCaseId: string | number): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        suite: suiteId,
+        testcase: String(testCaseId),
+        version: null,
+        tab: 'details'
+      }),
+      replaceUrl: true
+    });
   }
 }
