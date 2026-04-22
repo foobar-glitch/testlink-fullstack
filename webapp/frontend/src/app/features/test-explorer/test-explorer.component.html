@@ -77,12 +77,22 @@
       <!-- Tab bar - for switching VIEWS of current context                 -->
       <!-- ================================================================ -->
       <div class="tabs">
-        <!-- Overview Tab -->
+
+        <!-- Plan Overview Tab (only when NO suite selected) -->
         <button
+          *ngIf="!ctx.suiteId"
           class="tab"
           [class.active]="ctx.activeTab === 'overview'"
-          (click)="ctx.suiteId ? navigateToSuiteOverview(ctx.suiteId) : navigateToPlanOverview()"
+          (click)="navigateToPlanOverview()"
         >Overview</button>
+
+        <!-- Test Cases Tab (only when suite IS selected) -->
+        <button
+          *ngIf="ctx.suiteId"
+          class="tab"
+          [class.active]="ctx.activeTab === 'overview'"
+          (click)="navigateToSuiteOverview(ctx.suiteId)"
+        >Test Cases</button>
 
         <!-- Run Items Tab (visible when test run is selected) -->
         <button
@@ -123,6 +133,7 @@
           [class.active]="ctx.activeTab === 'runs'"
           (click)="navigateToVersionRuns()"
         >Runs</button>
+
       </div>
 
       <!-- ================================================================ -->

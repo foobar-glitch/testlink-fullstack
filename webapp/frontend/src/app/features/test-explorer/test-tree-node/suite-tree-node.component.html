@@ -52,9 +52,9 @@
   ></app-suite-tree-node>
 </div>
 
-<!-- Test cases within this suite (shown when suite is open) -->
+<!-- Test cases within this suite -->
 <div class="cases-list" *ngIf="isOpen">
-  <ng-container *ngIf="testCases$ | async as cases">
+  <ng-container *ngIf="testCases$ | async as cases; else casesLoading">
     <div
       *ngFor="let tc of cases"
       class="case-row"
@@ -78,4 +78,9 @@
       <span class="case-id">{{ tc.testSuite?.project?.projectKey }}-{{ tc.identifierNumber }}</span>
     </div>
   </ng-container>
+  <ng-template #casesLoading>
+    <div class="cases-loading" [style.padding-left.px]="34 + depth * 14">
+      Loading...
+    </div>
+  </ng-template>
 </div>

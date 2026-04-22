@@ -77,6 +77,7 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  // In suite-tree-node.component.ts
   onSuiteClick(): void {
     this.treeState.toggle(this.suite.testSuiteId);
     if (this.treeState.isExpanded(this.suite.testSuiteId)) {
@@ -86,8 +87,7 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
     const projectKey = this.ctx.snapshot.projectKey;
     const planId = this.ctx.snapshot.testPlanId;
 
-    // Clicking a suite goes to overview with suite context
-    // The overview will show test cases for this suite
+    // Navigate with tab = 'overview' (this shows Test Cases tab because suite is present)
     this.router.navigate([], {
       queryParams: {
         project: projectKey,
@@ -95,7 +95,7 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
         suite: this.suite.testSuiteId,
         testcase: null,
         version: null,
-        tab: 'overview',  // ← Stay on overview, just change suite context
+        tab: 'overview',  // ← This is correct! The template will show "Test Cases" tab
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,
@@ -113,8 +113,8 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
 
     this.router.navigate([], {
       queryParams: {
-        project: projectKey,        // ADD THIS
-        plan: planId,               // ADD THIS
+        project: projectKey,
+        plan: planId,
         suite: this.suite.testSuiteId,
         testcase: tc.identifierNumber,
         tab: 'details',
@@ -122,6 +122,8 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
+
+    this.cdr.markForCheck(); // ← Add this
   }
 
   getCaseColor(_tc: TestCase): string {
