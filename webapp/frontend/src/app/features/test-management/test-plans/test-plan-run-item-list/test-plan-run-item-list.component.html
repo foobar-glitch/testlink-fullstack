@@ -6,10 +6,7 @@
         {{ runName }}
       </span>
     </div>
-    <button
-      class="back-btn"
-      [routerLink]="['/projects/project-key', projectKey, 'testplans', testPlanId, 'runs']"
-    >
+    <button class="back-btn" (click)="backToRuns()">
       ← Back to Runs
     </button>
   </header>

@@ -50,7 +50,7 @@ export class TestCaseDetailComponent implements OnInit {
       );
 
     this.versions$ = this.versionService
-      .getVersionsByTestCase(this.projectKey, this.testCaseIdentifier, this.suiteId)
+      .getVersionsByTestCase(this.projectKey, this.testCaseIdentifier)
       .pipe(
         catchError(err => {
           // Not critical, just show empty list
@@ -59,17 +59,13 @@ export class TestCaseDetailComponent implements OnInit {
       );
   }
 
-  getVersionLink(version: TestCaseVersion): string[] {
-    return [
-      '/projects/project-key',
-      this.projectKey,
-      'suites',
-      this.suiteId,
-      'testcases',
-      this.testCaseIdentifier.toString(),
-      'versions',
-      version.versionNumber.toString(),
-      'content'
-    ];
+  getVersionLink(version: TestCaseVersion): string {
+    const params = new URLSearchParams();
+    params.set('project', this.projectKey);
+    params.set('suite', this.suiteId);
+    params.set('testcase', this.testCaseIdentifier.toString());
+    params.set('version', version.versionNumber.toString());
+    params.set('tab', 'steps');
+    return `/explorer?${params.toString()}`;
   }
 }

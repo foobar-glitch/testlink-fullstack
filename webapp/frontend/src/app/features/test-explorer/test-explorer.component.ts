@@ -205,7 +205,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.runItems$ = this.runSvc.getTestRunsByTestPlan(projectKey, planId).pipe(
       switchMap(runs => {
         if (!runs.length) return of([]);
-        return this.runItemSvc.getRunItems(projectKey, planId, runs[0].testPlanRunId);
+        return this.runItemSvc.getRunItems(projectKey, runs[0].testPlanRunId);
       }),
       catchError(() => of([]))
     );

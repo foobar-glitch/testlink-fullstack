@@ -1,7 +1,7 @@
 <div class="runs-container">
   <header class="header">
     <h2>Execution History</h2>
-    <button class="back-btn" [routerLink]="['/projects/project-key', projectKey, 'suite', suiteId, 'testcase-identifier', testCaseIdentifier, 'versions', versionNumber, 'content']">
+    <button class="back-btn" (click)="backToVersion()">
       ← Back to Version
     </button>
   </header>

@@ -28,11 +28,9 @@ export class TestCaseService {
   getTestCase(
     projectKey: string,
     testCaseIdentifier: number,
-    suiteId: string,
   ): Observable<TestCase> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
-      .set('suiteId', suiteId)
       .set('testCaseIdentifier', testCaseIdentifier.toString());
     return this.http.get<TestCase>(`${this.apiUrl}testcases/view`, {
       withCredentials: true,

@@ -50,7 +50,6 @@ public class TestCaseController {
     @GetMapping("/view")
     public ResponseEntity<TestCaseDTO> getTestCaseOfProjectNumber(
             @RequestParam String projectKey,
-            @RequestParam String suiteId,
             @RequestParam Long testCaseIdentifier,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){

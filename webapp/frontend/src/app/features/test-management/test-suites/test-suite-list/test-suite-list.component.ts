@@ -1,10 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { TestSuiteService } from '../../../../core/services/test-suite.service';
-import { ProjectService } from '../../../../core/services/project.service';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { TestSuite } from '../../../../core/models/testsuite';
@@ -16,24 +15,29 @@ import { TestSuite } from '../../../../core/models/testsuite';
   templateUrl: './test-suite-list.component.html',
   styleUrls: ['./test-suite-list.component.scss']
 })
-export class TestSuiteListComponent {
+export class TestSuiteListComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly testSuiteService = inject(TestSuiteService);
-  private readonly projectService = inject(ProjectService);
 
-  readonly projectKey: string;
-  readonly suites$: Observable<TestSuite[]>;
+  suites$!: Observable<TestSuite[]>;
   errorMessage = '';
 
-  // test-suite-list.component.ts
-  constructor() {
-    this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
+  // Context from query params
+  projectKey!: string;
 
-    this.suites$ = this.testSuiteService.getTestSuitesByProjectKey(this.projectKey).pipe(
-      catchError(err => {
-        this.errorMessage = err.message || 'Failed to load test suites';
-        return of([]);
+  ngOnInit(): void {
+    this.suites$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        if (!project) return of([]);
+        this.projectKey = project;
+        return this.testSuiteService.getTestSuitesByProjectKey(project).pipe(
+          catchError(err => {
+            this.errorMessage = err.message || 'Failed to load test suites';
+            return of([]);
+          })
+        );
       })
     );
   }
@@ -44,14 +48,16 @@ export class TestSuiteListComponent {
   }
 
   selectSuite(suite: TestSuite): void {
-    // Navigate using the new project-key based URL structure
-    this.router.navigate([
-      '/projects/project-key',
-      this.projectKey,
-      'suites',
-      suite.testSuiteId,
-      'testcases'
-    ]);
+    const queryParams = {
+      project: this.projectKey,
+      suite: suite.testSuiteId,
+      tab: 'cases'
+    };
+    this.router.navigate(['/explorer'], { queryParams });
+  }
+
+  backToProjects(): void {
+    this.router.navigate(['/projects']);
   }
 
   hasChildren(suite: TestSuite): boolean {

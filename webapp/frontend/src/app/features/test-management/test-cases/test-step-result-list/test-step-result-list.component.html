@@ -1,15 +1,12 @@
 <div class="result-list-container">
-  <header class="header">
+  <header class="2header">
     <div class="title-section">
       <h2>Execution History</h2>
       <span *ngIf="stepAction$ | async as action" class="step-action">
         {{ action }}
       </span>
     </div>
-    <button
-      class="back-btn"
-      [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases', testCaseIdentifier, 'versions', versionNumber, 'content']"
-    >
+    <button class="back-btn" (click)="backToVersionContent()">
       ← Back to Steps
     </button>
   </header>

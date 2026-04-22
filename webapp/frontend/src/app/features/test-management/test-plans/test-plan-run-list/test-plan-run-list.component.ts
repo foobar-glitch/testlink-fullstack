@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -16,50 +16,65 @@ import { TestPlanRun } from '../../../../core/models/testexecution';
   templateUrl: './test-plan-run-list.component.html',
   styleUrls: ['./test-plan-run-list.component.scss'],
 })
-export class TestPlanRunListComponent {
+export class TestPlanRunListComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly testPlanRunService = inject(TestPlanRunService);
   private readonly testPlanService = inject(TestPlanService);
 
-  readonly projectKey: string;
-  readonly testPlanId: string;
-
-  runs$: Observable<TestPlanRun[]>;
-  testPlanName$: Observable<string>;
+  runs$!: Observable<TestPlanRun[]>;
+  testPlanName$!: Observable<string>;
   errorMessage = '';
 
-  constructor() {
-    this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
-    this.testPlanId = this.route.snapshot.paramMap.get('testPlanId')!;
+  // Context from query params
+  projectKey!: string;
+  planId!: string;
 
-    this.runs$ = this.testPlanRunService
-      .getTestRunsByTestPlan(this.projectKey, this.testPlanId)
-      .pipe(
-        catchError(err => {
-          this.errorMessage = err.message || 'Failed to load test runs';
-          return of([]);
-        })
-      );
+  ngOnInit(): void {
+    this.runs$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        const plan = params['plan'];
+        if (!project || !plan) return of([]);
+        this.projectKey = project;
+        this.planId = plan;
+        return this.testPlanRunService.getTestRunsByTestPlan(project, plan).pipe(
+          catchError(err => {
+            this.errorMessage = err.message || 'Failed to load test runs';
+            return of([]);
+          })
+        );
+      })
+    );
 
-    // Fetch test plan name for header
-    this.testPlanName$ = this.testPlanService
-      .getTestPlan(this.projectKey, this.testPlanId)
-      .pipe(
-        map(plan => plan.name),
-        catchError(() => of('Test Plan'))
-      );
+    this.testPlanName$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        const plan = params['plan'];
+        if (!project || !plan) return of('Test Plan');
+        return this.testPlanService.getTestPlan(project, plan).pipe(
+          map(p => p.name),
+          catchError(() => of('Test Plan'))
+        );
+      })
+    );
   }
 
   selectRun(run: TestPlanRun): void {
-    this.router.navigate([
-      '/projects/project-key',
-      this.projectKey,
-      'testplans',
-      this.testPlanId,
-      'runs',
-      run.testPlanRunId,
-      'items'
-    ]);
+    const queryParams = {
+      project: this.projectKey,
+      plan: this.planId,
+      testRunId: run.testPlanRunId,
+      tab: 'run-items'
+    };
+    this.router.navigate(['/explorer'], { queryParams });
+  }
+
+  backToPlans(): void {
+    const queryParams = {
+      project: this.projectKey,
+      tab: 'plans'
+    };
+    this.router.navigate(['/explorer'], { queryParams });
   }
 }

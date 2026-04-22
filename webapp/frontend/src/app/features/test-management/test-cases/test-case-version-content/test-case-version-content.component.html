@@ -1,8 +1,7 @@
 <div class="version-content-container">
 
   <header class="page-header">
-    <button class="back-btn"
-            [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases', testCaseIdentifier, 'versions']">
+    <button class="back-btn" (click)="backToVersions()">
       ← Versions
     </button>
     <div class="header-info">
@@ -82,13 +81,9 @@
       <!-- Steps -->
       <ng-container *ngIf="steps$ | async as steps">
         <div class="steps-section">
-          <h3>
-            Test Steps
-            <span class="step-count">{{ steps.length }}</span>
-          </h3>
           <div class="section-header">
-            <h3>Test Steps</h3>
-            <button class="view-runs-btn" [routerLink]="['/projects/project-key', projectKey, 'suite', suiteId, 'testcase-identifier', testCaseIdentifier, 'versions', versionNumber, 'runs']">
+            <h3>Test Steps <span class="step-count">{{ steps.length }}</span></h3>
+            <button class="view-runs-btn" (click)="viewAllRuns()">
               View All Runs →
             </button>
           </div>
@@ -138,4 +133,4 @@
     </div>
   </ng-template>
 
-</div>5
+</div>
