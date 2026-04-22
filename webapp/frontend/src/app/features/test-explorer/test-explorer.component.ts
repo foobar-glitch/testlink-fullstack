@@ -89,33 +89,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
   private subs = new Subscription();
 
-  private syncSelectionFromUrl(): void {
-    const snapshot = this.route.snapshot;
-    const suiteId = snapshot.paramMap.get('suiteId');
-    const testCaseId = snapshot.paramMap.get('testCaseIdentifier');
-
-    if (!suiteId || !this.projectKey) return;
-
-    // Wait for tree data to be available (it's set by MainLayoutComponent)
-    this.treeState.waitForTree().pipe(
-      filter(tree => tree.length > 0),
-      take(1)
-    ).subscribe(() => {
-      const suite = this.treeState.findSuiteById(suiteId);
-      if (suite) {
-        this.treeState.selectSuite(suite);
-        // Ensure parent nodes are expanded (treeState should handle, but we can also expand explicitly)
-        this.expandPathTo(suite);
-        if (testCaseId) {
-          const identifier = Number(testCaseId);
-          const testCase = this.findTestCaseInSuite(suite, identifier);
-          if (testCase) {
-            this.treeState.selectCase(testCase);
-          }
-        }
-      }
-    });
-  }
+  private isSyncingFromUrl = false;   // <-- add this
 
   private expandPathTo(suite: TestSuite): void {
     // Expand all ancestors – the tree state already has expand/collapse,
@@ -146,6 +120,18 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     );
     // Also call once initially
     this.syncSelectionFromUrl();
+
+    // React to tree selection changes and update URL
+    this.subs.add(
+      this.treeState.selection$.subscribe((sel) => {
+        this.selection = sel;
+        this.onSelectionChange(sel);
+        if (!this.isSyncingFromUrl) {
+          this.navigateToSelection(sel);
+        }
+        this.cdr.markForCheck();
+      })
+    );
 
     if (this.projectKey) {
       this.projectName$ = this.projSvc.getProjectByKey(this.projectKey).pipe(
@@ -204,7 +190,83 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
+
   // ── Selection handler ─────────────────────────────────────────────────
+  private navigateToSelection(sel: TreeSelection): void {
+    if (!this.projectKey) return;
+    if (sel.type === 'suite') {
+      this.router.navigate([
+        '/projects/project-key', this.projectKey,
+        'suites', sel.suite.testSuiteId, 'testcases'
+      ]);
+    } else if (sel.type === 'case') {
+      const tc = sel.testCase;
+      this.router.navigate([
+        '/projects/project-key', this.projectKey,
+        'suites', tc.testSuite.testSuiteId,
+        'testcases', tc.identifierNumber,
+        'versions'
+      ]);
+    } else if (sel.type === 'none') {
+      // Navigate back to the explorer overview (plan view)
+      this.router.navigate(['/explorer']);
+    }
+  }
+
+  private syncSelectionFromUrl(): void {
+    this.isSyncingFromUrl = true;
+    const snapshot = this.route.snapshot;
+    const suiteId = snapshot.paramMap.get('suiteId');
+    const testCaseId = snapshot.paramMap.get('testCaseIdentifier');
+
+    if (!suiteId || !this.projectKey) {
+      this.isSyncingFromUrl = false;
+      return;
+    }
+
+    this.treeState.waitForTree().pipe(
+      filter(tree => tree.length > 0),
+      take(1)
+    ).subscribe(() => {
+      const suite = this.treeState.findSuiteById(suiteId);
+      if (suite) {
+        this.treeState.selectSuite(suite);
+        this.expandPathTo(suite);
+        if (testCaseId) {
+          const identifier = Number(testCaseId);
+          const testCase = this.findTestCaseInSuite(suite, identifier);
+          if (testCase) {
+            this.treeState.selectCase(testCase);
+          }
+        }
+      }
+      this.isSyncingFromUrl = false;
+    });
+  }
+
+  // Remove manual navigation from these methods:
+  selectSuiteFromChip(suite: TestSuite): void {
+    this.treeState.selectSuite(suite);   // selection will trigger navigation
+  }
+
+  onCaseSelectedFromTable(tc: TestCase): void {
+    this.treeState.selectCase(tc);       // selection will trigger navigation
+  }
+
+  // Also update backToSuite to use navigation instead of direct selection:
+  backToSuite(): void {
+    const sel = this.selection;
+    if (sel.type === 'case' && sel.testCase.testSuite) {
+      const suite = sel.testCase.testSuite;
+      this.router.navigate([
+        '/projects/project-key', this.projectKey,
+        'suites', suite.testSuiteId, 'testcases'
+      ]);
+    } else {
+      this.treeState.clearSelection();
+    }
+  }
+
   private onSelectionChange(sel: TreeSelection): void {
     if (sel.type === 'suite') {
       this.loadSuiteCases(sel.suite);
@@ -277,29 +339,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.treeState.clearSelection();
   }
 
-  backToSuite(): void {
-    const sel = this.selection;
-    if (sel.type === 'case' && sel.testCase.testSuite) {
-      const suiteId = sel.testCase.testSuite.testSuiteId;
-      const fullSuite = this.treeState.findSuiteById(suiteId);
-      if (fullSuite) {
-        this.treeState.selectSuite(fullSuite);
-      } else {
-        // Fallback: tree not loaded or suite not found
-        this.treeState.clearSelection();
-      }
-    } else {
-      this.treeState.clearSelection();
-    }
-  }
 
-  selectSuiteFromChip(suite: TestSuite): void {
-    this.treeState.selectSuite(suite);
-  }
-
-  onCaseSelectedFromTable(tc: TestCase): void {
-    this.treeState.selectCase(tc);
-  }
 
   goToRuns(): void {
     if (this.projectKey && this.planId) {
