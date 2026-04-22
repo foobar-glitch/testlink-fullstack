@@ -11,7 +11,7 @@
 
     <div class="topbar-divider"></div>
 
-    <!-- Context selectors -->
+    <!-- Context selectors - ONLY Project and Test Plan -->
     <div class="context-group">
       <span class="ctx-label">Project</span>
       <select
@@ -45,24 +45,6 @@
           {{ plan.name }}
         </option>
       </select>
-
-      <div class="topbar-divider"></div>
-
-      <span class="ctx-label">Test Run</span>
-      <select
-        class="ctx-select"
-        [value]="selectedRunId"
-        (change)="onRunChange($event)"
-        [disabled]="!selectedPlanId"
-      >
-        <option value="" disabled>Select run…</option>
-        <option
-          *ngFor="let run of testRuns$ | async"
-          [value]="run.testPlanRunId"
-        >
-          {{ run.name }}
-        </option>
-      </select>
     </div>
 
     <!-- Spacer -->
@@ -83,7 +65,7 @@
         {{ sidebarCollapsed ? 'Show Sidebar' : 'Hide Sidebar' }}
       </button>
 
-      <!-- Dashboard link (new component) -->
+      <!-- Dashboard link -->
       <button
         class="topbar-btn"
         routerLink="/dashboard"
@@ -97,7 +79,7 @@
         Dashboard
       </button>
 
-      <!-- TestLink-style explorer -->
+      <!-- Explorer -->
       <button
         class="topbar-btn"
         routerLink="/explorer"
@@ -109,13 +91,6 @@
           <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
         </svg>
         Explorer
-      </button>
-
-      <button class="topbar-btn primary" (click)="goToExecution()" title="Execution view">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="5 3 19 12 5 21 5 3"/>
-        </svg>
-        Execution
       </button>
 
       <div class="user-avatar" [title]="currentUser?.username ?? ''">

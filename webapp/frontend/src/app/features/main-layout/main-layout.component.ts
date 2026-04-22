@@ -16,14 +16,13 @@ import { AuthService } from '../../core/services/auth.service';
 import { ProjectService } from '../../core/services/project.service';
 import { TestSuiteService } from '../../core/services/test-suite.service';
 import { TestPlanService } from '../../core/services/test-plan.service';
-import { TestPlanRunService } from '../../core/services/test-plan-run.service';
 import { ContextService } from '../../core/services/context.service';
 import { TreeStateService } from '../../core/services/tree-state.service';
 
 import { Authentication } from '../../core/models/authentication';
 import { ProjectMembership } from '../../core/models/project';
 import { TestSuite } from '../../core/models/testsuite';
-import { TestPlan, TestPlanRun } from '../../core/models/testexecution';
+import { TestPlan } from '../../core/models/testexecution';
 
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 import { SuiteTreeNodeComponent } from '../test-explorer/test-tree-node/suite-tree-node.component';
@@ -47,7 +46,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   private readonly projects = inject(ProjectService);
   private readonly suitesSvc = inject(TestSuiteService);
   private readonly plansSvc = inject(TestPlanService);
-  private readonly runsSvc = inject(TestPlanRunService);
   private readonly ctx = inject(ContextService);
   private readonly treeState = inject(TreeStateService);
   private readonly router = inject(Router);
@@ -60,13 +58,12 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     return (this.currentUser?.username ?? '').slice(0, 2).toUpperCase();
   }
 
+  // Only Project and Test Plan in header
   selectedProjectKey = '';
   selectedPlanId = '';
-  selectedRunId = '';
 
   memberships$: Observable<ProjectMembership[]> = of([]);
   testPlans$: Observable<TestPlan[]> = of([]);
-  testRuns$: Observable<TestPlanRun[]> = of([]);
 
   private _suiteLoading$ = new BehaviorSubject<boolean>(false);
   suiteLoading$: Observable<boolean> = this._suiteLoading$.asObservable();
@@ -99,7 +96,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.route.queryParams.pipe(take(1)).subscribe(params => {
       const projectKey = params['project'];
       const planId = params['plan'];
-      const testRunId = params['testRunId'];
 
       if (projectKey) {
         this.selectedProjectKey = projectKey;
@@ -110,12 +106,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       if (planId) {
         this.selectedPlanId = planId;
         this.ctx.setPlan(planId);
-        if (projectKey) {
-          this.loadRuns(projectKey, planId);
-        }
-      }
-      if (testRunId) {
-        this.selectedRunId = testRunId;
       }
 
       if (!projectKey && !planId) {
@@ -127,9 +117,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
         }
         if (saved.testPlanId) {
           this.selectedPlanId = saved.testPlanId;
-          if (saved.projectKey) {
-            this.loadRuns(saved.projectKey, saved.testPlanId);
-          }
         }
       }
     });
@@ -143,8 +130,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     const key = (event.target as HTMLSelectElement).value;
     this.selectedProjectKey = key;
     this.selectedPlanId = '';
-    this.selectedRunId = '';
-    this.testRuns$ = of([]);
     this.ctx.setProject(key);
     this.loadSuites(key);
     this.loadPlans(key);
@@ -160,26 +145,9 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     const id = (event.target as HTMLSelectElement).value;
     this.selectedPlanId = id;
     this.ctx.setPlan(id);
-    this.selectedRunId = '';
-
-    if (this.selectedProjectKey && id) {
-      this.loadRuns(this.selectedProjectKey, id);
-    } else {
-      this.testRuns$ = of([]);
-    }
 
     this.router.navigate([], {
-      queryParams: { plan: id, testRunId: null, suite: null, testcase: null },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  onRunChange(event: Event): void {
-    const runId = (event.target as HTMLSelectElement).value;
-    this.selectedRunId = runId;
-    this.router.navigate([], {
-      queryParams: { testRunId: runId, tab: 'run-items' },
+      queryParams: { plan: id, suite: null, testcase: null },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
@@ -194,13 +162,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       this.loadSuites(this.selectedProjectKey);
     }
     this.router.navigate(['/explorer']);
-  }
-
-  goToExecution(): void {
-    this.router.navigate(['/explorer'], {
-      queryParams: { tab: 'run-items' },
-      queryParamsHandling: 'merge'
-    });
   }
 
   logout(): void {
@@ -241,12 +202,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   private loadPlans(projectKey: string): void {
     this.testPlans$ = this.plansSvc
       .getTestPlansByProjectKey(projectKey)
-      .pipe(catchError(() => of([])));
-  }
-
-  private loadRuns(projectKey: string, planId: string): void {
-    this.testRuns$ = this.runsSvc
-      .getTestRunsByTestPlan(projectKey, planId)
       .pipe(catchError(() => of([])));
   }
 
