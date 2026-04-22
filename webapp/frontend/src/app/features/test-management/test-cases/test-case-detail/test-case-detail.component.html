@@ -43,55 +43,6 @@
       </div>
     </div>
 
-    <!-- Version History -->
-    <div class="versions-section">
-      <div class="section-header">
-        <h3>Version History</h3>
-        <button class="view-all-btn" (click)="viewAllVersions()">
-          View all →
-        </button>
-      </div>
-
-      <ng-container *ngIf="versions$ | async as versions; else versionLoading">
-        <div *ngIf="versions.length > 0; else noVersions" class="versions-table">
-          <table>
-            <thead>
-            <tr>
-              <th>Version</th>
-              <th>Priority</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let version of versions" class="version-row" (click)="navigateToVersion(version)">
-              <td>
-                <span class="version-num">v{{ version.versionNumber }}</span>
-              </td>
-              <td>
-                <app-priority-badge [priority]="version.priority"></app-priority-badge>
-              </td>
-              <td>
-                <app-status-badge [status]="version.status"></app-status-badge>
-              </td>
-              <td class="date-cell">{{ version.stamp.timeStamp.createdAt | date:'mediumDate' }}</td>
-              <td>
-                <span class="view-link">View →</span>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-        <ng-template #noVersions>
-          <p class="no-data">No versions found for this test case.</p>
-        </ng-template>
-      </ng-container>
-      <ng-template #versionLoading>
-        <app-spinner [inline]="true" label="Loading versions..."></app-spinner>
-      </ng-template>
-    </div>
-
   </ng-container>
 
   <ng-template #loading>

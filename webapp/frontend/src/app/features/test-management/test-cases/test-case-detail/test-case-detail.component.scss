@@ -50,7 +50,6 @@
   border: 1px solid vars.$border;
   border-radius: vars.$radius-md;
   padding: vars.$spacing-lg;
-  margin-bottom: vars.$spacing-xl;
   box-shadow: vars.$shadow-sm;
 }
 
@@ -96,101 +95,6 @@
     line-height: 1.6;
     color: vars.$text;
     margin: 0;
-  }
-}
-
-.versions-section {
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: vars.$spacing-md;
-  }
-
-  h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: vars.$text;
-    margin: 0;
-  }
-
-  .view-all-btn {
-    background: none;
-    border: none;
-    color: vars.$accent;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 6px 12px;
-    border-radius: vars.$radius-sm;
-    transition: vars.$transition;
-
-    &:hover {
-      background: vars.$accent-soft;
-    }
-  }
-
-  .versions-table {
-    background: vars.$white;
-    border: 1px solid vars.$border;
-    border-radius: vars.$radius-md;
-    overflow: hidden;
-    box-shadow: vars.$shadow-sm;
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-
-      th {
-        text-align: left;
-        padding: 12px 16px;
-        background: vars.$gray-light;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: vars.$muted;
-        border-bottom: 1px solid vars.$border;
-      }
-
-      td {
-        padding: 14px 16px;
-        border-bottom: 1px solid vars.$border;
-        color: vars.$text;
-        font-size: 13px;
-      }
-
-      tr:last-child td {
-        border-bottom: none;
-      }
-    }
-
-    .version-row {
-      cursor: pointer;
-      transition: background 0.15s;
-
-      &:hover {
-        background: vars.$accent-soft;
-      }
-    }
-
-    .version-num {
-      font-family: 'Fira Code', monospace;
-      font-weight: 700;
-      color: vars.$accent;
-    }
-
-    .view-link {
-      color: vars.$accent;
-      font-weight: 600;
-      font-size: 12px;
-    }
-  }
-
-  .no-data {
-    color: vars.$muted;
-    font-style: italic;
-    padding: vars.$spacing-md 0;
   }
 }
 
