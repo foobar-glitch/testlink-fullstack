@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 import { TestCaseService } from '../../../../core/services/test-case.service';
 import { TestCaseVersionService } from '../../../../core/services/test-case-version.service';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
@@ -36,7 +36,6 @@ export class TestCaseDetailComponent implements OnInit {
   versions$!: Observable<TestCaseVersion[]>;
   errorMessage = '';
 
-  // Context from query params
   projectKey!: string;
   suiteId!: string;
   testCaseIdentifier!: number;
@@ -72,32 +71,28 @@ export class TestCaseDetailComponent implements OnInit {
     );
   }
 
-  getVersionLink(version: TestCaseVersion): string {
-    const params = new URLSearchParams();
-    params.set('project', this.projectKey);
-    params.set('suite', this.suiteId);
-    params.set('testcase', this.testCaseIdentifier.toString());
-    params.set('version', version.versionNumber.toString());
-    params.set('tab', 'steps');
-    return `/explorer?${params.toString()}`;
+  navigateToVersion(version: TestCaseVersion): void {
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testcase: this.testCaseIdentifier,
+        version: version.versionNumber,
+        tab: 'steps'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
   viewAllVersions(): void {
-    const queryParams = {
-      project: this.projectKey,
-      suite: this.suiteId,
-      testcase: this.testCaseIdentifier,
-      tab: 'versions'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
-  }
-
-  backToTestCases(): void {
-    const queryParams = {
-      project: this.projectKey,
-      suite: this.suiteId,
-      tab: 'cases'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testcase: this.testCaseIdentifier,
+        tab: 'versions'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 }

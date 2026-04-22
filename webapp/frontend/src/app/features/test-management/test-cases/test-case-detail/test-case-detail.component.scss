@@ -2,22 +2,46 @@
 @use 'app/shared/styles/mixins' as mix;
 
 .test-case-detail-container {
-  padding: vars.$spacing-lg;
+  padding: 0;
 }
 
 .detail-header {
-  display: flex;
-  align-items: center;
-  gap: vars.$spacing-md;
   margin-bottom: vars.$spacing-lg;
-  border-bottom: 2px solid vars.$border;
-  padding-bottom: vars.$spacing-sm;
 
-  h2 {
-    font-size: 24px;
-    font-weight: 800;
-    color: vars.$text;
-    margin: 0;
+  .header-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+
+    h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: vars.$text;
+      margin: 0;
+    }
+  }
+
+  .header-sub {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: vars.$muted;
+
+    .identifier {
+      font-family: 'Fira Code', monospace;
+      color: vars.$accent;
+      font-weight: 600;
+    }
+
+    .dot {
+      color: vars.$border;
+    }
+
+    .suite-name {
+      color: vars.$muted;
+    }
   }
 }
 
@@ -32,9 +56,11 @@
 
 .meta-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: vars.$spacing-md;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: vars.$spacing-lg;
   margin-bottom: vars.$spacing-lg;
+  padding-bottom: vars.$spacing-md;
+  border-bottom: 1px solid vars.$border;
 }
 
 .meta-item {
@@ -45,25 +71,19 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: vars.$muted;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
 
   .value {
-    font-size: 15px;
+    font-size: 14px;
     color: vars.$text;
     font-weight: 500;
-
-    &.identifier {
-      font-family: 'Fira Code', monospace;
-      color: vars.$accent;
-      font-weight: 600;
-    }
   }
 }
 
 .description-section {
   h3 {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -75,35 +95,58 @@
     font-size: 14px;
     line-height: 1.6;
     color: vars.$text;
+    margin: 0;
   }
 }
 
 .versions-section {
-  h3 {
-    font-size: 18px;
-    font-weight: 700;
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: vars.$spacing-md;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
     color: vars.$text;
+    margin: 0;
+  }
+
+  .view-all-btn {
+    background: none;
+    border: none;
+    color: vars.$accent;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: vars.$radius-sm;
+    transition: vars.$transition;
+
+    &:hover {
+      background: vars.$accent-soft;
+    }
   }
 
   .versions-table {
     background: vars.$white;
     border: 1px solid vars.$border;
     border-radius: vars.$radius-md;
-    overflow: auto;
+    overflow: hidden;
     box-shadow: vars.$shadow-sm;
 
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 500px;
 
       th {
         text-align: left;
         padding: 12px 16px;
         background: vars.$gray-light;
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 11px;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         color: vars.$muted;
@@ -111,31 +154,43 @@
       }
 
       td {
-        padding: 12px 16px;
+        padding: 14px 16px;
         border-bottom: 1px solid vars.$border;
         color: vars.$text;
-        font-size: 14px;
+        font-size: 13px;
       }
 
       tr:last-child td {
         border-bottom: none;
       }
+    }
 
-      .view-link {
-        color: vars.$accent;
-        font-weight: 600;
-        text-decoration: none;
+    .version-row {
+      cursor: pointer;
+      transition: background 0.15s;
 
-        &:hover {
-          text-decoration: underline;
-        }
+      &:hover {
+        background: vars.$accent-soft;
       }
+    }
+
+    .version-num {
+      font-family: 'Fira Code', monospace;
+      font-weight: 700;
+      color: vars.$accent;
+    }
+
+    .view-link {
+      color: vars.$accent;
+      font-weight: 600;
+      font-size: 12px;
     }
   }
 
   .no-data {
     color: vars.$muted;
     font-style: italic;
+    padding: vars.$spacing-md 0;
   }
 }
 
@@ -144,27 +199,4 @@
   justify-content: center;
   align-items: center;
   min-height: 200px;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.back-btn {
-  background: none;
-  border: 1px solid #e8e8e8;
-  padding: 6px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s;
-
-  &:hover {
-    border-color: #6c63ff;
-    color: #6c63ff;
-    background: #f0eeff;
-  }
 }

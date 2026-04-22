@@ -1,16 +1,11 @@
 <div class="test-case-detail-container">
   <ng-container *ngIf="testCase$ | async as testCase; else loading">
 
-    <!-- Header with back button -->
+    <!-- Header -->
     <header class="detail-header">
-      <div class="header-left">
-        <button class="back-btn" (click)="backToTestCases()">
-          ← Back to Test Cases
-        </button>
-        <div class="header-main">
-          <h2>{{ testCase.title }}</h2>
-          <app-status-badge [status]="testCase.status"></app-status-badge>
-        </div>
+      <div class="header-main">
+        <h2>{{ testCase.title }}</h2>
+        <app-status-badge [status]="testCase.status"></app-status-badge>
       </div>
       <div class="header-sub">
         <span class="identifier">
@@ -21,7 +16,7 @@
       </div>
     </header>
 
-    <!-- Metadata card (no priority — that belongs to versions) -->
+    <!-- Metadata card -->
     <div class="detail-card">
       <div class="meta-grid">
         <div class="meta-item">
@@ -48,7 +43,7 @@
       </div>
     </div>
 
-    <!-- Version History — priority lives here per version -->
+    <!-- Version History -->
     <div class="versions-section">
       <div class="section-header">
         <h3>Version History</h3>
@@ -70,17 +65,19 @@
             </tr>
             </thead>
             <tbody>
-            <tr *ngFor="let version of versions">
+            <tr *ngFor="let version of versions" class="version-row" (click)="navigateToVersion(version)">
               <td>
                 <span class="version-num">v{{ version.versionNumber }}</span>
               </td>
               <td>
                 <app-priority-badge [priority]="version.priority"></app-priority-badge>
               </td>
-              <td><app-status-badge [status]="version.status"></app-status-badge></td>
-              <td class="date-cell">{{ version.testCase?.stamp?.timeStamp?.createdAt | date:'mediumDate' }}</td>
               <td>
-                <a [routerLink]="getVersionLink(version)" class="view-link">View →</a>
+                <app-status-badge [status]="version.status"></app-status-badge>
+              </td>
+              <td class="date-cell">{{ version.stamp.timeStamp.createdAt | date:'mediumDate' }}</td>
+              <td>
+                <span class="view-link">View →</span>
               </td>
             </tr>
             </tbody>
