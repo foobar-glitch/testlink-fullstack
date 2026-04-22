@@ -44,11 +44,7 @@
         <span class="crumb link" (click)="navigateToOverview()">{{ ctx.projectName }}</span>
         <span class="sep">›</span>
         <span class="crumb link" (click)="navigateToOverview()">{{ planName || 'Overview' }}</span>
-
-        <ng-container *ngIf="ctx.suiteId">
-          <span class="sep">›</span>
-          <span class="crumb link" (click)="navigateToCases(ctx.suiteId)">{{ ctx.suiteName || 'Suite' }}</span>
-        </ng-container>
+        
 
         <ng-container *ngIf="ctx.testCaseId">
           <span class="sep">›</span>
@@ -72,13 +68,6 @@
           (click)="navigateToOverview()"
         >Overview</button>
 
-        <!-- Cases - visible when suite is selected -->
-        <button
-          *ngIf="ctx.suiteId"
-          class="tab"
-          [class.active]="ctx.activeTab === 'cases'"
-          (click)="navigateToCases(ctx.suiteId)"
-        >Test Cases</button>
 
         <!-- Run Items - visible when test run is selected -->
         <button
@@ -246,12 +235,6 @@
         </ng-container>
       </ng-container>
 
-      <!-- ================================================================ -->
-      <!-- Test Cases Tab                                                  -->
-      <!-- ================================================================ -->
-      <ng-container *ngIf="ctx.activeTab === 'cases'">
-        <app-test-case-list></app-test-case-list>
-      </ng-container>
 
       <!-- ================================================================ -->
       <!-- Test Case Details Tab                                           -->

@@ -43,7 +43,6 @@ interface PlanStats {
 
 type ExplorerTab =
   | 'overview'
-  | 'cases'
   | 'details'
   | 'steps'
   | 'versions'
@@ -469,17 +468,6 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  navigateToCases(suiteId: string): void {
-    this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        suite: suiteId,
-        testcase: null,
-        version: null,
-        tab: 'cases'
-      }),
-      replaceUrl: true
-    });
-  }
 
   navigateToDetails(suiteId: string, testCaseId: string | number): void {
     this.router.navigate([], {
