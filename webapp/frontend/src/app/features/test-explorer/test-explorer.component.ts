@@ -38,7 +38,6 @@ import { TestCaseService } from '../../core/services/test-case.service';
 
 type ExplorerTab =
   | 'overview'
-  | 'stats'
   | 'details'
   | 'steps'
   | 'versions'
@@ -353,19 +352,6 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
-  navigateToStats(): void {
-    const snapshot = this.route.snapshot;
-    this.router.navigate([], {
-      queryParams: this.buildQueryParams({
-        suite: snapshot.queryParams['suite'] || null,
-        testcase: snapshot.queryParams['testcase'] || null,
-        version: snapshot.queryParams['version'] ? Number(snapshot.queryParams['version']) : null,
-        tab: 'stats'
-      }),
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
 
   navigateToTestCaseDetails(suiteId: string, testCaseId: string | number): void {
     this.router.navigate([], {

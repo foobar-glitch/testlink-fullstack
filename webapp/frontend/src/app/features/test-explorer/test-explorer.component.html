@@ -37,7 +37,7 @@
       filteredRunItems: filteredRunItems$ | async,
       suiteStats: suiteStats$ | async
     } as ctx">
-      
+
       <!-- Breadcrumb -->
       <nav class="breadcrumb">
         <span class="crumb link" (click)="navigateToPlanOverview()">{{ ctx.projectName }}</span>
@@ -80,9 +80,6 @@
           <button class="tab" [class.active]="ctx.activeTab === 'overview'" (click)="navigateToPlanOverview()">
             Overview
           </button>
-          <button class="tab" [class.active]="ctx.activeTab === 'stats'" (click)="navigateToStats()">
-            Stats
-          </button>
           <button *ngIf="ctx.testRunId" class="tab" [class.active]="ctx.activeTab === 'run-items'" (click)="navigateToRunItems()">
             Run Items
           </button>
@@ -94,9 +91,6 @@
         <ng-container *ngIf="ctx.suiteId && !ctx.testCaseId">
           <button class="tab" [class.active]="ctx.activeTab === 'overview'" (click)="navigateToSuiteOverview(ctx.suiteId)">
             Test Cases
-          </button>
-          <button class="tab" [class.active]="ctx.activeTab === 'stats'" (click)="navigateToStats()">
-            Stats
           </button>
           <button *ngIf="ctx.testRunId" class="tab" [class.active]="ctx.activeTab === 'run-items'" (click)="navigateToRunItems()">
             Run Items
@@ -187,30 +181,6 @@
             <p>Choose a test suite from the sidebar to view its test cases.</p>
           </div>
         </ng-template>
-      </ng-container>
-
-      <!-- STATS TAB -->
-      <ng-container *ngIf="ctx.activeTab === 'stats'">
-        <div class="panel-header">
-          <div>
-            <h1 class="panel-title">{{ planName || 'Test Plan Statistics' }}</h1>
-            <p class="panel-subtitle">{{ ctx.testPlan?.description || 'Execution statistics and run history' }}</p>
-          </div>
-        </div>
-
-        <!-- Test Run selector -->
-        <div class="run-selector" *ngIf="testRuns$ | async as runs">
-          <span class="run-label">Test Run</span>
-          <select class="run-select" [value]="ctx.testRunId" (change)="selectTestRun($any($event.target).value)">
-            <option *ngFor="let run of runs" [value]="run.testPlanRunId">
-              {{ run.name }} {{ run.environment ? '(' + run.environment + ')' : '' }}
-            </option>
-          </select>
-        </div>
-
-        <ng-container *ngIf="ctx.runItems as items; else loading">
-          <app-execution-table [items]="items"></app-execution-table>
-        </ng-container>
       </ng-container>
 
       <!-- RUN ITEMS TAB -->
