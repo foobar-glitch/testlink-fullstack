@@ -240,110 +240,6 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   }
 
 
-  /** Navigate to a specific version's steps */
-  navigateToSteps(versionNumber: number): void {
-    this.router.navigate([], {
-      queryParams: {
-        version: versionNumber,
-        tab: 'steps'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  /** Navigate to versions list */
-  navigateToVersions(): void {
-    this.router.navigate([], {
-      queryParams: {
-        version: null,
-        tab: 'versions'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  /** Navigate to runs for a version */
-  navigateToRuns(): void {
-    this.router.navigate([], {
-      queryParams: {
-        tab: 'runs'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  /** Navigate to run items (execution view) */
-  navigateToRunItems(): void {
-    this.router.navigate([], {
-      queryParams: {
-        tab: 'run-items'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  /** Navigate to a specific run detail */
-  navigateToRunDetail(runItemId: string): void {
-    this.router.navigate([], {
-      queryParams: {
-        runItemId,
-        tab: 'run-detail'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  /** Navigate to step results */
-  navigateToStepResults(stepId: string): void {
-    this.router.navigate([], {
-      queryParams: {
-        stepId,
-        tab: 'step-results'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  /** Navigate to step result detail */
-  navigateToStepResultDetail(actionId: string): void {
-    this.router.navigate([], {
-      queryParams: {
-        actionId,
-        tab: 'step-result-detail'
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  // ── SECONDARY CONTEXT: Test Run selection (filters data only) ──────────────
-
-  /** Select a test run - this filters execution data but preserves suite navigation */
-  selectTestRun(testRunId: string): void {
-    this.router.navigate([], {
-      queryParams: { testRunId },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
-
-  /** Clear suite/testcase filter from run items view */
-  clearRunFilter(): void {
-    this.router.navigate([], {
-      queryParams: {
-        suite: null,
-        testcase: null
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
-  }
 
   // ── Plan data loading ─────────────────────────────────────────────────────
   private loadPlanData(projectKey: string, planId: string): void {
@@ -472,8 +368,15 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     return result;
   }
 
-// Now all navigation methods are clean and safe:
-  navigateToOverview(): void {
+
+
+
+  // ────────────────────────────────────────────────────────────────────────────
+// Navigation Methods (each has ONE clear purpose, all use buildQueryParams)
+// ────────────────────────────────────────────────────────────────────────────
+
+  /** Navigate to plan overview (top level - clears suite/testcase/version) */
+  navigateToPlanOverview(): void {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({
         suite: null,
@@ -481,12 +384,32 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
         version: null,
         tab: 'overview'
       }),
+      queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
+  /** Navigate to suite overview (shows test cases for suite) */
+  navigateToSuiteOverview(suiteId: string): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        suite: suiteId,
+        testcase: null,
+        version: null,
+        tab: 'overview'
+      }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
 
+  /** Navigate to test case details (alias for navigateToTestCaseDetails) */
   navigateToDetails(suiteId: string, testCaseId: string | number): void {
+    this.navigateToTestCaseDetails(suiteId, testCaseId);
+  }
+
+  /** Navigate to test case details */
+  navigateToTestCaseDetails(suiteId: string, testCaseId: string | number): void {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({
         suite: suiteId,
@@ -494,19 +417,148 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
         version: null,
         tab: 'details'
       }),
+      queryParamsHandling: 'merge',
       replaceUrl: true
     });
   }
 
-  // Add this method to handle case selection from the table
+  /** Navigate to versions list for current test case */
+  navigateToVersions(): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        version: null,
+        tab: 'versions'
+      }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to steps for a specific version */
+  navigateToSteps(versionNumber: number): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        version: versionNumber,
+        tab: 'steps'
+      }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to steps for a version (alias - more explicit name) */
+  navigateToVersionSteps(versionNumber: number): void {
+    this.navigateToSteps(versionNumber);
+  }
+
+  /** Navigate to runs for a version (execution history) */
+  navigateToRuns(): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        tab: 'runs'
+      }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to runs for a version (alias - more explicit name) */
+  navigateToVersionRuns(): void {
+    this.navigateToRuns();
+  }
+
+  /** Navigate to run items (execution view for test run) */
+  navigateToRunItems(): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        tab: 'run-items'
+      }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to a specific run detail */
+  navigateToRunDetail(runItemId: string): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        runItemId,
+        tab: 'run-detail'
+      }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to step results (execution history for a step) */
+  navigateToStepResults(stepId: string): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        stepId,
+        tab: 'step-results'
+      }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Navigate to step result detail (single execution result) */
+  navigateToStepResultDetail(actionId: string): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        actionId,
+        tab: 'step-result-detail'
+      }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Secondary Context (preserves navigation state)
+// ────────────────────────────────────────────────────────────────────────────
+
+  /** Select a test run - filters execution data but preserves suite navigation */
+  selectTestRun(testRunId: string): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        testRunId
+      }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /** Clear suite/testcase filter from run items view */
+  clearRunFilter(): void {
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        suite: null,
+        testcase: null
+      }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+
+// ────────────────────────────────────────────────────────────────────────────
+// Event Handlers
+// ────────────────────────────────────────────────────────────────────────────
+
+  /** Handle case selection from the case table */
   onCaseSelected(testCase: TestCase): void {
     const suiteId = this.route.snapshot.queryParams['suite'];
     if (suiteId) {
-      this.navigateToDetails(suiteId, testCase.identifierNumber);
+      this.navigateToTestCaseDetails(suiteId, testCase.identifierNumber);
     }
   }
 
-// Update loadPlanData or add a new method to load test cases when suite changes
+// ────────────────────────────────────────────────────────────────────────────
+// Data Loading
+// ────────────────────────────────────────────────────────────────────────────
+
+  /** Load test cases for a specific suite */
   private loadTestCasesForSuite(projectKey: string, suiteId: string): void {
     this.testCasesForSuite$ = this.casesSvc
       .getTestCases(projectKey, suiteId)

@@ -39,37 +39,52 @@
       filteredRunItems: filteredRunItems$ | async
     } as ctx">
 
-      <!-- Breadcrumb -->
+      <!-- ================================================================ -->
+      <!-- Breadcrumb - for navigating UP the hierarchy                     -->
+      <!-- ================================================================ -->
       <nav class="breadcrumb">
-        <span class="crumb link" (click)="navigateToOverview()">{{ ctx.projectName }}</span>
+        <!-- Project level -->
+        <span class="crumb link" (click)="navigateToPlanOverview()">{{ ctx.projectName }}</span>
+
+        <!-- Plan level -->
         <span class="sep">›</span>
-        <span class="crumb link" (click)="navigateToOverview()">{{ planName || 'Overview' }}</span>
+        <span class="crumb link" (click)="navigateToPlanOverview()">{{ planName || 'Plan' }}</span>
 
+        <!-- Suite level (only if suite selected) -->
+        <ng-container *ngIf="ctx.suiteId">
+          <span class="sep">›</span>
+          <span class="crumb link" (click)="navigateToSuiteOverview(ctx.suiteId)">
+            {{ ctx.suiteName || 'Suite' }}
+          </span>
+        </ng-container>
 
+        <!-- Test Case level (only if test case selected) -->
         <ng-container *ngIf="ctx.testCaseId">
           <span class="sep">›</span>
-          <span class="crumb link" (click)="navigateToDetails(ctx.suiteId, ctx.testCaseId)">
+          <span class="crumb link" (click)="navigateToTestCaseDetails(ctx.suiteId, ctx.testCaseId)">
             {{ ctx.caseLabel || 'Test Case' }}
           </span>
         </ng-container>
 
+        <!-- Version level (only if version selected) -->
         <ng-container *ngIf="ctx.versionNumber">
           <span class="sep">›</span>
           <span class="crumb current">Version {{ ctx.versionNumber }}</span>
         </ng-container>
       </nav>
 
-      <!-- Tab bar -->
+      <!-- ================================================================ -->
+      <!-- Tab bar - for switching VIEWS of current context                 -->
+      <!-- ================================================================ -->
       <div class="tabs">
-        <!-- Overview - always visible -->
+        <!-- Overview Tab -->
         <button
           class="tab"
           [class.active]="ctx.activeTab === 'overview'"
-          (click)="navigateToOverview()"
+          (click)="ctx.suiteId ? navigateToSuiteOverview(ctx.suiteId) : navigateToPlanOverview()"
         >Overview</button>
 
-
-        <!-- Run Items - visible when test run is selected -->
+        <!-- Run Items Tab (visible when test run is selected) -->
         <button
           *ngIf="ctx.testRunId"
           class="tab"
@@ -77,15 +92,15 @@
           (click)="navigateToRunItems()"
         >Run Items</button>
 
-        <!-- Details - visible when test case is selected -->
+        <!-- Details Tab (visible when test case is selected) -->
         <button
           *ngIf="ctx.testCaseId"
           class="tab"
           [class.active]="ctx.activeTab === 'details'"
-          (click)="navigateToDetails(ctx.suiteId, ctx.testCaseId)"
+          (click)="navigateToTestCaseDetails(ctx.suiteId, ctx.testCaseId)"
         >Details</button>
 
-        <!-- Versions - visible when test case is selected -->
+        <!-- Versions Tab (visible when test case is selected) -->
         <button
           *ngIf="ctx.testCaseId"
           class="tab"
@@ -93,20 +108,20 @@
           (click)="navigateToVersions()"
         >Versions</button>
 
-        <!-- Steps - visible when version is selected -->
+        <!-- Steps Tab (visible when version is selected) -->
         <button
           *ngIf="ctx.versionNumber"
           class="tab"
           [class.active]="ctx.activeTab === 'steps'"
-          (click)="navigateToSteps(ctx.versionNumber)"
+          (click)="navigateToVersionSteps(ctx.versionNumber)"
         >Steps</button>
 
-        <!-- Runs - visible when version is selected -->
+        <!-- Runs Tab (visible when version is selected) -->
         <button
           *ngIf="ctx.versionNumber"
           class="tab"
           [class.active]="ctx.activeTab === 'runs'"
-          (click)="navigateToRuns()"
+          (click)="navigateToVersionRuns()"
         >Runs</button>
       </div>
 
@@ -225,6 +240,7 @@
         </ng-template>
 
       </ng-container>
+
       <!-- ================================================================ -->
       <!-- Run Items Tab                                                   -->
       <!-- ================================================================ -->
@@ -272,7 +288,6 @@
           <app-execution-table [items]="items"></app-execution-table>
         </ng-container>
       </ng-container>
-
 
       <!-- ================================================================ -->
       <!-- Test Case Details Tab                                           -->
