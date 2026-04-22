@@ -9,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 import { TestSuite, TestCase } from '../../../core/models/testsuite';
 import { TestCaseService } from '../../../core/services/test-case.service';
@@ -31,6 +32,7 @@ export class SuiteTreeNodeComponent implements OnInit {
   private readonly treeState = inject(TreeStateService);
   private readonly ctx       = inject(ContextService);
   private readonly cdr       = inject(ChangeDetectorRef);
+  private readonly router    = inject(Router);
 
   // Always an Observable (never null) — avoids the TS2769 type error with async pipe
   testCases$: Observable<TestCase[]> = of([]);
@@ -67,12 +69,30 @@ export class SuiteTreeNodeComponent implements OnInit {
     if (this.treeState.isExpanded(this.suite.testSuiteId)) {
       this.loadCases();
     }
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        suite: this.suite.testSuiteId,
+        testcase: null,
+        tab: 'cases',
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
     this.cdr.markForCheck();
   }
 
   onCaseClick(event: Event, tc: TestCase): void {
     event.stopPropagation();
     this.treeState.selectCase(tc);
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        suite: this.suite.testSuiteId,
+        testcase: tc.identifierNumber,
+        tab: 'details',
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
     this.cdr.markForCheck();
   }
 
