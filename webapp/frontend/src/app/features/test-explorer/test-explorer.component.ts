@@ -32,6 +32,8 @@ import { TestCaseVersionRunsComponent } from '../test-management/test-cases/test
 import { TestCaseVersionRunDetailComponent } from '../test-management/test-cases/test-case-version-run-detail/test-case-version-run-detail.component';
 import { TestStepResultListComponent } from '../test-management/test-cases/test-step-result-list/test-step-result-list.component';
 import { TestStepResultDetailComponent } from '../test-management/test-cases/test-step-result-detail/test-step-result-detail.component';
+import { TestCase } from '../../core/models/testsuite';
+import { TestCaseService } from '../../core/services/test-case.service';
 
 interface PlanStats {
   total: number;
@@ -80,11 +82,16 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   private readonly treeState = inject(TreeStateService);
   private readonly plansSvc = inject(TestPlanService);
   private readonly runSvc = inject(TestPlanRunService);
+  private readonly casesSvc = inject(TestCaseService);
   private readonly runItemSvc = inject(TestPlanRunItemService);
   private readonly projSvc = inject(ProjectService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  testCasesForSuite$: Observable<TestCase[]> = of([]);
+
+
 
   // ── State derived from query parameters (READ ONLY) ─────────────────────────
   readonly projectKey$ = this.route.queryParams.pipe(
@@ -147,6 +154,16 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       combineLatest([this.projectKey$, this.planId$]).subscribe(([project, plan]) => {
         if (project) this.ctx.setProject(project);
         if (plan) this.ctx.setPlan(plan);
+      })
+    );
+
+    this.subs.add(
+      combineLatest([this.projectKey$, this.suiteId$]).subscribe(([projectKey, suiteId]) => {
+        if (projectKey && suiteId) {
+          this.loadTestCasesForSuite(projectKey, suiteId);
+        } else {
+          this.testCasesForSuite$ = of([]);
+        }
       })
     );
 
@@ -480,4 +497,20 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       replaceUrl: true
     });
   }
+
+  // Add this method to handle case selection from the table
+  onCaseSelected(testCase: TestCase): void {
+    const suiteId = this.route.snapshot.queryParams['suite'];
+    if (suiteId) {
+      this.navigateToDetails(suiteId, testCase.identifierNumber);
+    }
+  }
+
+// Update loadPlanData or add a new method to load test cases when suite changes
+  private loadTestCasesForSuite(projectKey: string, suiteId: string): void {
+    this.testCasesForSuite$ = this.casesSvc
+      .getTestCases(projectKey, suiteId)
+      .pipe(catchError(() => of([])));
+  }
+
 }

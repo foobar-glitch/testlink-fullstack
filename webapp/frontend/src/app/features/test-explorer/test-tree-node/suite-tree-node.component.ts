@@ -83,13 +83,19 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
       this.loadCases();
     }
 
-    // Navigate with explicit tab = 'cases'
+    const projectKey = this.ctx.snapshot.projectKey;
+    const planId = this.ctx.snapshot.testPlanId;
+
+    // Clicking a suite goes to overview with suite context
+    // The overview will show test cases for this suite
     this.router.navigate([], {
       queryParams: {
+        project: projectKey,
+        plan: planId,
         suite: this.suite.testSuiteId,
         testcase: null,
         version: null,
-        tab: 'cases',
+        tab: 'overview',  // ← Stay on overview, just change suite context
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,
