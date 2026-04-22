@@ -2,129 +2,217 @@
 @use 'app/shared/styles/variables' as vars;
 @use 'app/shared/styles/mixins' as mix;
 
-// ── Page layout ───────────────────────────────────────────────────────────────
 .version-list-container {
-  max-width: 1000px;
+  max-width: 900px;
   margin: 0 auto;
   padding: vars.$spacing-xl vars.$spacing-lg;
 
-  @media (max-width: 600px) {
-    padding: vars.$spacing-lg vars.$spacing-md;
-  }
+  @media (max-width: 600px) { padding: vars.$spacing-lg vars.$spacing-md; }
 }
 
-// ── Header ────────────────────────────────────────────────────────────────────
-.header {
+// ── Page header ───────────────────────────────────────────────────────────────
+.page-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 2px solid vars.$text;
-  padding-bottom: 10px;
+  align-items: flex-start;
+  gap: vars.$spacing-md;
   margin-bottom: vars.$spacing-xl;
+  padding-bottom: vars.$spacing-md;
+  border-bottom: 1px solid vars.$border;
+}
 
-  .title-section {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
+.header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: vars.$spacing-md;
+  flex: 1;
+}
 
-    h2 {
-      font-size: 22px;
-      font-weight: 800;
-      text-transform: uppercase;
-      color: vars.$text;
-    }
+.back-btn { @include mix.btn-ghost; white-space: nowrap; flex-shrink: 0; }
 
-    .testcase-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: vars.$accent;
-    }
+.header-title {
+  h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: vars.$text;
+    margin: 0 0 4px;
+    line-height: 1.2;
   }
 }
 
-.back-btn {
-  @include mix.btn-ghost;
+.header-sub {
+  font-size: 13px;
+  color: vars.$muted;
 }
 
-// ── Versions table ────────────────────────────────────────────────────────────
-.versions-table {
-  background: vars.$white;
-  border: 1px solid vars.$border;
-  border-radius: vars.$radius-md;
-  box-shadow: vars.$shadow-sm;
-  overflow: hidden;
+// ── Version cards ─────────────────────────────────────────────────────────────
+.version-cards {
+  display: flex;
+  flex-direction: column;
+  gap: vars.$spacing-md;
+}
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
+.version-card {
+  @include mix.card;
+  padding: vars.$spacing-md vars.$spacing-lg;
+  cursor: pointer;
+  transition: vars.$transition;
 
-    th {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: vars.$muted;
-      padding: 12px 16px;
-      text-align: left;
-      background: vars.$gray-light;
-      border-bottom: 1px solid vars.$border;
-    }
-
-    td {
-      padding: 13px 16px;
-      text-align: left;
-      border-bottom: 1px solid vars.$border;
-      font-size: 14px;
-      color: vars.$text;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
+  &:hover {
+    border-color: vars.$accent-mid;
+    box-shadow: vars.$shadow-md;
   }
 
-  .clickable-row {
-    cursor: pointer;
-    transition: background 0.15s;
+  &.latest {
+    border-left: 3px solid vars.$accent;
+    padding-left: calc(vars.$spacing-lg - 2px);
+  }
+}
 
-    &:hover {
-      background: vars.$accent-soft;
-    }
+// ── Card top row ──────────────────────────────────────────────────────────────
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-sm;
+  flex-wrap: wrap;
+  margin-bottom: vars.$spacing-sm;
+}
+
+.version-badge {
+  background: vars.$accent;
+  color: vars.$white;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: vars.$radius-sm;
+  font-family: 'Fira Code', monospace;
+  letter-spacing: 0.2px;
+}
+
+.latest-tag {
+  background: rgba(vars.$color-success, 0.1);
+  color: vars.$color-success;
+  border: 1px solid rgba(vars.$color-success, 0.25);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: vars.$radius-pill;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-actions {
+  margin-left: auto;
+}
+
+.open-btn {
+  background: vars.$accent-soft;
+  border: 1px solid vars.$accent-mid;
+  color: vars.$accent;
+  padding: 5px 13px;
+  border-radius: vars.$radius-sm;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: vars.$font;
+  cursor: pointer;
+  transition: vars.$transition;
+  white-space: nowrap;
+
+  &:hover {
+    background: vars.$accent;
+    color: vars.$white;
+    border-color: vars.$accent;
+  }
+}
+
+// ── Stats row ─────────────────────────────────────────────────────────────────
+.card-stats {
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-lg;
+  padding: vars.$spacing-sm 0;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+
+  .stat-val {
+    font-size: 18px;
+    font-weight: 800;
+    color: vars.$text;
+    line-height: 1;
   }
 
-  .view-btn {
-    background: vars.$accent-soft;
-    border: 1px solid vars.$accent-mid;
-    color: vars.$accent;
-    padding: 5px 12px;
-    border-radius: vars.$radius-sm;
-    font-size: 12px;
+  .stat-lbl {
+    font-size: 11px;
+    color: vars.$muted;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
     font-weight: 600;
-    font-family: vars.$font;
-    cursor: pointer;
-    transition: vars.$transition;
-
-    &:hover {
-      background: vars.$accent;
-      color: vars.$white;
-      border-color: vars.$accent;
-    }
   }
+
+  &.pass .stat-val { color: vars.$color-success; }
+  &.fail .stat-val { color: vars.$color-danger; }
+  &.block .stat-val { color: vars.$color-warning; }
+  &.last, &.date { flex-direction: column; gap: 3px; }
+}
+
+.stat-divider {
+  width: 1px;
+  height: 32px;
+  background: vars.$border;
+  flex-shrink: 0;
+}
+
+.card-stats-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: vars.$spacing-sm 0;
+  font-size: 13px;
+  color: vars.$muted;
+}
+
+// ── Mini progress bar ─────────────────────────────────────────────────────────
+.mini-bar {
+  height: 6px;
+  border-radius: vars.$radius-pill;
+  background: #f0f0f0;
+  overflow: hidden;
+  display: flex;
+  margin-top: vars.$spacing-xs;
+
+  .bar-pass   { background: vars.$color-success; transition: width 0.4s ease; }
+  .bar-fail   { background: vars.$color-danger;  transition: width 0.4s ease; }
+  .bar-block  { background: vars.$color-warning; transition: width 0.4s ease; }
+  .bar-notrun { background: #ccc;                transition: width 0.4s ease; }
+}
+
+// ── Card footer ───────────────────────────────────────────────────────────────
+.card-footer {
+  font-size: 12px;
+  color: vars.$muted;
+  margin-top: vars.$spacing-xs;
+  padding-top: vars.$spacing-xs;
+  border-top: 1px solid vars.$border;
 }
 
 // ── States ────────────────────────────────────────────────────────────────────
-.loading-state,
-.error-state,
-.empty-state {
+.loading-state, .error-state, .empty-state {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 200px;
+  gap: vars.$spacing-sm;
 }
 
-.empty-state {
-  p {
-    font-size: 15px;
-    color: vars.$muted;
-  }
+.empty-icon { font-size: 36px; opacity: 0.4; }
+
+.empty-state p {
+  font-size: 14px;
+  color: vars.$muted;
 }

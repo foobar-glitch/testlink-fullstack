@@ -1,48 +1,106 @@
 <div class="version-list-container">
-  <header class="header">
-    <div class="title-section">
-      <h2>Version History</h2>
-      <span *ngIf="testCaseTitle$ | async as title" class="testcase-title">
-        {{ title }}
-      </span>
+
+  <header class="page-header">
+    <div class="header-left">
+      <button class="back-btn" [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases']">
+        ← Test Cases
+      </button>
+      <div class="header-title">
+        <h1 *ngIf="testCaseTitle$ | async as title">{{ title }}</h1>
+        <p class="header-sub">Version history · {{ projectKey }}-{{ testCaseIdentifier }}</p>
+      </div>
     </div>
-    <button
-      class="back-btn"
-      [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases']"
-    >
-      ← Back to Test Cases
-    </button>
   </header>
 
-  <div *ngIf="errorMessage" class="error-state">
-    <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
-  </div>
+  <app-error-banner *ngIf="errorMessage" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
 
   <ng-container *ngIf="versions$ | async as versions; else loading">
-    <div *ngIf="versions.length > 0; else empty" class="versions-table">
-      <table>
-        <thead>
-        <tr>
-          <th>Version</th>
-          <th>Status</th>
-          <th>Created</th>
-          <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let version of versions" class="clickable-row">
-          <td>v{{ version.versionNumber }}</td>
-          <td><app-status-badge [status]="version.status"></app-status-badge></td>
-          <td>{{ version.testCase.stamp.timeStamp.createdAt | date:'medium' }}</td>
-          <td>
-            <button class="view-btn" (click)="viewVersion(version)">View</button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
+    <ng-container *ngIf="versions.length > 0; else empty">
+
+      <!-- Version cards -->
+      <div class="version-cards">
+        <div
+          *ngFor="let version of versions"
+          class="version-card"
+          [class.latest]="version.versionNumber === latestVersionNumber(versions)"
+          (click)="viewVersion(version)"
+        >
+          <!-- Card header -->
+          <div class="card-top">
+            <div class="version-badge">v{{ version.versionNumber }}</div>
+
+            <!-- Priority comes from the VERSION, not the test case -->
+            <app-priority-badge [priority]="version.priority"></app-priority-badge>
+            <app-status-badge [status]="version.status"></app-status-badge>
+
+            <span class="latest-tag" *ngIf="version.versionNumber === latestVersionNumber(versions)">
+              Latest
+            </span>
+            <div class="card-actions">
+              <button class="open-btn" (click)="viewVersion(version); $event.stopPropagation()">
+                Open →
+              </button>
+            </div>
+          </div>
+
+          <!-- Inline stats (loaded lazily per version card) -->
+          <div class="card-stats" *ngIf="getStats(version) | async as stats; else statsLoading">
+            <div class="stat-item">
+              <span class="stat-val">{{ stats.totalExecutions }}</span>
+              <span class="stat-lbl">Executions</span>
+            </div>
+            <div class="stat-item pass" *ngIf="stats.totalExecutions > 0">
+              <span class="stat-val">{{ stats.passedCount }}</span>
+              <span class="stat-lbl">Passed</span>
+            </div>
+            <div class="stat-item fail" *ngIf="stats.totalExecutions > 0">
+              <span class="stat-val">{{ stats.failedCount }}</span>
+              <span class="stat-lbl">Failed</span>
+            </div>
+            <div class="stat-item block" *ngIf="stats.totalExecutions > 0">
+              <span class="stat-val">{{ stats.blockedCount }}</span>
+              <span class="stat-lbl">Blocked</span>
+            </div>
+            <div class="stat-divider" *ngIf="stats.totalExecutions > 0"></div>
+            <div class="stat-item last" *ngIf="stats.lastExecutionStatus">
+              <app-test-run-status-badge [status]="stats.lastExecutionStatus"></app-test-run-status-badge>
+              <span class="stat-lbl">Last result</span>
+            </div>
+            <div class="stat-item date" *ngIf="stats.lastExecutedAt">
+              <span class="stat-val">{{ stats.lastExecutedAt | date:'mediumDate' }}</span>
+              <span class="stat-lbl">Last run</span>
+            </div>
+          </div>
+          <ng-template #statsLoading>
+            <div class="card-stats-loading">
+              <app-spinner [inline]="true"></app-spinner>
+              <span>Loading stats…</span>
+            </div>
+          </ng-template>
+
+          <!-- Mini progress bar -->
+          <ng-container *ngIf="getStats(version) | async as stats">
+            <div class="mini-bar" *ngIf="stats.totalExecutions > 0" [title]="barTitle(stats)">
+              <div class="bar-pass"  [style.width.%]="pct(stats.passedCount,  stats.totalExecutions)"></div>
+              <div class="bar-fail"  [style.width.%]="pct(stats.failedCount,  stats.totalExecutions)"></div>
+              <div class="bar-block" [style.width.%]="pct(stats.blockedCount, stats.totalExecutions)"></div>
+              <div class="bar-notrun"
+                   [style.width.%]="pct(stats.totalExecutions - stats.passedCount - stats.failedCount - stats.blockedCount, stats.totalExecutions)">
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Footer meta -->
+          <div class="card-footer">
+            <span>Created {{ version.testCase?.stamp?.timeStamp?.createdAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
     <ng-template #empty>
       <div class="empty-state">
+        <div class="empty-icon">📋</div>
         <p>No versions found for this test case.</p>
       </div>
     </ng-template>
@@ -53,4 +111,5 @@
       <app-spinner label="Loading versions..."></app-spinner>
     </div>
   </ng-template>
+
 </div>

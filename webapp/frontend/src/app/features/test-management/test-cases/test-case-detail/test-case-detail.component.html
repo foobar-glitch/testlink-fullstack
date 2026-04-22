@@ -1,28 +1,27 @@
 <div class="test-case-detail-container">
   <ng-container *ngIf="testCase$ | async as testCase; else loading">
+
+    <!-- Header -->
     <header class="detail-header">
-      <h2>{{ testCase.title }}</h2>
-      <app-status-badge [status]="testCase.status"></app-status-badge>
+      <div class="header-main">
+        <h2>{{ testCase.title }}</h2>
+        <app-status-badge [status]="testCase.status"></app-status-badge>
+      </div>
+      <div class="header-sub">
+        <span class="identifier">
+          {{ testCase.testSuite?.project?.projectKey ?? projectKey }}-{{ testCase.identifierNumber }}
+        </span>
+        <span class="dot">·</span>
+        <span class="suite-name">{{ testCase.testSuite.name }}</span>
+      </div>
     </header>
 
+    <!-- Metadata card (no priority — that belongs to versions) -->
     <div class="detail-card">
       <div class="meta-grid">
         <div class="meta-item">
-          <span class="label">ID</span>
-          <!-- project may be undefined if backend omits it; fall back to injected projectKey -->
-          <span class="value identifier">
-            {{ testCase.testSuite?.project?.projectKey ?? projectKey }}-{{ testCase.identifierNumber }}
-          </span>
-        </div>
-        <div class="meta-item">
-          <span class="label">Suite</span>
-          <span class="value">{{ testCase.testSuite.name }}</span>
-        </div>
-        <div class="meta-item">
           <span class="label">Status</span>
-          <span class="value">
-            <app-status-badge [status]="testCase.status"></app-status-badge>
-          </span>
+          <app-status-badge [status]="testCase.status"></app-status-badge>
         </div>
         <div class="meta-item">
           <span class="label">Created By</span>
@@ -30,28 +29,37 @@
         </div>
         <div class="meta-item">
           <span class="label">Created At</span>
-          <span class="value">{{ testCase.stamp.timeStamp.createdAt | date:'medium' }}</span>
+          <span class="value">{{ testCase.stamp.timeStamp.createdAt | date:'mediumDate' }}</span>
         </div>
         <div class="meta-item" *ngIf="testCase.stamp.timeStamp.updatedAt">
           <span class="label">Updated At</span>
-          <span class="value">{{ testCase.stamp.timeStamp.updatedAt | date:'medium' }}</span>
+          <span class="value">{{ testCase.stamp.timeStamp.updatedAt | date:'mediumDate' }}</span>
         </div>
       </div>
 
-      <div class="description-section">
+      <div class="description-section" *ngIf="testCase.description">
         <h3>Description</h3>
-        <p>{{ testCase.description || 'No description provided.' }}</p>
+        <p>{{ testCase.description }}</p>
       </div>
     </div>
 
+    <!-- Version History — priority lives here per version -->
     <div class="versions-section">
-      <h3>Version History</h3>
+      <div class="section-header">
+        <h3>Version History</h3>
+        <button class="view-all-btn"
+                [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases', testCaseIdentifier, 'versions']">
+          View all →
+        </button>
+      </div>
+
       <ng-container *ngIf="versions$ | async as versions; else versionLoading">
         <div *ngIf="versions.length > 0; else noVersions" class="versions-table">
           <table>
             <thead>
             <tr>
               <th>Version</th>
+              <th>Priority</th>
               <th>Status</th>
               <th>Created</th>
               <th></th>
@@ -59,11 +67,17 @@
             </thead>
             <tbody>
             <tr *ngFor="let version of versions">
-              <td>v{{ version.versionNumber }}</td>
-              <td><app-status-badge [status]="version.status"></app-status-badge></td>
-              <td>{{ version.testCase.stamp.timeStamp.createdAt | date:'medium' }}</td>
               <td>
-                <a [routerLink]="getVersionLink(version)" class="view-link">View Details →</a>
+                <span class="version-num">v{{ version.versionNumber }}</span>
+              </td>
+              <td>
+                <!-- Priority is on the VERSION, not the test case -->
+                <app-priority-badge [priority]="version.priority"></app-priority-badge>
+              </td>
+              <td><app-status-badge [status]="version.status"></app-status-badge></td>
+              <td class="date-cell">{{ version.testCase?.stamp?.timeStamp?.createdAt | date:'mediumDate' }}</td>
+              <td>
+                <a [routerLink]="getVersionLink(version)" class="view-link">View →</a>
               </td>
             </tr>
             </tbody>
@@ -77,6 +91,7 @@
         <app-spinner [inline]="true" label="Loading versions..."></app-spinner>
       </ng-template>
     </div>
+
   </ng-container>
 
   <ng-template #loading>

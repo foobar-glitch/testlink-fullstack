@@ -1,0 +1,32 @@
+@use '../../../shared/styles/variables' as vars;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: vars.$radius-pill;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+
+  &.high {
+    background: rgba(#d94040, 0.10);
+    color: #b02828;
+    border-color: rgba(#d94040, 0.25);
+  }
+
+  &.medium {
+    background: rgba(#c49a00, 0.10);
+    color: #9a7800;
+    border-color: rgba(#c49a00, 0.25);
+  }
+
+  &.low {
+    background: rgba(#18a76a, 0.10);
+    color: #0d7a4e;
+    border-color: rgba(#18a76a, 0.25);
+  }
+}

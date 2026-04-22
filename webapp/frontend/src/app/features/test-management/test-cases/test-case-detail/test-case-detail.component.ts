@@ -11,6 +11,7 @@ import { ErrorBannerComponent } from '../../../../shared/components/error-banner
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { TestCase } from '../../../../core/models/testsuite';
 import { TestCaseVersion } from '../../../../core/models/testsuite';
+import { PriorityBadgeComponent } from '../../../../shared/components/priority-badge/priority-badge.component';
 
 @Component({
   selector: 'app-test-case-detail',
@@ -19,6 +20,7 @@ import { TestCaseVersion } from '../../../../core/models/testsuite';
     CommonModule,
     RouterModule,
     SpinnerComponent,
+    PriorityBadgeComponent,
     ErrorBannerComponent,
     StatusBadgeComponent
   ],

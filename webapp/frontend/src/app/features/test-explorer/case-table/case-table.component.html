@@ -52,9 +52,6 @@
           <td class="id-cell">{{ tc.testSuite?.project?.projectKey }}-{{ tc.identifierNumber }}</td>
           <td>{{ tc.title }}</td>
           <td><app-status-badge [status]="tc.status"></app-status-badge></td>
-          <td>
-            <span class="priority-pill" [ngClass]="tc.priority">{{ tc.priority | titlecase }}</span>
-          </td>
           <td class="muted">{{ tc.stamp?.timeStamp?.createdAt | date:'mediumDate' }}</td>
         </tr>
       </tbody>

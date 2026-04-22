@@ -18,7 +18,8 @@ export interface ProjectMembership {
   project: Project;
   role: ProjectRole;
 }
-
+// TODO projectStats like testCaseStats
+// SuiteStats
 export interface ProjectStats {
   suiteCount: number;
   testCaseCount: number;

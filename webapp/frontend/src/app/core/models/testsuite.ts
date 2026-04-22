@@ -58,7 +58,6 @@ export interface TestCase {
   testSuite: TestSuiteItem;
   identifierNumber: number;
   title: string;
-  priority?: TestCasePriority;
   description: string;
   status: TestCaseStatus;
   stamp: UserCreatedTimeStamp;
@@ -82,7 +81,7 @@ export interface TestCaseVersion {
   priority: TestCasePriority;
   versionNumber: number;
   status: TestCaseVersionStatus;
-  stam: UserCreatedTimeStamp;
+  stamp: UserCreatedTimeStamp;
 }
 
 export interface TestStep {
