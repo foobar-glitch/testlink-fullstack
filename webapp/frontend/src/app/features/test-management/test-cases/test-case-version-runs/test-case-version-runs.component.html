@@ -1,0 +1,25 @@
+<div class="runs-container">
+  <header class="header">
+    <h2>Execution History</h2>
+    <button class="back-btn" [routerLink]="['/projects/project-key', projectKey, 'suite', suiteId, 'testcase-identifier', testCaseIdentifier, 'versions', versionNumber, 'content']">
+      ← Back to Version
+    </button>
+  </header>
+
+  <app-error-banner *ngIf="errorMessage" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
+
+  <ng-container *ngIf="runs$ | async as runs; else loading">
+    <app-execution-table
+      [items]="runs"
+      (itemSelected)="onRunSelected($event)"
+      *ngIf="runs.length; else empty"
+    ></app-execution-table>
+    <ng-template #empty>
+      <div class="empty-state">No execution records found for this version.</div>
+    </ng-template>
+  </ng-container>
+
+  <ng-template #loading>
+    <app-spinner label="Loading execution history..."></app-spinner>
+  </ng-template>
+</div>

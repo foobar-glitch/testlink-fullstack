@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { TestCase, TestSuite } from '../models/testsuite';
+import { filter } from 'rxjs/operators';
 
 export type TreeSelection =
   | { type: 'none' }
@@ -14,12 +15,21 @@ export class TreeStateService {
 
   private expandedIds = new Set<string>();
 
-  // Store the full tree for lookups
-  private treeData: TestSuite[] = [];
+  private treeDataSubject = new BehaviorSubject<TestSuite[]>([]);
+  readonly treeData$ = this.treeDataSubject.asObservable();
 
   setTreeData(data: TestSuite[]): void {
     this.treeData = data;
+    this.treeDataSubject.next(data);
   }
+
+  waitForTree(): Observable<TestSuite[]> {
+    return this.treeData$.pipe(filter(data => data.length > 0));
+  }
+
+  // Store the full tree for lookups
+  private treeData: TestSuite[] = [];
+
 
   findSuiteById(id: string): TestSuite | undefined {
     return this.findRecursive(this.treeData, id);

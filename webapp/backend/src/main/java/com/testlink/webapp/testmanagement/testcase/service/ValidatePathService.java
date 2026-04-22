@@ -71,7 +71,18 @@ public class ValidatePathService {
                 .build();
     }
 
-    public ProjectTestSuiteTestCaseTestVersionTestStep checkTestSuitePath(String projectKey, String suiteId, Long testCaseIdentifier, Long versionId, String stepId){
+    public ProjectTestPlanRunItem checkTestSuiteTestRunPath(String projectKey, String suiteId, Long testCaseIdentifier, Long versionId, String runId){
+        ProjectTestSuiteTestCaseTestVersion data = this.checkTestSuitePath(projectKey, suiteId, testCaseIdentifier, versionId);
+        //TestPlanRunItem
+        TestPlanRunItem testPlanRunItem = testPlanRunItemService.findByTestPlanRunItemId(fromBase62(runId));
+
+        if(!data.testCaseVersion().equals(testPlanRunItem.getTestCaseVersion())){
+            throw new BadRequestException(String.format("RunId %s not in TestCaseVersion %d", runId, versionId));
+        }
+        return ProjectTestPlanRunItem.builder().project(data.project()).testPlanRunItem(testPlanRunItem).build();
+    }
+
+    public ProjectTestSuiteTestCaseTestVersionTestStep checkTestSuiteTestStepPath(String projectKey, String suiteId, Long testCaseIdentifier, Long versionId, String stepId){
         ProjectTestSuiteTestCaseTestVersion data = this.checkTestSuitePath(projectKey, suiteId, testCaseIdentifier, versionId);
         TestCaseVersionStep testCaseVersionStep = testCaseVersionStepService.findTestCaseVersionByPublicId(fromBase62(stepId));
         if(!data.testCaseVersion().equals(testCaseVersionStep.getTestCaseVersion())){
@@ -86,8 +97,8 @@ public class ValidatePathService {
                 .build();
     }
 
-    public ProjectTestSuiteTestCaseTestVersionTestStepResult checkTestSuitePath(String projectKey, String suiteId, Long testCaseIdentifier, Long versionId, String stepId, String actionId){
-        ProjectTestSuiteTestCaseTestVersionTestStep data = this.checkTestSuitePath(projectKey, suiteId, testCaseIdentifier, versionId, stepId);
+    public ProjectTestSuiteTestCaseTestVersionTestStepResult checkTestSuiteTestStepPath(String projectKey, String suiteId, Long testCaseIdentifier, Long versionId, String stepId, String actionId){
+        ProjectTestSuiteTestCaseTestVersionTestStep data = this.checkTestSuiteTestStepPath(projectKey, suiteId, testCaseIdentifier, versionId, stepId);
         TestStepResult testStepResult = testStepResultService.findTestStepResultsByPublicId(fromBase62(actionId));
         if(!data.testCaseVersionStep().equals(testStepResult.getTestCaseVersionStep())){
             throw new BadRequestException(String.format("actionId %s not in TestStepResultId %s", actionId, stepId));
@@ -164,5 +175,8 @@ public class ValidatePathService {
     public record ProjectTestPlanTestPlanRun(Project project, TestPlan testPlan, TestPlanRun testPlanRun){}
     @Builder
     public record ProjectTestPlanTestPlanRunItem(Project project, TestPlan testPlan, TestPlanRun testPlanRun, TestPlanRunItem testPlanRunItem){}
+
+    @Builder
+    public record ProjectTestPlanRunItem(Project project, TestPlanRunItem testPlanRunItem){};
 
 }

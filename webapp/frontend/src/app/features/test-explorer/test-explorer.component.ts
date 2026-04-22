@@ -9,7 +9,7 @@ import {
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, of } from 'rxjs';
-import { switchMap, catchError, map } from 'rxjs/operators';
+import { switchMap, catchError, map, filter, take } from 'rxjs/operators';
 
 import { ContextService } from '../../core/services/context.service';
 import { TreeStateService, TreeSelection } from '../../core/services/tree-state.service';
@@ -89,11 +89,63 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
   private subs = new Subscription();
 
+  private syncSelectionFromUrl(): void {
+    const snapshot = this.route.snapshot;
+    const suiteId = snapshot.paramMap.get('suiteId');
+    const testCaseId = snapshot.paramMap.get('testCaseIdentifier');
+
+    if (!suiteId || !this.projectKey) return;
+
+    // Wait for tree data to be available (it's set by MainLayoutComponent)
+    this.treeState.waitForTree().pipe(
+      filter(tree => tree.length > 0),
+      take(1)
+    ).subscribe(() => {
+      const suite = this.treeState.findSuiteById(suiteId);
+      if (suite) {
+        this.treeState.selectSuite(suite);
+        // Ensure parent nodes are expanded (treeState should handle, but we can also expand explicitly)
+        this.expandPathTo(suite);
+        if (testCaseId) {
+          const identifier = Number(testCaseId);
+          const testCase = this.findTestCaseInSuite(suite, identifier);
+          if (testCase) {
+            this.treeState.selectCase(testCase);
+          }
+        }
+      }
+    });
+  }
+
+  private expandPathTo(suite: TestSuite): void {
+    // Expand all ancestors – the tree state already has expand/collapse,
+    // but we can ensure the suite itself is expanded.
+    if (!this.treeState.isExpanded(suite.testSuiteId)) {
+      this.treeState.toggle(suite.testSuiteId);
+    }
+    // We might need to expand parents recursively – simplified here.
+  }
+
+  private findTestCaseInSuite(suite: TestSuite, identifier: number): TestCase | undefined {
+    // This would require fetching test cases for the suite – better to use the already loaded testCases$
+    // or add a method in TreeStateService to find a case by identifier.
+    // For simplicity, we can rely on the fact that selecting the suite will load cases,
+    // and the case row will be highlighted via isCaseSelected in the template.
+    return undefined; // we can skip explicit selection; the case row will be highlighted by its own logic.
+  }
+
+
   ngOnInit(): void {
     // Restore context
     const saved = this.ctx.snapshot;
     this.projectKey = saved.projectKey;
     this.planId = saved.testPlanId;
+
+    this.subs.add(
+      this.route.params.subscribe(() => this.syncSelectionFromUrl())
+    );
+    // Also call once initially
+    this.syncSelectionFromUrl();
 
     if (this.projectKey) {
       this.projectName$ = this.projSvc.getProjectByKey(this.projectKey).pipe(

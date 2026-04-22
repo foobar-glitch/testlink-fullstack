@@ -53,7 +53,7 @@ public class TestCaseVersionStepController {
             @PathVariable String stepId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
-        ValidatePathService.ProjectTestSuiteTestCaseTestVersionTestStep data = validatePathService.checkTestSuitePath(
+        ValidatePathService.ProjectTestSuiteTestCaseTestVersionTestStep data = validatePathService.checkTestSuiteTestStepPath(
                 projectKey, suiteId, testCaseIdentifier, version, stepId);
         projectAccessService.checkAccessOfUserInProject(data.project(), userDetails.getUser(), ProjectRole.VIEWER);
         return ResponseEntity.ok(testCaseVersionStepMapper.toDto(data.testCaseVersionStep()));

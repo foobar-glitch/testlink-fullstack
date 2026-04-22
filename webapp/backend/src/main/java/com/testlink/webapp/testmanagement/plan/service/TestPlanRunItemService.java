@@ -4,6 +4,7 @@ import com.testlink.webapp.shared.exception.ResourceNotFoundException;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlanRun;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlanRunItem;
 import com.testlink.webapp.testmanagement.plan.repository.TestPlanRunItemRepository;
+import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,10 @@ public class TestPlanRunItemService {
 
     public List<TestPlanRunItem> findAllRunItemsOfTestPlanRun(TestPlanRun testPlanRun){
         return testPlanRunItemRepository.findAllByTestPlanRun(testPlanRun);
+    }
+
+    public List<TestPlanRunItem> findAllRunItemsOfTestCaseVersion(TestCaseVersion testCaseVersion){
+        return testPlanRunItemRepository.findAllByTestCaseVersion(testCaseVersion);
     }
 
 }

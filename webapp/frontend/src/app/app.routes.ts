@@ -63,6 +63,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'projects/project-key/:projectKey/suite/:suiteId/testcase-identifier/:testCaseIdentifier/versions/:versionNumber/runs',
+        loadComponent: () => import('./features/test-management/test-cases/test-case-version-runs/test-case-version-runs.component').then(m => m.TestCaseVersionRunsComponent)
+      },
+      {
+        path: 'projects/project-key/:projectKey/suite/:suiteId/testcase-identifier/:testCaseIdentifier/versions/:versionNumber/runs/:runId',
+        loadComponent: () => import('./features/test-management/test-cases/test-case-version-run-detail/test-case-version-run-detail.component').then(m => m.TestCaseVersionRunDetailComponent)
+      },
+      {
         path: 'projects/project-key/:projectKey/suite/:suiteId/testcase-identifier/:testCaseIdentifier/versions/:versionNumber/content',
         loadComponent: () =>
           import('./features/test-management/test-cases/test-case-version-content/test-case-version-content.component').then(

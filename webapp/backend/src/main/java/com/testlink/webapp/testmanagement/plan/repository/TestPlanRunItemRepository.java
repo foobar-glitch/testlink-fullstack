@@ -3,6 +3,7 @@ package com.testlink.webapp.testmanagement.plan.repository;
 
 import com.testlink.webapp.testmanagement.plan.entity.TestPlanRun;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlanRunItem;
+import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,6 @@ public interface TestPlanRunItemRepository  extends JpaRepository<TestPlanRunIte
     List<TestPlanRunItem> findAllByTestPlanRun(TestPlanRun testPlanRun);
 
     Optional<TestPlanRunItem> findTestPlanRunItemsByPublicId(UUID publicId);
+
+    List<TestPlanRunItem> findAllByTestCaseVersion(TestCaseVersion testCaseVersion);
 }

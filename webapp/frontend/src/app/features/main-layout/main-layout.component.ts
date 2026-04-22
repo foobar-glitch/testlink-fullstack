@@ -27,7 +27,7 @@ import { TestPlan } from '../../core/models/testexecution';
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 import { SuiteTreeNodeComponent } from '../test-explorer/test-tree-node/suite-tree-node.component';
 /** Routes on which the left sidebar should be visible */
-const SIDEBAR_ROUTES = ['/explorer'];
+const HIDE_SIDEBAR_ROUTES: string[] = []; // none for now
 
 @Component({
   selector: 'app-main-layout',
@@ -81,7 +81,8 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
 
   ngOnInit(): void {
-    // Track authenticated user
+    this.showSidebar = true;
+
     this.subs.add(
       this.auth.currentUser$.subscribe(u => {
         this.currentUser = u;
@@ -89,7 +90,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       }),
     );
 
-    // Load projects once user is ready
     this.memberships$ = this.auth.currentUser$.pipe(
       filter(u => u !== null),
       switchMap(() =>
@@ -98,7 +98,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       startWith([]),
     );
 
-    // Restore context from session
     const saved = this.ctx.snapshot;
     if (saved.projectKey) {
       this.selectedProjectKey = saved.projectKey;
@@ -108,20 +107,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     if (saved.testPlanId) {
       this.selectedPlanId = saved.testPlanId;
     }
-
-    // Show/hide sidebar based on route
-    const isSidebarRoute = (url: string) =>
-      SIDEBAR_ROUTES.some(r => url === r || url.startsWith(r + '?'));
-
-    this.subs.add(
-      this.router.events
-        .pipe(filter(e => e instanceof NavigationEnd))
-        .subscribe((e: any) => {
-          this.showSidebar = isSidebarRoute(e.urlAfterRedirects ?? e.url);
-          this.cdr.markForCheck();
-        }),
-    );
-    this.showSidebar = isSidebarRoute(this.router.url);
   }
 
   ngOnDestroy(): void {

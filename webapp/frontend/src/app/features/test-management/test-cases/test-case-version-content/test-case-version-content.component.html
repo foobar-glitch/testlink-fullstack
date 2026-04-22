@@ -86,6 +86,12 @@
             Test Steps
             <span class="step-count">{{ steps.length }}</span>
           </h3>
+          <div class="section-header">
+            <h3>Test Steps</h3>
+            <button class="view-runs-btn" [routerLink]="['/projects/project-key', projectKey, 'suite', suiteId, 'testcase-identifier', testCaseIdentifier, 'versions', versionNumber, 'runs']">
+              View All Runs →
+            </button>
+          </div>
 
           <div *ngIf="steps.length > 0; else noSteps" class="steps-list">
             <div *ngFor="let step of steps; let i = index" class="step-item">
