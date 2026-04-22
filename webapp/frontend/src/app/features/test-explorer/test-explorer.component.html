@@ -78,21 +78,19 @@
       <!-- ================================================================ -->
       <div class="tabs">
 
-        <!-- Plan Overview Tab (only when NO suite selected) -->
+        <!-- Overview Tab - Shows statistics when NO suite selected, or test cases when suite selected -->
         <button
-          *ngIf="!ctx.suiteId"
           class="tab"
           [class.active]="ctx.activeTab === 'overview'"
           (click)="navigateToPlanOverview()"
         >Overview</button>
 
-        <!-- Test Cases Tab (only when suite IS selected) -->
+        <!-- Stats Tab - Always shows plan statistics and runs -->
         <button
-          *ngIf="ctx.suiteId"
           class="tab"
-          [class.active]="ctx.activeTab === 'overview'"
-          (click)="navigateToSuiteOverview(ctx.suiteId)"
-        >Test Cases</button>
+          [class.active]="ctx.activeTab === 'stats'"
+          (click)="navigateToStats()"
+        >Stats</button>
 
         <!-- Run Items Tab (visible when test run is selected) -->
         <button
@@ -137,118 +135,111 @@
       </div>
 
       <!-- ================================================================ -->
-      <!-- Overview Tab                                                    -->
+      <!-- OVERVIEW TAB - Shows test cases when suite selected, otherwise shows welcome -->
       <!-- ================================================================ -->
       <ng-container *ngIf="ctx.activeTab === 'overview'">
 
-        <!-- Header -->
-        <div class="panel-header">
-          <div>
-            <h1 class="panel-title">
-              <ng-container *ngIf="ctx.suiteId; else planOverview">
-                {{ ctx.suiteName || 'Test Suite' }}
-              </ng-container>
-              <ng-template #planOverview>
-                {{ planName || 'Test Plan Overview' }}
-              </ng-template>
-            </h1>
-            <p class="panel-subtitle">
-              <ng-container *ngIf="ctx.suiteId; else planDescription">
-                Test cases in this suite
-              </ng-container>
-              <ng-template #planDescription>
-                {{ ctx.testPlan?.description || 'Select a test suite from the sidebar to view test cases.' }}
-              </ng-template>
-            </p>
+        <!-- WHEN SUITE IS SELECTED: Show test cases table -->
+        <ng-container *ngIf="ctx.suiteId; else noSuiteSelectedOverview">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">{{ ctx.suiteName || 'Test Suite' }}</h1>
+              <p class="panel-subtitle">Test cases in this suite</p>
+            </div>
           </div>
-        </div>
 
-        <!-- ───────────────────────────────────────────────────────────────── -->
-        <!-- WHEN SUITE IS SELECTED: Show test cases table                    -->
-        <!-- ───────────────────────────────────────────────────────────────── -->
-        <ng-container *ngIf="ctx.suiteId; else noSuiteSelected">
-
-          <!-- Test Cases Table -->
           <ng-container *ngIf="testCasesForSuite$ | async as cases; else loading">
             <app-case-table
               [cases]="cases"
               (caseSelected)="onCaseSelected($event)"
             ></app-case-table>
           </ng-container>
-
         </ng-container>
 
-        <!-- ───────────────────────────────────────────────────────────────── -->
-        <!-- WHEN NO SUITE SELECTED: Show plan stats and recent runs          -->
-        <!-- ───────────────────────────────────────────────────────────────── -->
-        <ng-template #noSuiteSelected>
-
-          <!-- Stats Grid -->
-          <div class="stat-grid" *ngIf="ctx.planStats as stats; else loading">
-            <div class="stat-card">
-              <div class="stat-label">Total</div>
-              <div class="stat-value">{{ stats.total }}</div>
-              <div class="stat-sub">test cases</div>
+        <!-- WHEN NO SUITE SELECTED: Show welcome message with prompt to select a suite -->
+        <ng-template #noSuiteSelectedOverview>
+          <div class="welcome-small">
+            <div class="welcome-icon-small">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="1.5">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
             </div>
-            <div class="stat-card pass">
-              <div class="stat-label">Passed</div>
-              <div class="stat-value">{{ stats.passed }}</div>
-              <div class="stat-sub">{{ pct(stats.passed, stats.total) }}%</div>
-            </div>
-            <div class="stat-card fail">
-              <div class="stat-label">Failed</div>
-              <div class="stat-value">{{ stats.failed }}</div>
-              <div class="stat-sub">{{ pct(stats.failed, stats.total) }}%</div>
-            </div>
-            <div class="stat-card block">
-              <div class="stat-label">Blocked</div>
-              <div class="stat-value">{{ stats.blocked }}</div>
-              <div class="stat-sub">{{ pct(stats.blocked, stats.total) }}%</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Not Run</div>
-              <div class="stat-value">{{ stats.notRun }}</div>
-              <div class="stat-sub">{{ pct(stats.notRun, stats.total) }}%</div>
-            </div>
+            <h3>Select a Test Suite</h3>
+            <p>Choose a test suite from the sidebar to view its test cases.</p>
           </div>
-
-          <!-- Progress bar -->
-          <div class="progress-card" *ngIf="ctx.planStats as stats">
-            <div class="progress-label">Execution Progress</div>
-            <div class="progress-track">
-              <div class="pb pass" [style.width.%]="pct(stats.passed, stats.total)"></div>
-              <div class="pb fail" [style.width.%]="pct(stats.failed, stats.total)"></div>
-              <div class="pb block" [style.width.%]="pct(stats.blocked, stats.total)"></div>
-              <div class="pb notrun" [style.width.%]="pct(stats.notRun, stats.total)"></div>
-            </div>
-            <div class="progress-legend">
-              <span class="leg pass">Passed {{ pct(stats.passed, stats.total) }}%</span>
-              <span class="leg fail">Failed {{ pct(stats.failed, stats.total) }}%</span>
-              <span class="leg block">Blocked {{ pct(stats.blocked, stats.total) }}%</span>
-              <span class="leg notrun">Not Run {{ pct(stats.notRun, stats.total) }}%</span>
-            </div>
-          </div>
-
-          <!-- Test Run selector -->
-          <div class="run-selector" *ngIf="testRuns$ | async as runs">
-            <span class="run-label">Test Run</span>
-            <select
-              class="run-select"
-              [value]="ctx.testRunId"
-              (change)="selectTestRun($any($event.target).value)"
-            >
-              <option *ngFor="let run of runs" [value]="run.testPlanRunId">
-                {{ run.name }} {{ run.environment ? '(' + run.environment + ')' : '' }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Recent runs table -->
-          <ng-container *ngIf="ctx.runItems as items; else loading">
-            <app-execution-table [items]="items"></app-execution-table>
-          </ng-container>
-
         </ng-template>
+
+      </ng-container>
+
+      <!-- ================================================================ -->
+      <!-- STATS TAB - Shows plan statistics and execution history           -->
+      <!-- ================================================================ -->
+      <ng-container *ngIf="ctx.activeTab === 'stats'">
+
+        <!-- Stats Grid -->
+        <div class="stat-grid" *ngIf="ctx.planStats as stats; else loading">
+          <div class="stat-card">
+            <div class="stat-label">Total</div>
+            <div class="stat-value">{{ stats.total }}</div>
+            <div class="stat-sub">test cases</div>
+          </div>
+          <div class="stat-card pass">
+            <div class="stat-label">Passed</div>
+            <div class="stat-value">{{ stats.passed }}</div>
+            <div class="stat-sub">{{ pct(stats.passed, stats.total) }}%</div>
+          </div>
+          <div class="stat-card fail">
+            <div class="stat-label">Failed</div>
+            <div class="stat-value">{{ stats.failed }}</div>
+            <div class="stat-sub">{{ pct(stats.failed, stats.total) }}%</div>
+          </div>
+          <div class="stat-card block">
+            <div class="stat-label">Blocked</div>
+            <div class="stat-value">{{ stats.blocked }}</div>
+            <div class="stat-sub">{{ pct(stats.blocked, stats.total) }}%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Not Run</div>
+            <div class="stat-value">{{ stats.notRun }}</div>
+            <div class="stat-sub">{{ pct(stats.notRun, stats.total) }}%</div>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-card" *ngIf="ctx.planStats as stats">
+          <div class="progress-label">Execution Progress</div>
+          <div class="progress-track">
+            <div class="pb pass" [style.width.%]="pct(stats.passed, stats.total)"></div>
+            <div class="pb fail" [style.width.%]="pct(stats.failed, stats.total)"></div>
+            <div class="pb block" [style.width.%]="pct(stats.blocked, stats.total)"></div>
+            <div class="pb notrun" [style.width.%]="pct(stats.notRun, stats.total)"></div>
+          </div>
+          <div class="progress-legend">
+            <span class="leg pass">Passed {{ pct(stats.passed, stats.total) }}%</span>
+            <span class="leg fail">Failed {{ pct(stats.failed, stats.total) }}%</span>
+            <span class="leg block">Blocked {{ pct(stats.blocked, stats.total) }}%</span>
+            <span class="leg notrun">Not Run {{ pct(stats.notRun, stats.total) }}%</span>
+          </div>
+        </div>
+
+        <!-- Test Run selector -->
+        <div class="run-selector" *ngIf="testRuns$ | async as runs">
+          <span class="run-label">Test Run</span>
+          <select
+            class="run-select"
+            [value]="ctx.testRunId"
+            (change)="selectTestRun($any($event.target).value)"
+          >
+            <option *ngFor="let run of runs" [value]="run.testPlanRunId">
+              {{ run.name }} {{ run.environment ? '(' + run.environment + ')' : '' }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Recent runs table -->
+        <ng-container *ngIf="ctx.runItems as items; else loading">
+          <app-execution-table [items]="items"></app-execution-table>
+        </ng-container>
 
       </ng-container>
 

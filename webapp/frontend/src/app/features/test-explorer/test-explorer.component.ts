@@ -45,6 +45,7 @@ interface PlanStats {
 
 type ExplorerTab =
   | 'overview'
+  | 'stats'
   | 'details'
   | 'steps'
   | 'versions'
@@ -508,6 +509,25 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       queryParams: this.buildQueryParams({
         actionId,
         tab: 'step-result-detail'
+      }),
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+  
+  /** Navigate to stats view (shows plan statistics and runs) - preserves current suite/test case selection */
+  navigateToStats(): void {
+    // Get current values from the route snapshot
+    const currentSuiteId = this.route.snapshot.queryParams['suite'] || null;
+    const currentTestCaseId = this.route.snapshot.queryParams['testcase'] || null;
+    const currentVersion = this.route.snapshot.queryParams['version'] || null;
+
+    this.router.navigate([], {
+      queryParams: this.buildQueryParams({
+        suite: currentSuiteId,
+        testcase: currentTestCaseId,
+        version: currentVersion ? Number(currentVersion) : null,
+        tab: 'stats' as ExplorerTab
       }),
       queryParamsHandling: 'merge',
       replaceUrl: true
