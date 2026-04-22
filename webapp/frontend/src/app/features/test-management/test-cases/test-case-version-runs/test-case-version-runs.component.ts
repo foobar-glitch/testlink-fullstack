@@ -30,8 +30,8 @@ export class TestCaseVersionRunsComponent implements OnInit {
   runs$!: Observable<TestPlanRunItem[]>;
   errorMessage = '';
 
-  // Context values
   projectKey!: string;
+  suiteId!: string;
   testCaseIdentifier!: number;
   versionNumber!: number;
 
@@ -39,12 +39,19 @@ export class TestCaseVersionRunsComponent implements OnInit {
     this.runs$ = this.route.queryParams.pipe(
       switchMap(params => {
         const project = params['project'];
+        const suite = params['suite'];
         const testcase = params['testcase'];
         const version = params['version'];
-        if (!project || !testcase || !version) return of([]);
+
+        if (!project || !testcase || !version) {
+          return of([]);
+        }
+
         this.projectKey = project;
+        this.suiteId = suite || '';
         this.testCaseIdentifier = +testcase;
         this.versionNumber = +version;
+
         return this.runsService.getRunsForVersion(project, +testcase, +version).pipe(
           catchError(err => {
             this.errorMessage = err.message || 'Failed to load runs';
@@ -56,23 +63,16 @@ export class TestCaseVersionRunsComponent implements OnInit {
   }
 
   onRunSelected(item: TestPlanRunItem): void {
-    const queryParams = {
-      project: this.projectKey,
-      testcase: this.testCaseIdentifier,
-      version: this.versionNumber,
-      runId: item.testRunItemId,
-      tab: 'run-detail'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
-  }
-
-  backToVersion(): void {
-    const queryParams = {
-      project: this.projectKey,
-      testcase: this.testCaseIdentifier,
-      version: this.versionNumber,
-      tab: 'steps'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testcase: this.testCaseIdentifier,
+        version: this.versionNumber,
+        runItemId: item.testRunItemId,
+        tab: 'run-detail'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 }

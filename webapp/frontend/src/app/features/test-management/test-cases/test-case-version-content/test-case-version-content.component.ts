@@ -41,7 +41,6 @@ export class TestCaseVersionContentComponent implements OnInit {
   private readonly testCaseService = inject(TestCaseService);
   private readonly stepService = inject(TestCaseVersionStepService);
 
-  // Context values extracted from query params
   projectKey!: string;
   suiteId!: string;
   testCaseIdentifier!: number;
@@ -53,7 +52,6 @@ export class TestCaseVersionContentComponent implements OnInit {
   stats$!: Observable<TestCaseVersionStats>;
   errorMessage = '';
 
-  // Default empty stats matching the interface
   private readonly EMPTY_STATS: TestCaseVersionStats = {
     totalExecutions: 0,
     lastExecutionStatus: null,
@@ -66,7 +64,6 @@ export class TestCaseVersionContentComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    // Use query params exclusively
     this.content$ = this.route.queryParams.pipe(
       switchMap(params => {
         const project = params['project'];
@@ -144,18 +141,6 @@ export class TestCaseVersionContentComponent implements OnInit {
         version: this.versionNumber,
         stepId: step.stepId,
         tab: 'step-results'
-      },
-      queryParamsHandling: 'merge'
-    });
-  }
-
-  backToVersions(): void {
-    this.router.navigate(['/explorer'], {
-      queryParams: {
-        project: this.projectKey,
-        suite: this.suiteId,
-        testcase: this.testCaseIdentifier,
-        tab: 'versions'
       },
       queryParamsHandling: 'merge'
     });

@@ -1,9 +1,6 @@
 <div class="version-content-container">
 
   <header class="page-header">
-    <button class="back-btn" (click)="backToVersions()">
-      ← Versions
-    </button>
     <div class="header-info">
       <div class="header-row">
         <span *ngIf="testCaseTitle$ | async as title" class="tc-title">{{ title }}</span>
@@ -70,7 +67,7 @@
       </div>
     </div>
 
-    <!-- Progress bar - UPDATED to use stats.notRunCount -->
+    <!-- Progress bar -->
     <div class="progress-bar" *ngIf="stats.totalExecutions > 0" [title]="barTitle(stats)">
       <div class="pb pass"   [style.width.%]="pct(stats.passedCount, stats.totalExecutions)"></div>
       <div class="pb fail"   [style.width.%]="pct(stats.failedCount, stats.totalExecutions)"></div>
