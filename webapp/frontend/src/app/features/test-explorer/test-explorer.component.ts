@@ -19,8 +19,9 @@ import { TestPlanRunService } from '../../core/services/test-plan-run.service';
 import { TestPlanRunItemService } from '../../core/services/test-plan-run-item.service';
 import { ProjectService } from '../../core/services/project.service';
 
-import { TestPlan, TestPlanRunItem } from '../../core/models/testexecution';
+import { TestPlan, TestPlanRun, TestPlanRunItem } from '../../core/models/testexecution';
 import { TestCase, TestSuite } from '../../core/models/testsuite';
+import { TreeSelection } from '../../core/services/tree-state.service';
 
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
@@ -95,12 +96,21 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     map(params => params['tab'] || 'overview'),
     distinctUntilChanged()
   );
+  readonly testRunId$ = this.route.queryParams.pipe(
+    map(params => params['testRunId'] || null),
+    distinctUntilChanged()
+  );
 
   // ── Data streams ──────────────────────────────────────────────────────────
   projectName$: Observable<string> = of('');
   testPlan$: Observable<TestPlan | null> = of(null);
   planStats$: Observable<PlanStats> = of({ total: 0, passed: 0, failed: 0, blocked: 0, notRun: 0 });
   runItems$: Observable<TestPlanRunItem[]> = of([]);
+  filteredRunItems$: Observable<TestPlanRunItem[]> = of([]);
+  testRuns$: Observable<TestPlanRun[]> = of([]);
+  selectedRunName$ = of('All Runs');
+  suiteName$ = of<string | null>(null);
+  selectedCaseLabel$ = of<string | null>(null);
   allCases$: Observable<TestCase[]> = of([]);
 
   planName = '';
@@ -146,11 +156,19 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Sync query params from tree selection changes
+    this.subs.add(
+      this.treeState.selection$.subscribe((selection) => this.syncParamsFromTreeSelection(selection))
+    );
+
     // Handle ?view=execution query param (legacy)
     this.subs.add(
       this.route.queryParams.subscribe(params => {
         if (params['view'] === 'execution') {
-          this.setTab('runs');
+          this.setTab('run-items');
+        }
+        if (params['tab'] === 'runs') {
+          this.setTab('run-items');
         }
       })
     );
@@ -164,6 +182,22 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   setTab(tab: string): void {
     this.router.navigate([], {
       queryParams: { tab },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  selectRun(testRunId: string): void {
+    this.router.navigate([], {
+      queryParams: { testRunId, tab: 'run-items' },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  clearRunFilter(): void {
+    this.router.navigate([], {
+      queryParams: { suite: null, testcase: null },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
@@ -192,6 +226,34 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     });
   }
 
+  private syncParamsFromTreeSelection(selection: TreeSelection): void {
+    if (this.isSyncingFromUrl) return;
+    if (selection.type === 'none') return;
+
+    if (selection.type === 'suite') {
+      this.router.navigate([], {
+        queryParams: {
+          suite: selection.suite.testSuiteId,
+          testcase: null,
+          tab: 'cases'
+        },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      });
+      return;
+    }
+
+    this.router.navigate([], {
+      queryParams: {
+        suite: selection.testCase.testSuite.testSuiteId,
+        testcase: selection.testCase.identifierNumber,
+        tab: 'details'
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
   // ── Plan data ─────────────────────────────────────────────────────────────
   private loadPlanData(projectKey: string, planId: string): void {
     this.testPlan$ = this.plansSvc.getTestPlan(projectKey, planId).pipe(catchError(() => of(null)));
@@ -202,12 +264,63 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.runItems$ = this.runSvc.getTestRunsByTestPlan(projectKey, planId).pipe(
-      switchMap(runs => {
+    this.testRuns$ = this.runSvc.getTestRunsByTestPlan(projectKey, planId).pipe(catchError(() => of([])));
+
+    this.subs.add(
+      combineLatest([this.testRuns$, this.testRunId$]).subscribe(([runs, selectedRunId]) => {
+        if (!runs.length || selectedRunId) return;
+        this.router.navigate([], {
+          queryParams: { testRunId: runs[0].testPlanRunId },
+          queryParamsHandling: 'merge',
+          replaceUrl: true
+        });
+      })
+    );
+
+    this.selectedRunName$ = combineLatest([this.testRuns$, this.testRunId$]).pipe(
+      map(([runs, selectedRunId]) => {
+        if (!runs.length) return 'No runs';
+        const selected = runs.find((run: TestPlanRun) => run.testPlanRunId === selectedRunId) ?? runs[0];
+        return selected?.name ?? 'Unnamed run';
+      })
+    );
+
+    this.runItems$ = combineLatest([this.testRuns$, this.testRunId$]).pipe(
+      switchMap(([runs, selectedRunId]) => {
         if (!runs.length) return of([]);
-        return this.runItemSvc.getRunItems(projectKey, runs[0].testPlanRunId);
+        const selected = runs.find((run: TestPlanRun) => run.testPlanRunId === selectedRunId) ?? runs[0];
+        if (!selected) return of([]);
+        return this.runItemSvc.getRunItems(projectKey, selected.testPlanRunId);
       }),
       catchError(() => of([]))
+    );
+
+    this.filteredRunItems$ = combineLatest([this.runItems$, this.suiteId$, this.testCaseId$]).pipe(
+      map(([items, suiteId, testCaseId]) => {
+        if (testCaseId) {
+          return items.filter(item => String(item.testCase.identifierNumber) === String(testCaseId));
+        }
+        if (suiteId) {
+          return items.filter(item => item.testCase.testSuite?.testSuiteId === suiteId);
+        }
+        return items;
+      })
+    );
+
+    this.suiteName$ = this.suiteId$.pipe(
+      map((suiteId) => {
+        if (!suiteId) return null;
+        return this.treeState.findSuiteById(suiteId)?.name ?? 'Selected suite';
+      })
+    );
+
+    this.selectedCaseLabel$ = combineLatest([this.testCaseId$, this.filteredRunItems$]).pipe(
+      map(([testCaseId, items]) => {
+        if (!testCaseId) return null;
+        const sample = items.find(item => String(item.testCase.identifierNumber) === String(testCaseId));
+        if (!sample) return `Test Case #${testCaseId}`;
+        return `${sample.testCase.testSuite?.project?.projectKey ?? ''}-${sample.testCase.identifierNumber}`;
+      })
     );
 
     this.planStats$ = this.runItems$.pipe(map(items => this.computeStats(items)));

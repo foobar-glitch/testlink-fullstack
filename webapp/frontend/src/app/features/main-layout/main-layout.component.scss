@@ -208,6 +208,10 @@ $topbar-h:  56px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+
+  &.collapsed {
+    width: 56px;
+  }
 }
 
 .sidebar-search {
