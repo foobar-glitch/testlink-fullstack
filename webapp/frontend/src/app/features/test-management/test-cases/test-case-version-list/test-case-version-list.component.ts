@@ -35,7 +35,6 @@ export class TestCaseVersionListComponent implements OnInit {
   private readonly versionService = inject(TestCaseVersionService);
   private readonly testCaseService = inject(TestCaseService);
 
-  // Context values extracted from query params
   projectKey!: string;
   testCaseIdentifier!: number;
   suiteId!: string;
@@ -44,10 +43,8 @@ export class TestCaseVersionListComponent implements OnInit {
   testCaseTitle$!: Observable<string>;
   errorMessage = '';
 
-  // Cache stats observables keyed by versionNumber to avoid re-fetching on CD
   private statsCache = new Map<number, Observable<TestCaseVersionStats>>();
 
-  // Default empty stats matching the interface
   private readonly EMPTY_STATS: TestCaseVersionStats = {
     totalExecutions: 0,
     lastExecutionStatus: null,
@@ -60,7 +57,6 @@ export class TestCaseVersionListComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    // Use query params exclusively
     this.versions$ = this.route.queryParams.pipe(
       switchMap(params => {
         const project = params['project'];
@@ -92,26 +88,21 @@ export class TestCaseVersionListComponent implements OnInit {
     );
   }
 
-  /** Lazily fetch and cache stats for each version card. */
   getStats(version: TestCaseVersion): Observable<TestCaseVersionStats> {
     if (!this.statsCache.has(version.versionNumber)) {
       const stats$ = this.versionService
         .getVersionStats(this.projectKey, this.testCaseIdentifier, version.versionNumber)
-        .pipe(
-          catchError(() => of(this.EMPTY_STATS))
-        );
+        .pipe(catchError(() => of(this.EMPTY_STATS)));
       this.statsCache.set(version.versionNumber, stats$);
     }
     return this.statsCache.get(version.versionNumber)!;
   }
 
-  /** Find the highest version number to mark it as "Latest". */
   latestVersionNumber(versions: TestCaseVersion[]): number {
     if (!versions.length) return 0;
     return Math.max(...versions.map(v => v.versionNumber));
   }
 
-  /** Percentage helper for progress bars. */
   pct(n: number, total: number): number {
     if (!total) return 0;
     return Math.round((n / total) * 100);
@@ -134,18 +125,6 @@ export class TestCaseVersionListComponent implements OnInit {
         testcase: this.testCaseIdentifier,
         version: version.versionNumber,
         tab: 'steps'
-      },
-      queryParamsHandling: 'merge'
-    });
-  }
-
-  backToTestCase(): void {
-    this.router.navigate(['/explorer'], {
-      queryParams: {
-        project: this.projectKey,
-        suite: this.suiteId,
-        testcase: this.testCaseIdentifier,
-        tab: 'details'
       },
       queryParamsHandling: 'merge'
     });

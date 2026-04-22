@@ -1,14 +1,9 @@
 <div class="version-list-container">
 
   <header class="page-header">
-    <div class="header-left">
-      <button class="back-btn" (click)="backToTestCase()">
-        ← Test Case
-      </button>
-      <div class="header-title">
-        <h1 *ngIf="testCaseTitle$ | async as title">{{ title }}</h1>
-        <p class="header-sub">Version history · {{ projectKey }}-{{ testCaseIdentifier }}</p>
-      </div>
+    <div class="header-title">
+      <h1 *ngIf="testCaseTitle$ | async as title">{{ title }}</h1>
+      <p class="header-sub">Version history · {{ projectKey }}-{{ testCaseIdentifier }}</p>
     </div>
   </header>
 
@@ -35,11 +30,6 @@
             <span class="latest-tag" *ngIf="version.versionNumber === latestVersionNumber(versions)">
               Latest
             </span>
-            <div class="card-actions">
-              <button class="open-btn" (click)="viewVersion(version); $event.stopPropagation()">
-                Open →
-              </button>
-            </div>
           </div>
 
           <!-- Inline stats (loaded lazily per version card) -->
@@ -81,7 +71,7 @@
             </div>
           </ng-template>
 
-          <!-- Mini progress bar - UPDATED to use stats.notRunCount -->
+          <!-- Mini progress bar -->
           <ng-container *ngIf="getStats(version) | async as stats">
             <div class="mini-bar" *ngIf="stats.totalExecutions > 0" [title]="barTitle(stats)">
               <div class="bar-pass"   [style.width.%]="pct(stats.passedCount, stats.totalExecutions)"></div>
@@ -93,7 +83,7 @@
 
           <!-- Footer meta -->
           <div class="card-footer">
-            <span>Created {{ version.testCase?.stamp?.timeStamp?.createdAt | date:'mediumDate' }}</span>
+            <span>Created {{ version.stamp.timeStamp.createdAt | date:'mediumDate' }}</span>
           </div>
         </div>
       </div>

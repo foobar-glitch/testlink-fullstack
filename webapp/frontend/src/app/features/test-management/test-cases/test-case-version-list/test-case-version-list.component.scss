@@ -1,37 +1,20 @@
-// ─── test-case-version-list.component.scss ───────────────────────────────────
 @use 'app/shared/styles/variables' as vars;
 @use 'app/shared/styles/mixins' as mix;
 
 .version-list-container {
   max-width: 900px;
-  margin: 0 auto;
-  padding: vars.$spacing-xl vars.$spacing-lg;
-
-  @media (max-width: 600px) { padding: vars.$spacing-lg vars.$spacing-md; }
+  margin: 0;
+  padding: 0;
 }
 
-// ── Page header ───────────────────────────────────────────────────────────────
+// Page header
 .page-header {
-  display: flex;
-  align-items: flex-start;
-  gap: vars.$spacing-md;
-  margin-bottom: vars.$spacing-xl;
-  padding-bottom: vars.$spacing-md;
-  border-bottom: 1px solid vars.$border;
+  margin-bottom: vars.$spacing-lg;
 }
-
-.header-left {
-  display: flex;
-  align-items: flex-start;
-  gap: vars.$spacing-md;
-  flex: 1;
-}
-
-.back-btn { @include mix.btn-ghost; white-space: nowrap; flex-shrink: 0; }
 
 .header-title {
   h1 {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: vars.$text;
     margin: 0 0 4px;
@@ -44,7 +27,7 @@
   color: vars.$muted;
 }
 
-// ── Version cards ─────────────────────────────────────────────────────────────
+// Version cards
 .version-cards {
   display: flex;
   flex-direction: column;
@@ -68,7 +51,7 @@
   }
 }
 
-// ── Card top row ──────────────────────────────────────────────────────────────
+// Card top row
 .card-top {
   display: flex;
   align-items: center;
@@ -100,31 +83,7 @@
   letter-spacing: 0.5px;
 }
 
-.card-actions {
-  margin-left: auto;
-}
-
-.open-btn {
-  background: vars.$accent-soft;
-  border: 1px solid vars.$accent-mid;
-  color: vars.$accent;
-  padding: 5px 13px;
-  border-radius: vars.$radius-sm;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: vars.$font;
-  cursor: pointer;
-  transition: vars.$transition;
-  white-space: nowrap;
-
-  &:hover {
-    background: vars.$accent;
-    color: vars.$white;
-    border-color: vars.$accent;
-  }
-}
-
-// ── Stats row ─────────────────────────────────────────────────────────────────
+// Stats row
 .card-stats {
   display: flex;
   align-items: center;
@@ -157,7 +116,6 @@
   &.pass .stat-val { color: vars.$color-success; }
   &.fail .stat-val { color: vars.$color-danger; }
   &.block .stat-val { color: vars.$color-warning; }
-  &.last, &.date { flex-direction: column; gap: 3px; }
 }
 
 .stat-divider {
@@ -176,7 +134,7 @@
   color: vars.$muted;
 }
 
-// ── Mini progress bar ─────────────────────────────────────────────────────────
+// Mini progress bar
 .mini-bar {
   height: 6px;
   border-radius: vars.$radius-pill;
@@ -191,7 +149,7 @@
   .bar-notrun { background: #ccc;                transition: width 0.4s ease; }
 }
 
-// ── Card footer ───────────────────────────────────────────────────────────────
+// Card footer
 .card-footer {
   font-size: 12px;
   color: vars.$muted;
@@ -200,7 +158,7 @@
   border-top: 1px solid vars.$border;
 }
 
-// ── States ────────────────────────────────────────────────────────────────────
+// States
 .loading-state, .error-state, .empty-state {
   display: flex;
   flex-direction: column;
