@@ -1,5 +1,6 @@
 package com.testlink.webapp.testmanagement.testcase.service;
 
+import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.shared.exception.ResourceNotFoundException;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersionStep;
@@ -19,9 +20,10 @@ public class TestCaseVersionStepService {
         return testCaseVersionStepRepository.findAllByTestCaseVersion(testCaseVersion);
     }
 
-    public TestCaseVersionStep findTestCaseVersionByPublicId(UUID stepId){
-        return testCaseVersionStepRepository.findByPublicId(stepId).orElseThrow(
+    public TestCaseVersionStep findTestCaseVersionByPublicIdAndProject(UUID stepId, Project project){
+        return testCaseVersionStepRepository.findByPublicIdAndProject(stepId, project).orElseThrow(
                 () -> new ResourceNotFoundException("TestCaseVersionStepRepository", "stepId", stepId)
         );
     }
+
 }

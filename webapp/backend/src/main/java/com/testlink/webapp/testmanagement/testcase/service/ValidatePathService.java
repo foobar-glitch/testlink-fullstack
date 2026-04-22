@@ -15,7 +15,6 @@ import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersionStep;
 import com.testlink.webapp.testmanagement.testcase.entity.TestStepResult;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,148 +34,51 @@ public class ValidatePathService {
     private final TestPlanRunService testPlanRunService;
     private final TestPlanRunItemService testPlanRunItemService;
 
-    public ProjectTestSuite checkTestSuitePath(String projectKey, String suiteId){
+    private Project getP(String projectKey){
+        return projectService.getProjectByKey(projectKey);
+    }
+
+    public TestSuite getTestSuite(String projectKey, String suiteId){
         Project project = projectService.getProjectByKey(projectKey);
         TestSuite testSuite = testSuiteService.findBySuiteId(fromBase62(suiteId));
         if(!project.equals(testSuite.getProject())){
             throw new BadRequestException(String.format("SuiteId %s not in ProjectKey %s", suiteId, projectKey));
         }
-        return ProjectTestSuite.builder().project(project).testSuite(testSuite).build();
+        return testSuite;
     }
 
-    public ProjectTestSuiteTestCase checkTestSuitePath(String projectKey, String suiteId, Long testCaseIdentifier){
-        ProjectTestSuite data = this.checkTestSuitePath(projectKey, suiteId);
-        TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(data.project(), testCaseIdentifier);
-        if(!data.testSuite().equals(testCase.getTestSuite())){
-            throw new BadRequestException(String.format("TestCase %d not in SuiteId %s", testCaseIdentifier, suiteId));
-        }
-        return ProjectTestSuiteTestCase.builder().project(data.project()).testSuite(data.testSuite()).testCase(testCase).build();
+    public TestCase getTestCase(String projectKey, Long testCaseIdentifier){
+        Project project = projectService.getProjectByKey(projectKey);
+        return testCaseService.findByProjectAndIdentifierNumber(project, testCaseIdentifier);
     }
 
     //@RequestMapping("/projects/project-key/{projectKey}/suite/{suiteId}/testcase-identifier/{testCaseIdentifier}/versions/{versionId}")
-    public ProjectTestSuiteTestCaseTestVersion checkTestSuitePath(String projectKey, String suiteId, Long testCaseIdentifier, Long versionId){
-        ProjectTestSuiteTestCase data = this.checkTestSuitePath(projectKey, suiteId, testCaseIdentifier);
-
-        TestCaseVersion testCaseVersion = testCaseVersionService.findByTestCaseAndVersionNumber(
-                data.testCase(), versionId
+    public TestCaseVersion getTestCaseVersion(String projectKey, Long testCaseIdentifier, Long versionId){
+        TestCase testCase = this.getTestCase(projectKey, testCaseIdentifier);
+        return testCaseVersionService.findByTestCaseAndVersionNumber(
+                testCase, versionId
         );
-        if(!data.testCase().equals(testCaseVersion.getTestCase())){
-            throw new BadRequestException(String.format("Version %d not in TestCase %d", versionId, testCaseIdentifier));
-        }
-        return ProjectTestSuiteTestCaseTestVersion.builder()
-                .project(data.project())
-                .testSuite(data.testSuite())
-                .testCase(data.testCase())
-                .testCaseVersion(testCaseVersion)
-                .build();
-    }
-
-    public ProjectTestPlanRunItem checkTestSuiteTestRunPath(String projectKey, String suiteId, Long testCaseIdentifier, Long versionId, String runId){
-        ProjectTestSuiteTestCaseTestVersion data = this.checkTestSuitePath(projectKey, suiteId, testCaseIdentifier, versionId);
-        //TestPlanRunItem
-        TestPlanRunItem testPlanRunItem = testPlanRunItemService.findByTestPlanRunItemId(fromBase62(runId));
-
-        if(!data.testCaseVersion().equals(testPlanRunItem.getTestCaseVersion())){
-            throw new BadRequestException(String.format("RunId %s not in TestCaseVersion %d", runId, versionId));
-        }
-        return ProjectTestPlanRunItem.builder().project(data.project()).testPlanRunItem(testPlanRunItem).build();
-    }
-
-    public ProjectTestSuiteTestCaseTestVersionTestStep checkTestSuiteTestStepPath(String projectKey, String suiteId, Long testCaseIdentifier, Long versionId, String stepId){
-        ProjectTestSuiteTestCaseTestVersion data = this.checkTestSuitePath(projectKey, suiteId, testCaseIdentifier, versionId);
-        TestCaseVersionStep testCaseVersionStep = testCaseVersionStepService.findTestCaseVersionByPublicId(fromBase62(stepId));
-        if(!data.testCaseVersion().equals(testCaseVersionStep.getTestCaseVersion())){
-            throw new BadRequestException(String.format("StepId %s not in TestCaseVersion %d", stepId, versionId));
-        }
-        return ProjectTestSuiteTestCaseTestVersionTestStep.builder()
-                .project(data.project())
-                .testSuite(data.testSuite())
-                .testCase(data.testCase())
-                .testCaseVersion(data.testCaseVersion())
-                .testCaseVersionStep(testCaseVersionStep)
-                .build();
-    }
-
-    public ProjectTestSuiteTestCaseTestVersionTestStepResult checkTestSuiteTestStepPath(String projectKey, String suiteId, Long testCaseIdentifier, Long versionId, String stepId, String actionId){
-        ProjectTestSuiteTestCaseTestVersionTestStep data = this.checkTestSuiteTestStepPath(projectKey, suiteId, testCaseIdentifier, versionId, stepId);
-        TestStepResult testStepResult = testStepResultService.findTestStepResultsByPublicId(fromBase62(actionId));
-        if(!data.testCaseVersionStep().equals(testStepResult.getTestCaseVersionStep())){
-            throw new BadRequestException(String.format("actionId %s not in TestStepResultId %s", actionId, stepId));
-        }
-        return ProjectTestSuiteTestCaseTestVersionTestStepResult.builder()
-                .project(data.project())
-                .testSuite(data.testSuite())
-                .testCase(data.testCase())
-                .testCaseVersion(data.testCaseVersion())
-                .testCaseVersionStep(data.testCaseVersionStep())
-                .testStepResult(testStepResult)
-                .build();
-    }
-
-    public ProjectTestPlan checkTestPlanPath(String projectKey, String testPlanId){
-        Project project = projectService.getProjectByKey(projectKey);
-        TestPlan testPlan = testPlanService.findByTestPlanId(fromBase62(testPlanId));
-        if(!project.equals(testPlan.getProject())){
-            throw new BadRequestException(String.format("TestPlan %s not in Project %s", testPlanId, projectKey));
-        }
-        return ProjectTestPlan.builder().project(project).testPlan(testPlan).build();
-    }
-
-    public ProjectTestPlanTestPlanRun checkTestPlanPath(String projectKey, String testPlanId, String testRunId){
-        ProjectTestPlan data = this.checkTestPlanPath(projectKey, testPlanId);
-        TestPlanRun testPlanRun = testPlanRunService.findByTestRunId(fromBase62(testRunId));
-        if(!data.testPlan().equals(testPlanRun.getTestPlan())){
-            throw new BadRequestException(String.format("TestPlan %s not in Project %s", testRunId, testPlanId));
-        }
-        return ProjectTestPlanTestPlanRun.builder()
-                .project(data.project())
-                .testPlan(data.testPlan())
-                .testPlanRun(testPlanRun).build();
-    }
-
-    public ProjectTestPlanTestPlanRunItem checkTestPlanPath(String projectKey, String testPlanId, String testRunId, String testRunItemId){
-        ProjectTestPlanTestPlanRun data = this.checkTestPlanPath(projectKey, testPlanId, testRunId);
-        TestPlanRunItem testPlanRunItem = testPlanRunItemService.findByTestPlanRunItemId(fromBase62(testRunItemId));
-
-        if(!data.testPlanRun().equals(testPlanRunItem.getTestPlanRun())){
-            throw new BadRequestException(String.format("TestPlan %s not in Project %s", testRunId, testPlanId));
-        }
-        return ProjectTestPlanTestPlanRunItem.builder()
-                .project(data.project())
-                .testPlan(data.testPlan())
-                .testPlanRun(data.testPlanRun())
-                .testPlanRunItem(testPlanRunItem)
-                .build();
     }
 
 
+    public TestCaseVersionStep getTestCaseVersionStep(String stepId, String projectKey){
+        return testCaseVersionStepService.findTestCaseVersionByPublicIdAndProject(fromBase62(stepId), getP(projectKey));
+    }
 
-    @Builder
-    public record ProjectTestSuite(Project project, TestSuite testSuite){}
-    @Builder
-    public record ProjectTestSuiteTestCase(Project project, TestSuite testSuite, TestCase testCase){}
-    @Builder
-    public record ProjectTestSuiteTestCaseTestVersion(
-            Project project, TestSuite testSuite, TestCase testCase, TestCaseVersion testCaseVersion){}
-    @Builder
-    public  record ProjectTestSuiteTestCaseTestVersionTestStep(
-            Project project, TestSuite testSuite, TestCase testCase, TestCaseVersion testCaseVersion,
-            TestCaseVersionStep testCaseVersionStep){}
+    public TestStepResult getTestStepResult(String actionId, String projectKey){
+        return testStepResultService.findTestStepResultsByPublicIdAndProject(fromBase62(actionId), getP(projectKey));
+    }
 
-    @Builder
-    public record  ProjectTestSuiteTestCaseTestVersionTestStepResult(
-            Project project, TestSuite testSuite, TestCase testCase, TestCaseVersion testCaseVersion,
-            TestCaseVersionStep testCaseVersionStep, TestStepResult testStepResult
-    ){}
+    public TestPlan getTestPlan(String testPlanId, String projectKey){
+        return testPlanService.findByTestPlanId(fromBase62(testPlanId), getP(projectKey));
+    }
 
-    @Builder
-    public record ProjectTestPlan(Project project, TestPlan testPlan){}
-    @Builder
-    public record ProjectTestPlanTestPlanRun(Project project, TestPlan testPlan, TestPlanRun testPlanRun){}
-    @Builder
-    public record ProjectTestPlanTestPlanRunItem(Project project, TestPlan testPlan, TestPlanRun testPlanRun, TestPlanRunItem testPlanRunItem){}
+    public TestPlanRun getTestPlanRun(String testRunId, String projectKey){
+        return testPlanRunService.findByTestRunId(fromBase62(testRunId), getP(projectKey));
+    }
 
-    @Builder
-    public record ProjectTestPlanRunItem(Project project, TestPlanRunItem testPlanRunItem){};
+    public TestPlanRunItem getTestPlanRunItemByItemId(String testRunItemId, String projectKey){
+        return testPlanRunItemService.findByTestPlanRunItemId(fromBase62(testRunItemId), getP(projectKey));
+    }
 
 }

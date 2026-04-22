@@ -1,5 +1,6 @@
 package com.testlink.webapp.testmanagement.plan.service;
 
+import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.shared.exception.ResourceNotFoundException;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlan;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlanRun;
@@ -19,7 +20,7 @@ public class TestPlanRunService {
         return testPlanRunRepository.findAllByTestPlan(testPlan);
     }
 
-    public TestPlanRun findByTestRunId(UUID testRunId){
-        return testPlanRunRepository.findTestPlanRunsByPublicId(testRunId).orElseThrow(() -> new ResourceNotFoundException("TestPlanRun", "testPlanRunId", testRunId));
+    public TestPlanRun findByTestRunId(UUID testRunId, Project project){
+        return testPlanRunRepository.findByPublicIdAndProject(testRunId, project).orElseThrow(() -> new ResourceNotFoundException("TestPlanRun", "testPlanRunId", testRunId));
     }
 }
