@@ -125,28 +125,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
-
-  /** Update query params while preserving existing ones */
-  private updateQueryParams(updates: { [key: string]: any }): void {
-    const currentParams = this.route.snapshot.queryParams;
-
-    // Build new params by merging current with updates
-    const newParams: { [key: string]: any } = { ...currentParams };
-
-    // Apply updates (null values will be removed)
-    Object.keys(updates).forEach(key => {
-      if (updates[key] === null) {
-        delete newParams[key];
-      } else {
-        newParams[key] = updates[key];
-      }
-    });
-
-    this.router.navigate([], {
-      queryParams: newParams,
-      replaceUrl: true
-    });
-  }
+  
 
   onProjectChange(event: Event): void {
     const key = (event.target as HTMLSelectElement).value;
@@ -156,12 +135,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.loadSuites(key);
     this.loadPlans(key);
 
-    this.updateQueryParams({
-      project: key,
-      plan: null,
-      suite: null,
-      testcase: null,
-      version: null
+    // Reset to base explorer URL - let it rebuild state
+    this.router.navigate(['/explorer'], {
+      queryParams: { project: key },
+      replaceUrl: true
     });
   }
 
@@ -170,9 +147,23 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.selectedPlanId = id;
     this.ctx.setPlan(id);
 
-    // Only update the plan - everything else stays!
-    this.updateQueryParams({
-      plan: id
+    const currentParams = this.route.snapshot.queryParams;
+
+    // Only preserve navigation context (suite/testcase/version/tab)
+    // testRunId is intentionally NOT preserved - let explorer reload it
+    this.router.navigate([], {
+      queryParams: {
+        project: currentParams['project'],
+        plan: id,
+        // Preserve navigation state
+        ...(currentParams['suite'] && { suite: currentParams['suite'] }),
+        ...(currentParams['testcase'] && { testcase: currentParams['testcase'] }),
+        ...(currentParams['version'] && { version: currentParams['version'] }),
+        ...(currentParams['tab'] && { tab: currentParams['tab'] })
+        // testRunId intentionally omitted - will be reloaded
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
     });
   }
 
