@@ -11,6 +11,9 @@ public record TestCaseVersionStatsDTO(
         TestRunStatus lastExecutionStatus,
         LocalDateTime lastExecutedAt,
         Integer passedCount,
-        Integer failedCount
+        Integer failedCount,
+        Integer blockedCount,
+        Integer notRunCount,
         //Integer avgExecutionTimeMs
+        LocalDateTime startsUpdatedAtd
 ) {}

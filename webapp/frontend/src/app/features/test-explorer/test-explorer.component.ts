@@ -514,7 +514,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       replaceUrl: true
     });
   }
-  
+
   /** Navigate to stats view (shows plan statistics and runs) - preserves current suite/test case selection */
   navigateToStats(): void {
     // Get current values from the route snapshot

@@ -23,7 +23,7 @@ public class TestCaseVersionStats {
     @JoinColumn(name = "test_case_version_id")
     private TestCaseVersion testCaseVersion;
 
-    @Column(name = "total_executions")
+    @Column(name = "total_executions", nullable = false)
     private Integer totalExecutions = 0;
 
     @Enumerated(EnumType.STRING)
@@ -33,15 +33,21 @@ public class TestCaseVersionStats {
     @Column(name = "last_executed_at")
     private LocalDateTime lastExecutedAt;
 
-    @Column(name = "passed_count")
+    @Column(name = "passed_count", nullable = false)
     private Integer passedCount = 0;
 
-    @Column(name = "failed_count")
+    @Column(name = "failed_count", nullable = false)
     private Integer failedCount = 0;
 
-    @Column(name = "blocked_count")
+    @Column(name = "blocked_count", nullable = false)
     private Integer blockedCount = 0;
+
+    @Column(name = "not_run_count", nullable = false)
+    private Integer notRunCount = 0;
 
     //@Column(name = "avg_execution_time_ms")
     //private Long avgExecutionTimeMs;
+
+    @Column(name = "stats_updated_at", nullable = false)
+    private LocalDateTime startsUpdatedAt;
 }
