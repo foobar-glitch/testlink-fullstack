@@ -1,11 +1,4 @@
 <div class="result-detail-container">
-  <header class="header">
-    <h2>Step Execution Detail</h2>
-    <button class="back-btn" (click)="backToStepResults()">
-      ← Back to Executions
-    </button>
-  </header>
-
   <div *ngIf="errorMessage" class="error-state">
     <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
   </div>

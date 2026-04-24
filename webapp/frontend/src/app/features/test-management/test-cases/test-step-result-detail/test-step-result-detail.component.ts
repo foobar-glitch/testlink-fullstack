@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { TestStepResultService } from '../../../../core/services/test-step-result.service';
@@ -18,13 +19,11 @@ import { TestStepResult } from '../../../../core/models/testexecution';
 })
 export class TestStepResultDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly resultService = inject(TestStepResultService);
 
-  result$!: Observable<TestStepResult>;
+  result$!: Observable<TestStepResult | null>;
   errorMessage = '';
 
-  // Context from query params
   projectKey!: string;
   stepId!: string;
 
@@ -34,25 +33,16 @@ export class TestStepResultDetailComponent implements OnInit {
         const project = params['project'];
         const actionId = params['actionId'];
         const stepId = params['stepId'];
-        if (!project || !actionId) return of(null as any);
+        if (!project || !actionId) return of(null);
         this.projectKey = project;
         this.stepId = stepId || '';
         return this.resultService.getResultById(project, actionId).pipe(
           catchError(err => {
             this.errorMessage = err.message || 'Failed to load step result';
-            return of(null as any);
+            return of(null);
           })
         );
       })
     );
-  }
-
-  backToStepResults(): void {
-    const queryParams = {
-      project: this.projectKey,
-      stepId: this.stepId,
-      tab: 'step-results'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
   }
 }

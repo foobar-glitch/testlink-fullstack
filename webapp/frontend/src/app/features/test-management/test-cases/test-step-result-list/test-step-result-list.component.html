@@ -1,19 +1,5 @@
 <div class="result-list-container">
-  <header class="2header">
-    <div class="title-section">
-      <h2>Execution History</h2>
-      <span *ngIf="stepAction$ | async as action" class="step-action">
-        {{ action }}
-      </span>
-    </div>
-    <button class="back-btn" (click)="backToVersionContent()">
-      ← Back to Steps
-    </button>
-  </header>
-
-  <div *ngIf="errorMessage" class="error-state">
-    <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
-  </div>
+  <app-error-banner *ngIf="errorMessage" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
 
   <ng-container *ngIf="results$ | async as results; else loading">
     <div *ngIf="results.length > 0; else empty" class="results-table">

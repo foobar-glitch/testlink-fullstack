@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { TestStepResultService } from '../../../../core/services/test-step-result.service';
@@ -24,10 +25,8 @@ export class TestStepResultListComponent implements OnInit {
   private readonly stepService = inject(TestCaseVersionStepService);
 
   results$!: Observable<TestStepResult[]>;
-  stepAction$!: Observable<string>;
   errorMessage = '';
 
-  // Context from query params
   projectKey!: string;
   stepId!: string;
 
@@ -47,36 +46,17 @@ export class TestStepResultListComponent implements OnInit {
         );
       })
     );
-
-    this.stepAction$ = this.route.queryParams.pipe(
-      switchMap(params => {
-        const project = params['project'];
-        const stepId = params['stepId'];
-        if (!project || !stepId) return of('Step');
-        return this.stepService.getStepById(project, stepId).pipe(
-          map(step => step.stepAction),
-          catchError(() => of('Step'))
-        );
-      })
-    );
   }
 
   viewResult(result: TestStepResult): void {
-    const queryParams = {
-      project: this.projectKey,
-      stepId: this.stepId,
-      actionId: result.testStepResultId,
-      tab: 'step-result-detail'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
-  }
-
-  backToVersionContent(): void {
-    // Navigate back to the version content (steps tab) – context from stored values
-    const queryParams = {
-      project: this.projectKey,
-      tab: 'steps'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        stepId: this.stepId,
+        actionId: result.testStepResultId,
+        tab: 'step-result-detail'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 }
