@@ -37,6 +37,32 @@
         </div>
       </div>
 
+      <!-- Test Case Stats Summary -->
+      <ng-container *ngIf="caseStats$ | async as stats">
+        <div class="case-stats-summary">
+          <div class="stat-item" [class.pass]="stats.passedCount > 0">
+            <span class="stat-value">{{ stats.passedCount }}</span>
+            <span class="stat-label">Passed</span>
+          </div>
+          <div class="stat-item" [class.fail]="stats.failedCount > 0">
+            <span class="stat-value">{{ stats.failedCount }}</span>
+            <span class="stat-label">Failed</span>
+          </div>
+          <div class="stat-item" [class.block]="stats.blockedCount > 0">
+            <span class="stat-value">{{ stats.blockedCount }}</span>
+            <span class="stat-label">Blocked</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ stats.notRunCount }}</span>
+            <span class="stat-label">Not Run</span>
+          </div>
+          <div class="stat-item" *ngIf="stats.lastExecutionStatus">
+            <app-test-run-status-badge [status]="stats.lastExecutionStatus"></app-test-run-status-badge>
+            <span class="stat-label">Last Run</span>
+          </div>
+        </div>
+      </ng-container>
+
       <div class="description-section" *ngIf="testCase.description">
         <h3>Description</h3>
         <p>{{ testCase.description }}</p>

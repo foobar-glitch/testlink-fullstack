@@ -7,7 +7,10 @@ import { TestCaseService } from '../../../../core/services/test-case.service';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
-import { TestCase } from '../../../../core/models/testsuite';
+import { TestCase, TestCaseStats } from '../../../../core/models/testsuite';
+import {
+  TestRunStatusBadgeComponent
+} from '../../../../shared/components/test-run-status-badge/test-run-status-badge.component';
 
 @Component({
   selector: 'app-test-case-detail',
@@ -17,7 +20,8 @@ import { TestCase } from '../../../../core/models/testsuite';
     RouterModule,
     SpinnerComponent,
     ErrorBannerComponent,
-    StatusBadgeComponent
+    StatusBadgeComponent,
+    TestRunStatusBadgeComponent
   ],
   templateUrl: './test-case-detail.component.html',
   styleUrls: ['./test-case-detail.component.scss']
@@ -27,6 +31,7 @@ export class TestCaseDetailComponent implements OnInit {
   private readonly testCaseService = inject(TestCaseService);
 
   testCase$!: Observable<TestCase | null>;
+  caseStats$!: Observable<TestCaseStats | null>;
   errorMessage = '';
 
   projectKey!: string;
@@ -43,6 +48,17 @@ export class TestCaseDetailComponent implements OnInit {
             this.errorMessage = err.message || 'Failed to load test case';
             return of(null);
           })
+        );
+      })
+    );
+
+    this.caseStats$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        const testcase = params['testcase'];
+        if (!project || !testcase) return of(null);
+        return this.testCaseService.getTestCaseStats(project, +testcase).pipe(
+          catchError(() => of(null))
         );
       })
     );

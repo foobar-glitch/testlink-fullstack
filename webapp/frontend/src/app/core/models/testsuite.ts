@@ -63,6 +63,18 @@ export interface TestCase {
   stamp: UserCreatedTimeStamp;
 }
 
+export interface TestCaseStats {
+  totalVersions: number;
+  totalExecutions: number;
+  lastExecutionStatus: TestRunStatus | null;
+  lastExecutedAt: string | null;
+  passedCount: number;
+  failedCount: number;
+  blockedCount: number;
+  notRunCount: number;
+  statsUpdatedAt: string;
+}
+
 export type TestCaseVersionStatus = 'draft' | 'active' | 'deprecated';
 
 export interface TestCaseVersionStats {

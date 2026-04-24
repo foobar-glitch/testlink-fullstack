@@ -6,8 +6,10 @@ import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseDTO;
+import com.testlink.webapp.testmanagement.testcase.dto.TestCaseStatsDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
 import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseMapper;
+import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseStatsMapper;
 import com.testlink.webapp.testmanagement.testcase.service.TestCaseService;
 import com.testlink.webapp.testmanagement.testcase.service.ValidatePathService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
@@ -27,6 +29,7 @@ public class TestCaseController {
     private final ProjectAccessService projectAccessService;
     private final TestCaseService testCaseService;
     private final TestCaseMapper testCaseMapper;
+    private final TestCaseStatsMapper testCaseStatsMapper;
 
     private final ValidatePathService validatePathService;
 
@@ -62,6 +65,20 @@ public class TestCaseController {
         );
     }
 
+    @GetMapping("/view/stats")
+    public ResponseEntity<TestCaseStatsDTO> getTestCaseStats(
+            @RequestParam String projectKey,
+            @RequestParam Long testCaseIdentifier,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        projectAccessService.checkAccessOfUserInProject(
+                projectKey, customUserDetails.getUser(), ProjectRole.VIEWER);
+        TestCase testCase = validatePathService.getTestCase(projectKey, testCaseIdentifier);
+
+        return ResponseEntity.ok(
+                testCaseStatsMapper.toDto(testCaseService.findTestCaseStatsByTestCase(testCase))
+        );
+    }
 
 
 }
