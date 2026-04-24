@@ -36,38 +36,70 @@
       runItems: runItems$ | async,
       filteredRunItems: filteredRunItems$ | async,
       suiteStats: suiteStats$ | async,
-      planStats: planStats$ | async
+      planStats: planStats$ | async,
+      stepId: stepId$ | async,
+      actionId: actionId$ | async
     } as ctx">
 
-      <!-- Breadcrumb -->
       <nav class="breadcrumb">
+        <!-- Project -->
         <span class="crumb link" (click)="navigateToPlanOverview()">{{ ctx.projectName }}</span>
         <span class="sep">›</span>
+
+        <!-- Plan -->
         <span class="crumb link" (click)="navigateToPlanOverview()">{{ planName || 'Plan' }}</span>
 
-        <!-- Suite level - clickable -->
+        <!-- Suite (if selected) -->
         <ng-container *ngIf="ctx.suiteId">
           <span class="sep">›</span>
           <span class="crumb link" (click)="navigateToSuiteOverview(ctx.suiteId)">
-            {{ ctx.suiteName || 'Suite' }}
-          </span>
+      {{ ctx.suiteName || 'Suite' }}
+    </span>
         </ng-container>
 
-        <!-- Test Case level - clickable -->
+        <!-- Test Case (if selected) -->
         <ng-container *ngIf="ctx.testCaseId">
           <span class="sep">›</span>
           <span class="crumb link" (click)="navigateToDetails(ctx.suiteId, ctx.testCaseId)">
-            {{ ctx.caseLabel || 'Test Case' }}
-          </span>
+      {{ ctx.caseLabel || 'Test Case' }}
+    </span>
         </ng-container>
 
-        <!-- Version level - NOT clickable (current) -->
+        <!-- Version level + deeper tabs -->
         <ng-container *ngIf="ctx.versionNumber">
           <span class="sep">›</span>
-          <span class="crumb current">Version {{ ctx.versionNumber }}</span>
+
+          <!-- Version: clickable unless we are on the Steps tab -->
+          <ng-container *ngIf="ctx.activeTab === 'steps'; else clickableVersion">
+            <span class="crumb current">Version {{ ctx.versionNumber }}</span>
+          </ng-container>
+          <ng-template #clickableVersion>
+      <span class="crumb link" (click)="navigateToVersionSteps(ctx.versionNumber)">
+        Version {{ ctx.versionNumber }}
+      </span>
+          </ng-template>
+
+          <!-- Runs tab -->
+          <ng-container *ngIf="ctx.activeTab === 'runs'">
+            <span class="sep">›</span>
+            <span class="crumb current">Runs</span>
+          </ng-container>
+
+          <!-- Step Results tab -->
+          <ng-container *ngIf="ctx.activeTab === 'step-results'">
+            <span class="sep">›</span>
+            <span class="crumb current">Step Results</span>
+          </ng-container>
+
+          <!-- Step Result Detail tab -->
+          <ng-container *ngIf="ctx.activeTab === 'step-result-detail'">
+            <span class="sep">›</span>
+            <span class="crumb link" (click)="navigateToStepResults(ctx.stepId)">Step Results</span>
+            <span class="sep">›</span>
+            <span class="crumb current">Detail</span>
+          </ng-container>
         </ng-container>
       </nav>
-
 
       <!-- ================================================================ -->
       <!-- Tab bar - for switching VIEWS of current context                 -->
