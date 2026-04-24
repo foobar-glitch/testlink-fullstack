@@ -141,7 +141,18 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
 
   ngOnInit(): void {
-    // Keep ContextService in sync with query params
+    // (A) Load plan data whenever project or plan changes (only once, with distinct)
+    this.subs.add(
+      combineLatest([this.projectKey$, this.planId$]).pipe(
+        distinctUntilChanged((prev, curr) => prev[0] === curr[0] && prev[1] === curr[1])
+      ).subscribe(([projectKey, planId]) => {
+        if (projectKey && planId) {
+          this.loadPlanData(projectKey, planId);
+        }
+      })
+    );
+
+    // (B) Keep ContextService in sync with the URL (separate concern)
     this.subs.add(
       combineLatest([this.projectKey$, this.planId$]).subscribe(([project, plan]) => {
         if (project) this.ctx.setProject(project);
@@ -149,7 +160,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Load suite data when suite changes
+    // (C) Load suite data (test cases & suite stats) when suite changes
     this.subs.add(
       combineLatest([this.projectKey$, this.suiteId$]).subscribe(([projectKey, suiteId]) => {
         if (projectKey && suiteId) {
@@ -162,7 +173,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Load plan stats when plan is selected
+    // (D) Load plan-level stats when plan is selected
     this.subs.add(
       combineLatest([this.projectKey$, this.planId$]).subscribe(([projectKey, planId]) => {
         if (projectKey && planId) {
@@ -173,7 +184,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Load project name
+    // (E) Load project display name
     this.subs.add(
       this.projectKey$.subscribe(key => {
         if (key) {
@@ -187,16 +198,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Load plan data when both project and plan are present
-    this.subs.add(
-      combineLatest([this.projectKey$, this.planId$]).subscribe(([projectKey, planId]) => {
-        if (projectKey && planId) {
-          this.loadPlanData(projectKey, planId);
-        }
-      })
-    );
-
-    // Expand tree path to selected suite when suiteId changes
+    // (F) Expand tree path to selected suite when suiteId changes
     this.subs.add(
       this.suiteId$.subscribe(suiteId => {
         if (suiteId) {

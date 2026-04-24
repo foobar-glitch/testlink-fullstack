@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { Observable, BehaviorSubject, Subscription, of } from 'rxjs';
-import { switchMap, catchError, filter, startWith, take } from 'rxjs/operators';
+import { switchMap, catchError, filter, startWith } from 'rxjs/operators';
 
 import { AuthService } from '../../core/services/auth.service';
 import { ProjectService } from '../../core/services/project.service';
@@ -58,7 +58,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     return (this.currentUser?.username ?? '').slice(0, 2).toUpperCase();
   }
 
-  // Only Project and Test Plan in header
   selectedProjectKey = '';
   selectedPlanId = '';
 
@@ -80,6 +79,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.showSidebar = true;
 
+    // User
     this.subs.add(
       this.auth.currentUser$.subscribe(u => {
         this.currentUser = u;
@@ -87,83 +87,72 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Reactively sync selectors from the URL and load data
+    this.subs.add(
+      this.route.queryParams.subscribe(params => {
+        const projectKey = params['project'] || null;
+        const planId = params['plan'] || null;
+
+        // Project changed
+        if (projectKey && this.selectedProjectKey !== projectKey) {
+          this.selectedProjectKey = projectKey;
+          this.ctx.setProject(projectKey);
+          this.loadSuites(projectKey);
+          this.loadPlans(projectKey);
+        }
+
+        // Plan changed
+        if (planId && this.selectedPlanId !== planId) {
+          this.selectedPlanId = planId;
+          this.ctx.setPlan(planId);
+        }
+
+        // If URL is empty but saved context exists, redirect to saved context
+        if (!projectKey && !planId) {
+          const saved = this.ctx.snapshot;
+          if (saved.projectKey || saved.testPlanId) {
+            this.router.navigate([], {
+              queryParams: {
+                project: saved.projectKey || undefined,
+                plan: saved.testPlanId || undefined,
+              },
+              queryParamsHandling: 'merge',
+              replaceUrl: true,
+            });
+          }
+        }
+
+        this.cdr.markForCheck();
+      })
+    );
+
+    // Memberships (unchanged)
     this.memberships$ = this.auth.currentUser$.pipe(
       filter(u => u !== null),
       switchMap(() => this.projects.getProjectMemberships().pipe(catchError(() => of([])))),
       startWith([])
     );
-
-    this.route.queryParams.pipe(take(1)).subscribe(params => {
-      const projectKey = params['project'];
-      const planId = params['plan'];
-
-      if (projectKey) {
-        this.selectedProjectKey = projectKey;
-        this.ctx.setProject(projectKey);
-        this.loadSuites(projectKey);
-        this.loadPlans(projectKey);
-      }
-      if (planId) {
-        this.selectedPlanId = planId;
-        this.ctx.setPlan(planId);
-      }
-
-      if (!projectKey && !planId) {
-        const saved = this.ctx.snapshot;
-        if (saved.projectKey) {
-          this.selectedProjectKey = saved.projectKey;
-          this.loadSuites(saved.projectKey);
-          this.loadPlans(saved.projectKey);
-        }
-        if (saved.testPlanId) {
-          this.selectedPlanId = saved.testPlanId;
-        }
-      }
-    });
   }
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
-  
 
   onProjectChange(event: Event): void {
     const key = (event.target as HTMLSelectElement).value;
-    this.selectedProjectKey = key;
-    this.selectedPlanId = '';
-    this.ctx.setProject(key);
-    this.loadSuites(key);
-    this.loadPlans(key);
-
-    // Reset to base explorer URL - let it rebuild state
-    this.router.navigate(['/explorer'], {
-      queryParams: { project: key },
-      replaceUrl: true
+    this.router.navigate([], {
+      queryParams: { project: key, plan: null, suite: null, testcase: null, version: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 
   onPlanChange(event: Event): void {
     const id = (event.target as HTMLSelectElement).value;
-    this.selectedPlanId = id;
-    this.ctx.setPlan(id);
-
-    const currentParams = this.route.snapshot.queryParams;
-
-    // Only preserve navigation context (suite/testcase/version/tab)
-    // testRunId is intentionally NOT preserved - let explorer reload it
     this.router.navigate([], {
-      queryParams: {
-        project: currentParams['project'],
-        plan: id,
-        // Preserve navigation state
-        ...(currentParams['suite'] && { suite: currentParams['suite'] }),
-        ...(currentParams['testcase'] && { testcase: currentParams['testcase'] }),
-        ...(currentParams['version'] && { version: currentParams['version'] }),
-        ...(currentParams['tab'] && { tab: currentParams['tab'] })
-        // testRunId intentionally omitted - will be reloaded
-      },
+      queryParams: { plan: id },
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
