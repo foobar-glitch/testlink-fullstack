@@ -104,3 +104,38 @@
   align-items: center;
   min-height: 200px;
 }
+.case-stats-summary {
+  display: flex;
+  gap: 24px;
+  padding: 16px 20px;
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: vars.$text;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: vars.$muted;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    &.pass .stat-value { color: vars.$color-success; }
+    &.fail .stat-value { color: vars.$color-danger; }
+    &.block .stat-value { color: vars.$color-warning; }
+  }
+}
