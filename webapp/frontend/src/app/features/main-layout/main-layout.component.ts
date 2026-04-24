@@ -208,7 +208,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   onPlanChange(event: Event): void {
     const id = (event.target as HTMLSelectElement).value;
     this.router.navigate([], {
-      queryParams: { plan: id },
+      queryParams: {
+        plan: id,
+        testRunId: null             // ← remove the old test run
+      },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
