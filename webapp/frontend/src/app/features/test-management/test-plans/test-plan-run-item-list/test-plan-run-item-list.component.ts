@@ -8,7 +8,7 @@ import { TestPlanRunService } from '../../../../core/services/test-plan-run.serv
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { TestRunStatusBadgeComponent } from '../../../../shared/components/test-run-status-badge/test-run-status-badge.component';
-import { TestPlanRunItem, TestRunStatus } from '../../../../core/models/testexecution';
+import { TestPlanRunItem } from '../../../../core/models/testexecution';
 
 @Component({
   selector: 'app-test-plan-run-item-list',
@@ -33,17 +33,19 @@ export class TestPlanRunItemListComponent implements OnInit {
   runName$!: Observable<string>;
   errorMessage = '';
 
-  // Context from query params
   projectKey!: string;
+  suiteId!: string;
   testRunId!: string;
 
   ngOnInit(): void {
     this.items$ = this.route.queryParams.pipe(
       switchMap(params => {
         const project = params['project'];
+        const suite = params['suite'];
         const testRunId = params['testRunId'];
         if (!project || !testRunId) return of([]);
         this.projectKey = project;
+        this.suiteId = suite || '';
         this.testRunId = testRunId;
         return this.runItemService.getRunItems(project, testRunId).pipe(
           catchError(err => {
@@ -73,25 +75,16 @@ export class TestPlanRunItemListComponent implements OnInit {
     return `${key}-${tc.identifierNumber}`;
   }
 
-  getBadgeStatus(status: TestRunStatus): string {
-    return status.toLowerCase();
-  }
-
   viewItem(item: TestPlanRunItem): void {
-    const queryParams = {
-      project: this.projectKey,
-      testRunId: this.testRunId,
-      runItemId: item.testRunItemId,
-      tab: 'run-item-detail'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
-  }
-
-  backToRuns(): void {
-    const queryParams = {
-      project: this.projectKey,
-      tab: 'runs'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testRunId: this.testRunId,
+        runItemId: item.testRunItemId,
+        tab: 'run-detail'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 }

@@ -1,11 +1,4 @@
 <div class="run-detail-container">
-  <header class="header">
-    <h2>Run Item Detail</h2>
-    <button class="back-btn" (click)="backToRuns()">
-      ← Back to Runs
-    </button>
-  </header>
-
   <app-error-banner *ngIf="errorMessage" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
 
   <ng-container *ngIf="item$ | async as item; else loading">
@@ -75,6 +68,8 @@
   </ng-container>
 
   <ng-template #loading>
-    <app-spinner label="Loading run details..."></app-spinner>
+    <div class="loading-state">
+      <app-spinner label="Loading run details..."></app-spinner>
+    </div>
   </ng-template>
 </div>

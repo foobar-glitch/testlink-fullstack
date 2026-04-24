@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { TestPlanRunItem } from '../../../../core/models/testexecution';
@@ -27,12 +27,10 @@ import { TestCaseVersionService } from '../../../../core/services/test-case-vers
 export class TestCaseVersionRunDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private runsService = inject(TestCaseVersionService);
-  private router = inject(Router);
 
-  item$!: Observable<TestPlanRunItem>;
+  item$!: Observable<TestPlanRunItem | null>;
   errorMessage = '';
 
-  // Context from query params
   projectKey!: string;
   testCaseIdentifier!: number;
   versionNumber!: number;
@@ -43,17 +41,17 @@ export class TestCaseVersionRunDetailComponent implements OnInit {
         const project = params['project'];
         const testcase = params['testcase'];
         const version = params['version'];
-        const runId = params['runId'];
-        if (!project || !testcase || !version || !runId) {
-          return of(null as any);
+        const runItemId = params['runItemId'];
+        if (!project || !testcase || !version || !runItemId) {
+          return of(null);
         }
         this.projectKey = project;
         this.testCaseIdentifier = +testcase;
         this.versionNumber = +version;
-        return this.runsService.getRunById(project, runId).pipe(
+        return this.runsService.getRunById(project, runItemId).pipe(
           catchError(err => {
             this.errorMessage = err.message || 'Failed to load run item';
-            return of(null as any);
+            return of(null);
           })
         );
       })
@@ -64,15 +62,5 @@ export class TestCaseVersionRunDetailComponent implements OnInit {
     const tc = item.testCase;
     const key = tc.testSuite?.project?.projectKey ?? this.projectKey;
     return `${key}-${tc.identifierNumber}`;
-  }
-
-  backToRuns(): void {
-    const queryParams = {
-      project: this.projectKey,
-      testcase: this.testCaseIdentifier,
-      version: this.versionNumber,
-      tab: 'runs'
-    };
-    this.router.navigate(['/explorer'], { queryParams });
   }
 }
