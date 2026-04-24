@@ -9,8 +9,23 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { Observable, BehaviorSubject, Subscription, of } from 'rxjs';
-import { switchMap, catchError, filter, startWith } from 'rxjs/operators';
+import {
+  Observable,
+  BehaviorSubject,
+  Subscription,
+  of,
+  Subject,
+  combineLatest,
+} from 'rxjs';
+import {
+  switchMap,
+  catchError,
+  filter,
+  startWith,
+  distinctUntilChanged,
+  map,
+  takeUntil,
+} from 'rxjs/operators';
 
 import { AuthService } from '../../core/services/auth.service';
 import { ProjectService } from '../../core/services/project.service';
@@ -58,14 +73,20 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     return (this.currentUser?.username ?? '').slice(0, 2).toUpperCase();
   }
 
+  // These are the single source of truth for the select [ngModel] bindings.
+  // They are updated ONLY from the URL (queryParams subscription).
   selectedProjectKey = '';
   selectedPlanId = '';
 
   memberships$: Observable<ProjectMembership[]> = of([]);
-  testPlans$: Observable<TestPlan[]> = of([]);
+
+  // Use a BehaviorSubject for testPlans so the async pipe can stay subscribed
+  // to a single stable observable rather than a re-assigned reference.
+  private _testPlans$ = new BehaviorSubject<TestPlan[]>([]);
+  readonly testPlans$: Observable<TestPlan[]> = this._testPlans$.asObservable();
 
   private _suiteLoading$ = new BehaviorSubject<boolean>(false);
-  suiteLoading$: Observable<boolean> = this._suiteLoading$.asObservable();
+  readonly suiteLoading$: Observable<boolean> = this._suiteLoading$.asObservable();
 
   allSuites: TestSuite[] = [];
   filteredSuites: TestSuite[] = [];
@@ -74,74 +95,111 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   showSidebar = true;
   sidebarCollapsed = false;
 
-  private subs = new Subscription();
+  private destroy$ = new Subject<void>();
 
   ngOnInit(): void {
     this.showSidebar = true;
 
-    // User
-    this.subs.add(
-      this.auth.currentUser$.subscribe(u => {
+    // ── 1. Track authenticated user ──────────────────────────────────────────
+    this.auth.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(u => {
         this.currentUser = u;
         this.cdr.markForCheck();
-      })
+      });
+
+    // ── 2. Memberships list (for project dropdown options) ────────────────────
+    this.memberships$ = this.auth.currentUser$.pipe(
+      filter(u => u !== null),
+      switchMap(() =>
+        this.projects.getProjectMemberships().pipe(catchError(() => of([])))
+      ),
+      startWith([])
     );
 
-    // Reactively sync selectors from the URL and load data
-    this.subs.add(
-      this.route.queryParams.subscribe(params => {
-        const projectKey = params['project'] || null;
-        const planId = params['plan'] || null;
+    // ── 3. PRIMARY SYNC: URL → component state ────────────────────────────────
+    //
+    // This is the single place that reads queryParams and drives:
+    //   • selectedProjectKey  (bound via [(ngModel)] to the project <select>)
+    //   • selectedPlanId      (bound via [(ngModel)] to the plan <select>)
+    //   • ContextService
+    //   • suite tree
+    //   • test plans list
+    //
+    // We use the router's root ActivatedRoute to make sure we always get the
+    // full query-string, regardless of which child route is active.
+    this.router.routerState.root.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const projectKey = params['project'] ?? null;
+        const planId     = params['plan']    ?? null;
 
-        // Project changed
-        if (projectKey && this.selectedProjectKey !== projectKey) {
-          this.selectedProjectKey = projectKey;
-          this.ctx.setProject(projectKey);
-          this.loadSuites(projectKey);
-          this.loadPlans(projectKey);
+        // ── Project changed ────────────────────────────────────────────────
+        if (projectKey !== this.selectedProjectKey) {
+          this.selectedProjectKey = projectKey ?? '';
+          this.ctx.setProject(projectKey ?? '');
+
+          if (projectKey) {
+            this.loadSuites(projectKey);
+            this.loadPlansIntoSubject(projectKey);
+          } else {
+            this.allSuites = [];
+            this.filteredSuites = [];
+            this._testPlans$.next([]);
+          }
         }
 
-        // Plan changed
-        if (planId && this.selectedPlanId !== planId) {
-          this.selectedPlanId = planId;
-          this.ctx.setPlan(planId);
+        // ── Plan changed ───────────────────────────────────────────────────
+        // Always sync — even if the project didn't change (e.g. direct URL
+        // load or manual back/forward navigation).
+        const newPlanId = planId ?? '';
+        if (newPlanId !== this.selectedPlanId) {
+          this.selectedPlanId = newPlanId;
+          if (planId) this.ctx.setPlan(planId);
         }
 
-        // If URL is empty but saved context exists, redirect to saved context
+        // ── If URL has no context but session storage does, restore it ─────
         if (!projectKey && !planId) {
           const saved = this.ctx.snapshot;
           if (saved.projectKey || saved.testPlanId) {
             this.router.navigate([], {
               queryParams: {
-                project: saved.projectKey || undefined,
-                plan: saved.testPlanId || undefined,
+                project: saved.projectKey ?? undefined,
+                plan:    saved.testPlanId  ?? undefined,
               },
               queryParamsHandling: 'merge',
               replaceUrl: true,
             });
+            return; // The navigation above will re-trigger this subscription
           }
         }
 
         this.cdr.markForCheck();
-      })
-    );
-
-    // Memberships (unchanged)
-    this.memberships$ = this.auth.currentUser$.pipe(
-      filter(u => u !== null),
-      switchMap(() => this.projects.getProjectMemberships().pipe(catchError(() => of([])))),
-      startWith([])
-    );
+      });
   }
 
   ngOnDestroy(): void {
-    this.subs.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
+
+  // ── User-initiated changes ──────────────────────────────────────────────────
+  //
+  // These handlers only update the URL. The queryParams subscription above
+  // will then react and update component state. This ensures bidirectionality
+  // without any risk of the component state diverging from the URL.
 
   onProjectChange(event: Event): void {
     const key = (event.target as HTMLSelectElement).value;
+    // When project changes, clear plan/suite/testcase so stale state is gone.
     this.router.navigate([], {
-      queryParams: { project: key, plan: null, suite: null, testcase: null, version: null },
+      queryParams: {
+        project:  key,
+        plan:     null,
+        suite:    null,
+        testcase: null,
+        version:  null,
+      },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
@@ -188,13 +246,15 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  // ── Private helpers ─────────────────────────────────────────────────────────
+
   private loadSuites(projectKey: string): void {
     this._suiteLoading$.next(true);
     this.suitesSvc
       .getTestSuitesByProjectKey(projectKey)
       .pipe(catchError(() => of([])))
       .subscribe(suites => {
-        this.allSuites = suites;
+        this.allSuites     = suites;
         this.filteredSuites = suites;
         this.treeState.setTreeData(suites);
         this._suiteLoading$.next(false);
@@ -202,15 +262,25 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       });
   }
 
-  private loadPlans(projectKey: string): void {
-    this.testPlans$ = this.plansSvc
+  /**
+   * Load test plans and push them into the stable BehaviorSubject so the
+   * async pipe in the template reacts without needing the observable reference
+   * to change.
+   */
+  private loadPlansIntoSubject(projectKey: string): void {
+    this._testPlans$.next([]); // clear while loading
+    this.plansSvc
       .getTestPlansByProjectKey(projectKey)
-      .pipe(catchError(() => of([])));
+      .pipe(catchError(() => of([])))
+      .subscribe(plans => {
+        this._testPlans$.next(plans);
+        this.cdr.markForCheck();
+      });
   }
 
   private filterSuites(suites: TestSuite[], q: string): TestSuite[] {
     return suites.reduce<TestSuite[]>((acc, s) => {
-      const nameMatch = s.name.toLowerCase().includes(q);
+      const nameMatch   = s.name.toLowerCase().includes(q);
       const childMatches = this.filterSuites(s.children ?? [], q);
       if (nameMatch || childMatches.length) {
         acc.push({ ...s, children: childMatches.length ? childMatches : s.children });

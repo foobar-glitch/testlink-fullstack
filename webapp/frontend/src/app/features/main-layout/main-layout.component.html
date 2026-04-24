@@ -16,7 +16,7 @@
       <span class="ctx-label">Project</span>
       <select
         class="ctx-select"
-        [value]="selectedProjectKey"
+        [ngModel]="selectedProjectKey"
         (change)="onProjectChange($event)"
       >
         <option value="" disabled>Select project…</option>
@@ -33,7 +33,7 @@
       <span class="ctx-label">Test Plan</span>
       <select
         class="ctx-select"
-        [value]="selectedPlanId"
+        [ngModel]="selectedPlanId"
         (change)="onPlanChange($event)"
         [disabled]="!selectedProjectKey"
       >
