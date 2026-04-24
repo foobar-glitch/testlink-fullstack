@@ -5,12 +5,13 @@ import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.testmanagement.plan.dto.TestPlanDTO;
+import com.testlink.webapp.testmanagement.plan.dto.TestPlanStatsDTO;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlan;
 import com.testlink.webapp.testmanagement.plan.mapper.TestPlanMapper;
+import com.testlink.webapp.testmanagement.plan.mapper.TestPlanStatsMapper;
 import com.testlink.webapp.testmanagement.plan.service.TestPlanService;
 import com.testlink.webapp.testmanagement.testcase.service.ValidatePathService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
-import com.testlink.webapp.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,6 +28,7 @@ public class TestPlanController {
     private final TestPlanMapper testPlanMapper;
     private final ValidatePathService validatePathService;
     private final ProjectAccessService accessService;
+    private final TestPlanStatsMapper testPlanStatsMapper;
 
 
     @GetMapping("")
@@ -43,8 +45,16 @@ public class TestPlanController {
     public ResponseEntity<TestPlanDTO> testPlanOfProjectOfId(
             @RequestParam String projectKey, @RequestParam String testPlanId, @AuthenticationPrincipal CustomUserDetails userDetails){
         accessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
-        TestPlan testPlan = validatePathService.getTestPlan(testPlanId, projectKey);
+        TestPlan testPlan = validatePathService.getTestPlanOfProjectKey(testPlanId, projectKey);
         return ResponseEntity.ok(testPlanMapper.toDto(testPlan));
+    }
+
+    @GetMapping("/view/stats")
+    public ResponseEntity<TestPlanStatsDTO> testPlanStatsOfProjectOfId(
+            @RequestParam String projectKey, @RequestParam String testPlanId, @AuthenticationPrincipal CustomUserDetails userDetails){
+        accessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
+        TestPlan testPlan = validatePathService.getTestPlanOfProjectKey(testPlanId, projectKey);
+        return ResponseEntity.ok(testPlanStatsMapper.toDto(testPlanService.findTestPlanStatsByTestPlan(testPlan)));
     }
 
 }

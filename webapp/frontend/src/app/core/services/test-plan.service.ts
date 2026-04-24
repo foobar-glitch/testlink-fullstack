@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { TestPlan } from '../models/testexecution';
+import { TestPlan, TestPlanStats } from '../models/testexecution';
 
 @Injectable({ providedIn: 'root' })
 export class TestPlanService {
@@ -34,4 +34,15 @@ export class TestPlanService {
       params
     });
   }
+
+  getTestPlanStats(projectKey: string, testPlanId: string): Observable<TestPlanStats> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId);
+    return this.http.get<TestPlanStats>(`${this.apiUrl}testplans/view/stats`, {
+      withCredentials: true,
+      params
+    });
+  }
+
 }

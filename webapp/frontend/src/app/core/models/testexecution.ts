@@ -12,6 +12,18 @@ export interface TestPlan {
   stamp: UserCreatedTimeStamp;
 }
 
+export interface TestPlanStats {
+  totalTestCases: number;
+  totalExecutions: number;
+  lastExecutionStatus: TestRunStatus | null;
+  lastExecutedAt: string | null;
+  passedCount: number;
+  failedCount: number;
+  blockedCount: number;
+  notRunCount: number;
+  startsUpdatedAt: string;
+}
+
 export interface TestPlanRun {
   testPlanRunId: string;
   testPlan: TestPlan;

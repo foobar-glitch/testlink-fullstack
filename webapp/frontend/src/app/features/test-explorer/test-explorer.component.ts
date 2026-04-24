@@ -19,8 +19,7 @@ import { TestPlanRunItemService } from '../../core/services/test-plan-run-item.s
 import { ProjectService } from '../../core/services/project.service';
 import { TestSuiteService } from '../../core/services/test-suite.service';
 
-import { TestPlan, TestPlanRun, TestPlanRunItem } from '../../core/models/testexecution';
-
+import { TestPlan, TestPlanRun, TestPlanRunItem, TestPlanStats } from '../../core/models/testexecution';
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { TestRunStatusBadgeComponent } from '../../shared/components/test-run-status-badge/test-run-status-badge.component';
@@ -85,6 +84,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
   testCasesForSuite$: Observable<TestCase[]> = of([]);
   suiteStats$: Observable<TestSuiteStats | null> = of(null);
+  planStats$: Observable<TestPlanStats | null> = of(null); // <-- NEW: plan-level stats
 
   // State derived from query parameters (READ ONLY)
   readonly projectKey$ = this.route.queryParams.pipe(
@@ -162,6 +162,17 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Load plan stats when plan is selected
+    this.subs.add(
+      combineLatest([this.projectKey$, this.planId$]).subscribe(([projectKey, planId]) => {
+        if (projectKey && planId) {
+          this.loadPlanStats(projectKey, planId);
+        } else {
+          this.planStats$ = of(null);
+        }
+      })
+    );
+
     // Load project name
     this.subs.add(
       this.projectKey$.subscribe(key => {
@@ -208,7 +219,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     return Math.round((n / total) * 100);
   }
 
-  // Plan data loading
+  // Plan data loading (runs, items, etc.)
   private loadPlanData(projectKey: string, planId: string): void {
     this.testPlan$ = this.plansSvc.getTestPlan(projectKey, planId).pipe(catchError(() => of(null)));
     this.subs.add(
@@ -283,6 +294,11 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       .pipe(catchError(() => of(null)));
   }
 
+  private loadPlanStats(projectKey: string, planId: string): void {
+    this.planStats$ = this.plansSvc.getTestPlanStats(projectKey, planId)
+      .pipe(catchError(() => of(null)));
+  }
+
   onCaseSelected(testCase: TestCase): void {
     const suiteId = this.route.snapshot.queryParams['suite'];
     if (suiteId) {
@@ -351,7 +367,6 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       replaceUrl: true
     });
   }
-
 
   navigateToTestCaseDetails(suiteId: string, testCaseId: string | number): void {
     this.router.navigate([], {

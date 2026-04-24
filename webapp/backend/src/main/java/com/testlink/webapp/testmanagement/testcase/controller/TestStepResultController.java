@@ -30,7 +30,7 @@ public class TestStepResultController {
             @RequestParam String stepId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         projectAccessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
-        TestCaseVersionStep testCaseVersionStep = validatePathService.getTestCaseVersionStep(stepId, projectKey);
+        TestCaseVersionStep testCaseVersionStep = validatePathService.getTestCaseVersionStepOfProjectKey(stepId, projectKey);
         return ResponseEntity.ok(testStepResultMapper.toDtoList(testStepResultService.findTestCaseStepsByTestCaseVersion(testCaseVersionStep)));
     }
 
@@ -40,7 +40,7 @@ public class TestStepResultController {
             @RequestParam String actionId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         projectAccessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
-        TestStepResult testStepResult = validatePathService.getTestStepResult(actionId, projectKey);
+        TestStepResult testStepResult = validatePathService.getTestStepResultOfProjectKey(actionId, projectKey);
         return ResponseEntity.ok(testStepResultMapper.toDto(testStepResult));
     }
 }

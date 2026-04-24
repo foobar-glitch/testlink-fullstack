@@ -61,23 +61,23 @@ public class ValidatePathService {
     }
 
 
-    public TestCaseVersionStep getTestCaseVersionStep(String stepId, String projectKey){
+    public TestCaseVersionStep getTestCaseVersionStepOfProjectKey(String stepId, String projectKey){
         return testCaseVersionStepService.findTestCaseVersionByPublicIdAndProject(fromBase62(stepId), getP(projectKey));
     }
 
-    public TestStepResult getTestStepResult(String actionId, String projectKey){
+    public TestStepResult getTestStepResultOfProjectKey(String actionId, String projectKey){
         return testStepResultService.findTestStepResultsByPublicIdAndProject(fromBase62(actionId), getP(projectKey));
     }
 
-    public TestPlan getTestPlan(String testPlanId, String projectKey){
+    public TestPlan getTestPlanOfProjectKey(String testPlanId, String projectKey){
         return testPlanService.findByTestPlanId(fromBase62(testPlanId), getP(projectKey));
     }
 
-    public TestPlanRun getTestPlanRun(String testRunId, String projectKey){
+    public TestPlanRun getTestPlanRunOfProjectKey(String testRunId, String projectKey){
         return testPlanRunService.findByTestRunId(fromBase62(testRunId), getP(projectKey));
     }
 
-    public TestPlanRunItem getTestPlanRunItemByItemId(String testRunItemId, String projectKey){
+    public TestPlanRunItem getTestPlanRunItemByItemIdOfProjectKey(String testRunItemId, String projectKey){
         return testPlanRunItemService.findByTestPlanRunItemId(fromBase62(testRunItemId), getP(projectKey));
     }
 

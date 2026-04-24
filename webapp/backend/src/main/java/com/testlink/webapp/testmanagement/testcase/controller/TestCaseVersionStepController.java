@@ -46,7 +46,7 @@ public class TestCaseVersionStepController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
         projectAccessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
-        TestCaseVersionStep testCaseVersionStep = validatePathService.getTestCaseVersionStep(stepId, projectKey);
+        TestCaseVersionStep testCaseVersionStep = validatePathService.getTestCaseVersionStepOfProjectKey(stepId, projectKey);
         return ResponseEntity.ok(testCaseVersionStepMapper.toDto(testCaseVersionStep));
     }
 

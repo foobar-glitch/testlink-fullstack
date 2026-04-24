@@ -101,7 +101,7 @@ public class TestCaseVersionController {
     ) {
         User user = userDetails.getUser();
         projectAccessService.checkAccessOfUserInProject(projectKey, user, ProjectRole.VIEWER);
-        TestPlanRunItem testPlanRunItem = validatePathService.getTestPlanRunItemByItemId(runId, projectKey);
+        TestPlanRunItem testPlanRunItem = validatePathService.getTestPlanRunItemByItemIdOfProjectKey(runId, projectKey);
         return ResponseEntity.ok(testPlanRunItemMapper.toDto(testPlanRunItem));
     }
 

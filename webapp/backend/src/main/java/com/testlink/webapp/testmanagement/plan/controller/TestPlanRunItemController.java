@@ -31,7 +31,7 @@ public class TestPlanRunItemController {
             @RequestParam String testRunId,
             @AuthenticationPrincipal CustomUserDetails userDetails){
         projectAccessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
-        TestPlanRun testPlanRun = validatePathService.getTestPlanRun(testRunId, projectKey);
+        TestPlanRun testPlanRun = validatePathService.getTestPlanRunOfProjectKey(testRunId, projectKey);
 
         return ResponseEntity.ok(testPlanRunItemMapper.toDtoList(testPlanRunItemService.findAllRunItemsOfTestPlanRun(
                 testPlanRun)));
@@ -45,7 +45,7 @@ public class TestPlanRunItemController {
             )
     {
         projectAccessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
-        TestPlanRunItem testPlanRunItem = validatePathService.getTestPlanRunItemByItemId(testRunItemId, projectKey);
+        TestPlanRunItem testPlanRunItem = validatePathService.getTestPlanRunItemByItemIdOfProjectKey(testRunItemId, projectKey);
         return ResponseEntity.ok(testPlanRunItemMapper.toDto(testPlanRunItem));
     }
 }

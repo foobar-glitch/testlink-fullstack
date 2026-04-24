@@ -30,7 +30,7 @@ public class TestPlanRunController {
     @GetMapping("")
     public ResponseEntity<List<TestPlanRunDTO>> testRunsOfTestPlan(@RequestParam String projectKey, @RequestParam String testPlanId, @AuthenticationPrincipal CustomUserDetails userDetails){
         projectAccessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
-        TestPlan testPlan = validatePathService.getTestPlan(testPlanId, projectKey);
+        TestPlan testPlan = validatePathService.getTestPlanOfProjectKey(testPlanId, projectKey);
         return ResponseEntity.ok(testPlanRunMapper.toDtoList(testPlanRunService.findAllRunsOfTestPlan(testPlan)));
     }
 
@@ -41,7 +41,7 @@ public class TestPlanRunController {
             @RequestParam String projectKey,
             @RequestParam String testRunId, @AuthenticationPrincipal CustomUserDetails userDetails){
         projectAccessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
-        TestPlanRun testPlanRun = validatePathService.getTestPlanRun(testRunId, projectKey);
+        TestPlanRun testPlanRun = validatePathService.getTestPlanRunOfProjectKey(testRunId, projectKey);
         return ResponseEntity.ok(testPlanRunMapper.toDto(testPlanRun));
     }
 }
