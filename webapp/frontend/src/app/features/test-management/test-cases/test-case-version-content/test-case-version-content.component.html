@@ -1,10 +1,6 @@
 <div class="version-content-container">
 
   <header class="page-header">
-    <button class="back-btn"
-            [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases', testCaseIdentifier, 'versions']">
-      ← Versions
-    </button>
     <div class="header-info">
       <div class="header-row">
         <span *ngIf="testCaseTitle$ | async as title" class="tc-title">{{ title }}</span>
@@ -12,7 +8,7 @@
       </div>
       <div class="header-meta" *ngIf="content$ | async as content">
         <app-priority-badge [priority]="content.testCaseVersion.priority"></app-priority-badge>
-        <app-status-badge   [status]="content.testCaseVersion.status"></app-status-badge>
+        <app-status-badge [status]="content.testCaseVersion.status"></app-status-badge>
         <span class="meta-sep">·</span>
         <span class="meta-text">
           {{ projectKey }}-{{ testCaseIdentifier }}
@@ -27,7 +23,7 @@
 
   <app-error-banner *ngIf="errorMessage" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
 
-  <!-- ── EXECUTION STATS DASHBOARD ─────────────────────────────────── -->
+  <!-- EXECUTION STATS DASHBOARD -->
   <section class="stats-section" *ngIf="stats$ | async as stats">
     <div class="stats-grid">
       <div class="stat-card">
@@ -51,6 +47,16 @@
       <div class="stat-card block">
         <div class="stat-val">{{ stats.blockedCount }}</div>
         <div class="stat-lbl">Blocked</div>
+        <div class="stat-pct" *ngIf="stats.totalExecutions">
+          {{ pct(stats.blockedCount, stats.totalExecutions) }}%
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">{{ stats.notRunCount }}</div>
+        <div class="stat-lbl">Not Run</div>
+        <div class="stat-pct" *ngIf="stats.totalExecutions">
+          {{ pct(stats.notRunCount, stats.totalExecutions) }}%
+        </div>
       </div>
       <div class="stat-card" *ngIf="stats.lastExecutionStatus">
         <div class="stat-lbl" style="margin-bottom:6px">Last Result</div>
@@ -63,14 +69,14 @@
 
     <!-- Progress bar -->
     <div class="progress-bar" *ngIf="stats.totalExecutions > 0" [title]="barTitle(stats)">
-      <div class="pb pass"   [style.width.%]="pct(stats.passedCount,  stats.totalExecutions)"></div>
-      <div class="pb fail"   [style.width.%]="pct(stats.failedCount,  stats.totalExecutions)"></div>
+      <div class="pb pass"   [style.width.%]="pct(stats.passedCount, stats.totalExecutions)"></div>
+      <div class="pb fail"   [style.width.%]="pct(stats.failedCount, stats.totalExecutions)"></div>
       <div class="pb block"  [style.width.%]="pct(stats.blockedCount, stats.totalExecutions)"></div>
-      <div class="pb notrun" [style.width.%]="pct(notRunCount(stats), stats.totalExecutions)"></div>
+      <div class="pb notrun" [style.width.%]="pct(stats.notRunCount, stats.totalExecutions)"></div>
     </div>
   </section>
 
-  <!-- ── CONTENT BODY ───────────────────────────────────────────────── -->
+  <!-- CONTENT BODY -->
   <ng-container *ngIf="content$ | async as content; else loading">
     <div class="content-card">
 
@@ -79,16 +85,18 @@
         <p>{{ content.preconditions }}</p>
       </div>
 
+      <!-- Expected Result -->
+      <div class="field" *ngIf="content.expectedResult">
+        <label>Expected Result</label>
+        <p>{{ content.expectedResult }}</p>
+      </div>
+
       <!-- Steps -->
       <ng-container *ngIf="steps$ | async as steps">
         <div class="steps-section">
-          <h3>
-            Test Steps
-            <span class="step-count">{{ steps.length }}</span>
-          </h3>
           <div class="section-header">
-            <h3>Test Steps</h3>
-            <button class="view-runs-btn" [routerLink]="['/projects/project-key', projectKey, 'suite', suiteId, 'testcase-identifier', testCaseIdentifier, 'versions', versionNumber, 'runs']">
+            <h3>Test Steps <span class="step-count">{{ steps.length }}</span></h3>
+            <button class="view-runs-btn" (click)="viewAllRuns()">
               View All Runs →
             </button>
           </div>
@@ -138,4 +146,4 @@
     </div>
   </ng-template>
 
-</div>5
+</div>

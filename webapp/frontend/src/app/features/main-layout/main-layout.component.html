@@ -11,7 +11,7 @@
 
     <div class="topbar-divider"></div>
 
-    <!-- Context selectors -->
+    <!-- Context selectors - ONLY Project and Test Plan -->
     <div class="context-group">
       <span class="ctx-label">Project</span>
       <select
@@ -61,8 +61,11 @@
         </svg>
         Refresh
       </button>
+      <button class="topbar-btn" (click)="toggleSidebar()" title="Toggle sidebar">
+        {{ sidebarCollapsed ? 'Show Sidebar' : 'Hide Sidebar' }}
+      </button>
 
-      <!-- Dashboard link (new component) -->
+      <!-- Dashboard link -->
       <button
         class="topbar-btn"
         routerLink="/dashboard"
@@ -76,7 +79,7 @@
         Dashboard
       </button>
 
-      <!-- TestLink-style explorer -->
+      <!-- Explorer -->
       <button
         class="topbar-btn"
         routerLink="/explorer"
@@ -88,13 +91,6 @@
           <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
         </svg>
         Explorer
-      </button>
-
-      <button class="topbar-btn primary" (click)="goToExecution()" title="Execution view">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="5 3 19 12 5 21 5 3"/>
-        </svg>
-        Execution
       </button>
 
       <div class="user-avatar" [title]="currentUser?.username ?? ''">
@@ -115,9 +111,9 @@
   <div class="body">
 
     <!-- Sidebar — shown on /explorer and /dashboard routes -->
-    <aside class="sidebar" *ngIf="showSidebar">
+    <aside class="sidebar" [class.collapsed]="sidebarCollapsed" *ngIf="showSidebar">
 
-      <div class="sidebar-search">
+      <div class="sidebar-search" *ngIf="!sidebarCollapsed">
         <div class="search-wrap">
           <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
@@ -131,7 +127,7 @@
         </div>
       </div>
 
-      <div class="sidebar-tree-header">
+      <div class="sidebar-tree-header" *ngIf="!sidebarCollapsed">
         <span class="tree-label">Test Suites</span>
         <div class="tree-actions">
           <button class="tree-btn" (click)="expandAll()" title="Expand all">
@@ -147,7 +143,7 @@
         </div>
       </div>
 
-      <div class="sidebar-tree" *ngIf="!(suiteLoading$ | async); else treeLoading">
+      <div class="sidebar-tree" *ngIf="!sidebarCollapsed && !(suiteLoading$ | async); else treeLoading">
         <ng-container *ngIf="filteredSuites.length > 0; else noSuites">
           <app-suite-tree-node
             *ngFor="let suite of filteredSuites"

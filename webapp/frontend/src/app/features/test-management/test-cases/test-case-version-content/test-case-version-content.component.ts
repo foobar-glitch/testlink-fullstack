@@ -1,12 +1,13 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { TestCaseVersionContentService } from '../../../../core/services/test-case-version-content.service';
 import { TestCaseVersionService } from '../../../../core/services/test-case-version.service';
 import { TestCaseService } from '../../../../core/services/test-case.service';
+import { TestCaseVersionStepService } from '../../../../core/services/test-case-version-step.service';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
@@ -16,7 +17,6 @@ import { TestRunStatusBadgeComponent } from '../../../../shared/components/test-
 import { TestCaseVersionContent } from '../../../../core/models/testsuite';
 import { TestCaseVersionStats } from '../../../../core/models/testsuite';
 import { TestCaseVersionStep } from '../../../../core/models/testexecution';
-import { TestCaseVersionStepService } from '../../../../core/services/test-case-version-step.service';
 
 @Component({
   selector: 'app-test-case-version-content',
@@ -33,56 +33,94 @@ import { TestCaseVersionStepService } from '../../../../core/services/test-case-
   templateUrl: './test-case-version-content.component.html',
   styleUrls: ['./test-case-version-content.component.scss'],
 })
-export class TestCaseVersionContentComponent {
-  private readonly route           = inject(ActivatedRoute);
-  private readonly contentService  = inject(TestCaseVersionContentService);
-  private readonly versionService  = inject(TestCaseVersionService);
+export class TestCaseVersionContentComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly contentService = inject(TestCaseVersionContentService);
+  private readonly versionService = inject(TestCaseVersionService);
   private readonly testCaseService = inject(TestCaseService);
-  private readonly stepService     = inject(TestCaseVersionStepService);
-  private readonly router          = inject(Router);
+  private readonly stepService = inject(TestCaseVersionStepService);
 
-  readonly projectKey:          string;
-  readonly suiteId:             string;
-  readonly testCaseIdentifier:  number;
-  readonly versionNumber:       number;
+  projectKey!: string;
+  suiteId!: string;
+  testCaseIdentifier!: number;
+  versionNumber!: number;
 
-  content$:       Observable<TestCaseVersionContent>;
-  testCaseTitle$: Observable<string>;
-  steps$:         Observable<TestCaseVersionStep[]>;
-  /** Stats loaded from the new /stats endpoint */
-  stats$:         Observable<TestCaseVersionStats>;
+  content$!: Observable<TestCaseVersionContent>;
+  testCaseTitle$!: Observable<string>;
+  steps$!: Observable<TestCaseVersionStep[]>;
+  stats$!: Observable<TestCaseVersionStats>;
   errorMessage = '';
 
-  constructor() {
-    this.projectKey         = this.route.snapshot.paramMap.get('projectKey')!;
-    this.suiteId            = this.route.snapshot.paramMap.get('suiteId')!;
-    this.testCaseIdentifier = Number(this.route.snapshot.paramMap.get('testCaseIdentifier'));
-    this.versionNumber      = Number(this.route.snapshot.paramMap.get('versionNumber'));
+  private readonly EMPTY_STATS: TestCaseVersionStats = {
+    totalExecutions: 0,
+    lastExecutionStatus: null,
+    lastExecutedAt: null,
+    passedCount: 0,
+    failedCount: 0,
+    blockedCount: 0,
+    notRunCount: 0,
+    avgExecutionTimeMs: null,
+  };
 
-    this.content$ = this.contentService
-      .getContent(this.projectKey, this.suiteId, this.testCaseIdentifier, this.versionNumber)
-      .pipe(catchError(err => { this.errorMessage = err.message || 'Failed to load content'; return of(null as any); }));
+  ngOnInit(): void {
+    this.content$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        const suite = params['suite'];
+        const testcase = params['testcase'];
+        const version = params['version'];
+        if (!project || !testcase || !version) return of(null as any);
+        this.projectKey = project;
+        this.suiteId = suite || '';
+        this.testCaseIdentifier = +testcase;
+        this.versionNumber = +version;
+        return this.contentService.getContent(project, +testcase, +version).pipe(
+          catchError(err => {
+            this.errorMessage = err.message || 'Failed to load content';
+            return of(null as any);
+          })
+        );
+      })
+    );
 
-    this.testCaseTitle$ = this.testCaseService
-      .getTestCase(this.projectKey, this.testCaseIdentifier, this.suiteId)
-      .pipe(map(tc => tc?.title || 'Test Case'), catchError(() => of('Test Case')));
+    this.testCaseTitle$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        const testcase = params['testcase'];
+        if (!project || !testcase) return of('Test Case');
+        return this.testCaseService.getTestCase(project, +testcase).pipe(
+          map(tc => tc?.title || 'Test Case'),
+          catchError(() => of('Test Case'))
+        );
+      })
+    );
 
-    this.steps$ = this.stepService
-      .getSteps(this.projectKey, this.suiteId, this.testCaseIdentifier, this.versionNumber)
-      .pipe(catchError(() => of([])));
+    this.steps$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        const testcase = params['testcase'];
+        const version = params['version'];
+        if (!project || !testcase || !version) return of([]);
+        return this.stepService.getSteps(project, +testcase, +version).pipe(
+          catchError(() => of([]))
+        );
+      })
+    );
 
-    // New stats endpoint
-    this.stats$ = this.versionService
-      .getVersionStats(this.projectKey, this.suiteId, this.testCaseIdentifier, this.versionNumber)
-      .pipe(catchError(() => of<TestCaseVersionStats>({
-        totalExecutions: 0,
-        lastExecutionStatus: null,
-        lastExecutedAt: null,
-        passedCount: 0,
-        failedCount: 0,
-        blockedCount: 0,
-        avgExecutionTimeMs: null,
-      })));
+    this.stats$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        const testcase = params['testcase'];
+        const version = params['version'];
+        if (!project || !testcase || !version) {
+          return of(this.EMPTY_STATS);
+        }
+        return this.versionService.getVersionStats(project, +testcase, +version).pipe(
+          catchError(() => of(this.EMPTY_STATS))
+        );
+      })
+    );
   }
 
   pct(n: number, total: number): number {
@@ -90,21 +128,34 @@ export class TestCaseVersionContentComponent {
     return Math.round((n / total) * 100);
   }
 
-  notRunCount(stats: TestCaseVersionStats): number {
-    return stats.totalExecutions - stats.passedCount - stats.failedCount - stats.blockedCount;
-  }
-
   barTitle(stats: TestCaseVersionStats): string {
-    return `Passed: ${stats.passedCount} · Failed: ${stats.failedCount} · Blocked: ${stats.blockedCount} · Not Run: ${this.notRunCount(stats)}`;
+    return `Passed: ${stats.passedCount} · Failed: ${stats.failedCount} · Blocked: ${stats.blockedCount} · Not Run: ${stats.notRunCount}`;
   }
 
   viewStep(step: TestCaseVersionStep): void {
-    this.router.navigate([
-      '/projects/project-key', this.projectKey,
-      'suite', this.suiteId,
-      'testcase-identifier', this.testCaseIdentifier,
-      'versions', this.versionNumber,
-      'content', 'steps', step.stepId, 'action',
-    ]);
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testcase: this.testCaseIdentifier,
+        version: this.versionNumber,
+        stepId: step.stepId,
+        tab: 'step-results'
+      },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  viewAllRuns(): void {
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testcase: this.testCaseIdentifier,
+        version: this.versionNumber,
+        tab: 'runs'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 }

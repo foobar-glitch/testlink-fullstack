@@ -1,9 +1,7 @@
 <div class="runs-container">
-  <header class="header">
+  <header class="page-header">
     <h2>Execution History</h2>
-    <button class="back-btn" [routerLink]="['/projects/project-key', projectKey, 'suite', suiteId, 'testcase-identifier', testCaseIdentifier, 'versions', versionNumber, 'content']">
-      ← Back to Version
-    </button>
+    <p class="header-sub">Version {{ versionNumber }} · {{ projectKey }}-{{ testCaseIdentifier }}</p>
   </header>
 
   <app-error-banner *ngIf="errorMessage" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
@@ -20,6 +18,8 @@
   </ng-container>
 
   <ng-template #loading>
-    <app-spinner label="Loading execution history..."></app-spinner>
+    <div class="loading-state">
+      <app-spinner label="Loading execution history..."></app-spinner>
+    </div>
   </ng-template>
 </div>

@@ -6,17 +6,16 @@ import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.testmanagement.suite.dto.TestSuiteHierarchyDTO;
+import com.testlink.webapp.testmanagement.suite.dto.TestSuiteStatsDTO;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.mapper.TestSuiteMapper;
+import com.testlink.webapp.testmanagement.suite.mapper.TestSuiteStatsMapper;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,17 +28,22 @@ import static com.testlink.webapp.shared.util.IdUtil.fromBase62;
 public class TestSuiteController {
     private final TestSuiteService testSuiteService;
     private final TestSuiteMapper testSuiteMapper;
+
     private final ProjectAccessService projectAccessService;
     private final ProjectService projectService;
 
-    @GetMapping("/project-key/{projectKey}/suites")
-    public ResponseEntity<List<TestSuiteHierarchyDTO>> getTestSuitesOfProductKey(@PathVariable String projectKey, @AuthenticationPrincipal CustomUserDetails customUserDetails){
+    private final TestSuiteStatsMapper testSuiteStatsMapper;
+
+    @GetMapping("")
+    public ResponseEntity<List<TestSuiteHierarchyDTO>> getTestSuitesOfProductKey(
+            @RequestParam String projectKey,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails){
         Project project = projectService.getProjectByKey(projectKey);
-        ProjectMembership projectMembership =  projectAccessService.checkAccessOfUserInProject(
+        projectAccessService.checkAccessOfUserInProject(
                 project, customUserDetails.getUser(), ProjectRole.VIEWER
         );
 
-        List<TestSuite> rootTree = testSuiteService.findProjectTestSuiteRootTree(projectMembership.getProject());
+        List<TestSuite> rootTree = testSuiteService.findProjectTestSuiteRootTree(project);
         List<TestSuiteHierarchyDTO> hierarchyDTO = new ArrayList<>();
 
         for(TestSuite item: rootTree){
@@ -47,7 +51,7 @@ public class TestSuiteController {
                     .current(testSuiteMapper.toDto(item))
                     .parent(null)
                     .children(testSuiteMapper.toDtoList(
-                            testSuiteService.findChildrenOfTestSuiteInProject(projectMembership.getProject(), item)))
+                            testSuiteService.findChildrenOfTestSuiteInProject(project, item)))
                     .build();
             hierarchyDTO.add(itemHierarchyDTO);
         }
@@ -57,14 +61,14 @@ public class TestSuiteController {
     }
 
 
-    @GetMapping("/project-key/{projectKey}/suites/{suiteId}")
+    @GetMapping("/view")
     public ResponseEntity<TestSuiteHierarchyDTO> getTestSuite(
-            @PathVariable String projectKey,
-            @PathVariable String suiteId,
+            @RequestParam String projectKey,
+            @RequestParam String suiteId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         Project project = projectService.getProjectByKey(projectKey);
-        ProjectMembership projectMembership =  projectAccessService.checkAccessOfUserInProject(
+        projectAccessService.checkAccessOfUserInProject(
                 project, customUserDetails.getUser(), ProjectRole.VIEWER
         );
         TestSuite testSuite = testSuiteService.findBySuiteId(fromBase62(suiteId));
@@ -72,10 +76,27 @@ public class TestSuiteController {
                 .current(testSuiteMapper.toDto(testSuite))
                 .parent(testSuiteMapper.toDto(testSuite.getParentTestSuite()))
                 .children(testSuiteMapper.toDtoList(
-                        testSuiteService.findChildrenOfTestSuiteInProject(projectMembership.getProject(), testSuite))
+                        testSuiteService.findChildrenOfTestSuiteInProject(project, testSuite))
                 )
                 .build();
         return ResponseEntity.ok(hierarchyDTO);
+    }
+
+    @GetMapping("/view/stats")
+    public ResponseEntity<TestSuiteStatsDTO> getTestSuiteStats(
+            @RequestParam String projectKey,
+            @RequestParam String suiteId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        Project project = projectService.getProjectByKey(projectKey);
+        projectAccessService.checkAccessOfUserInProject(
+                project, customUserDetails.getUser(), ProjectRole.VIEWER
+        );
+        TestSuite testSuite = testSuiteService.findBySuiteId(fromBase62(suiteId));
+
+        return ResponseEntity.ok(
+                testSuiteStatsMapper.toDto(testSuiteService.findTestSuiteStatsByTestSuite(testSuite))
+        );
     }
 
 }

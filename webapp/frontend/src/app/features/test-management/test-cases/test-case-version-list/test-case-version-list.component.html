@@ -1,14 +1,9 @@
 <div class="version-list-container">
 
   <header class="page-header">
-    <div class="header-left">
-      <button class="back-btn" [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases']">
-        ← Test Cases
-      </button>
-      <div class="header-title">
-        <h1 *ngIf="testCaseTitle$ | async as title">{{ title }}</h1>
-        <p class="header-sub">Version history · {{ projectKey }}-{{ testCaseIdentifier }}</p>
-      </div>
+    <div class="header-title">
+      <h1 *ngIf="testCaseTitle$ | async as title">{{ title }}</h1>
+      <p class="header-sub">Version history · {{ projectKey }}-{{ testCaseIdentifier }}</p>
     </div>
   </header>
 
@@ -29,18 +24,12 @@
           <div class="card-top">
             <div class="version-badge">v{{ version.versionNumber }}</div>
 
-            <!-- Priority comes from the VERSION, not the test case -->
             <app-priority-badge [priority]="version.priority"></app-priority-badge>
             <app-status-badge [status]="version.status"></app-status-badge>
 
             <span class="latest-tag" *ngIf="version.versionNumber === latestVersionNumber(versions)">
               Latest
             </span>
-            <div class="card-actions">
-              <button class="open-btn" (click)="viewVersion(version); $event.stopPropagation()">
-                Open →
-              </button>
-            </div>
           </div>
 
           <!-- Inline stats (loaded lazily per version card) -->
@@ -60,6 +49,10 @@
             <div class="stat-item block" *ngIf="stats.totalExecutions > 0">
               <span class="stat-val">{{ stats.blockedCount }}</span>
               <span class="stat-lbl">Blocked</span>
+            </div>
+            <div class="stat-item" *ngIf="stats.totalExecutions > 0">
+              <span class="stat-val">{{ stats.notRunCount }}</span>
+              <span class="stat-lbl">Not Run</span>
             </div>
             <div class="stat-divider" *ngIf="stats.totalExecutions > 0"></div>
             <div class="stat-item last" *ngIf="stats.lastExecutionStatus">
@@ -81,18 +74,16 @@
           <!-- Mini progress bar -->
           <ng-container *ngIf="getStats(version) | async as stats">
             <div class="mini-bar" *ngIf="stats.totalExecutions > 0" [title]="barTitle(stats)">
-              <div class="bar-pass"  [style.width.%]="pct(stats.passedCount,  stats.totalExecutions)"></div>
-              <div class="bar-fail"  [style.width.%]="pct(stats.failedCount,  stats.totalExecutions)"></div>
-              <div class="bar-block" [style.width.%]="pct(stats.blockedCount, stats.totalExecutions)"></div>
-              <div class="bar-notrun"
-                   [style.width.%]="pct(stats.totalExecutions - stats.passedCount - stats.failedCount - stats.blockedCount, stats.totalExecutions)">
-              </div>
+              <div class="bar-pass"   [style.width.%]="pct(stats.passedCount, stats.totalExecutions)"></div>
+              <div class="bar-fail"   [style.width.%]="pct(stats.failedCount, stats.totalExecutions)"></div>
+              <div class="bar-block"  [style.width.%]="pct(stats.blockedCount, stats.totalExecutions)"></div>
+              <div class="bar-notrun" [style.width.%]="pct(stats.notRunCount, stats.totalExecutions)"></div>
             </div>
           </ng-container>
 
           <!-- Footer meta -->
           <div class="card-footer">
-            <span>Created {{ version.testCase?.stamp?.timeStamp?.createdAt | date:'mediumDate' }}</span>
+            <span>Created {{ version.stamp.timeStamp.createdAt | date:'mediumDate' }}</span>
           </div>
         </div>
       </div>

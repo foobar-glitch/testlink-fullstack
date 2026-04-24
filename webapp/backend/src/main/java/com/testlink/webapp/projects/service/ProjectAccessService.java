@@ -13,13 +13,21 @@ import org.springframework.stereotype.Service;
 public class ProjectAccessService {
     private final ProjectService projectService;
 
-    public ProjectMembership checkAccessOfUserInProject(Project project, User user, ProjectRole requiredRole) {
+    public void checkAccessOfUserInProject(String projectKey, User user, ProjectRole requiredRole) {
+        Project project = projectService.getProjectByKey(projectKey);
         ProjectMembership membership = projectService.getMemberShipOfUserAndProject(project, user);
         ProjectRole userRole = membership.getRole();
         if(!userRole.hasAtLeast(requiredRole)){
             throw new InsufficientAuthorityException(user.getUserId(), project.getProjectId(), requiredRole, userRole);
         }
-        return membership;
+    }
+
+    public void checkAccessOfUserInProject(Project project, User user, ProjectRole requiredRole) {
+        ProjectMembership membership = projectService.getMemberShipOfUserAndProject(project, user);
+        ProjectRole userRole = membership.getRole();
+        if(!userRole.hasAtLeast(requiredRole)){
+            throw new InsufficientAuthorityException(user.getUserId(), project.getProjectId(), requiredRole, userRole);
+        }
     }
 
     public ProjectMembership checkAccessOfUserInProject(

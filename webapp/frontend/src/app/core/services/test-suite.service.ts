@@ -1,10 +1,9 @@
-// test-suite.service.ts
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { TestSuite, TestSuiteHierarchy, TestSuiteHierarchyDTO, TestSuiteItem } from '../models/testsuite';
+import { TestSuite, TestSuiteHierarchy, TestSuiteHierarchyDTO, TestSuiteItem, TestSuiteStats } from '../models/testsuite';
 
 @Injectable({ providedIn: 'root' })
 export class TestSuiteService {
@@ -13,24 +12,30 @@ export class TestSuiteService {
 
   /**
    * Fetch test suite tree using the project's business key.
-   * Backend endpoint: GET /projects/project-key/{projectKey}/suites
+   * Endpoint: GET /projects?projectKey={projectKey}
    */
   getTestSuitesByProjectKey(projectKey: string): Observable<TestSuite[]> {
+    const params = new HttpParams().set('projectKey', projectKey);
     return this.http
-      .get<TestSuiteHierarchyDTO[]>(`${this.apiUrl}projects/project-key/${projectKey}/suites`, {
+      .get<TestSuiteHierarchyDTO[]>(`${this.apiUrl}projects`, {
         withCredentials: true,
+        params
       })
       .pipe(map(dtos => dtos.map(dto => this.dtoToTreeNode(dto.current, dto.children))));
   }
 
   /**
    * Fetch a single test suite hierarchy by project key and suite ID.
-   * Assumes backend provides: GET /projects/project-key/{projectKey}/suites/{suiteId}
+   * Endpoint: GET /projects/view?projectKey={projectKey}&suiteId={suiteId}
    */
   getTestSuiteByProjectKeyAndId(projectKey: string, suiteId: string): Observable<TestSuiteHierarchy> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('suiteId', suiteId);
     return this.http
-      .get<TestSuiteHierarchyDTO>(`${this.apiUrl}projects/project-key/${projectKey}/suites/${suiteId}`, {
+      .get<TestSuiteHierarchyDTO>(`${this.apiUrl}projects/view`, {
         withCredentials: true,
+        params
       })
       .pipe(
         map(dto => ({
@@ -41,17 +46,6 @@ export class TestSuiteService {
       );
   }
 
-  /**
-   * Legacy method: fetch test suites by numeric project ID.
-   * Backend endpoint: GET /projects/{projectId}/suites
-   */
-  getTestSuitesByProject(projectId: number): Observable<TestSuite[]> {
-    return this.http
-      .get<TestSuiteHierarchyDTO[]>(`${this.apiUrl}projects/${projectId}/suites`, {
-        withCredentials: true,
-      })
-      .pipe(map(dtos => dtos.map(dto => this.dtoToTreeNode(dto.current, dto.children))));
-  }
 
   /**
    * Convert a flat DTO item and its raw children into a full tree node.
@@ -73,5 +67,21 @@ export class TestSuiteService {
       children: [],
       expanded: false,
     };
+  }
+
+
+  /**
+   * Get statistics for a specific test suite.
+   * Endpoint: GET /projects/view/stats?projectKey={projectKey}&suiteId={suiteId}
+   */
+  getTestSuiteStats(projectKey: string, suiteId: string): Observable<TestSuiteStats> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('suiteId', suiteId);
+
+    return this.http.get<TestSuiteStats>(`${this.apiUrl}projects/view/stats`, {
+      withCredentials: true,
+      params
+    });
   }
 }

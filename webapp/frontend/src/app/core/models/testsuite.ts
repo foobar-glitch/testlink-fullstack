@@ -63,6 +63,18 @@ export interface TestCase {
   stamp: UserCreatedTimeStamp;
 }
 
+export interface TestCaseStats {
+  totalVersions: number;
+  totalExecutions: number;
+  lastExecutionStatus: TestRunStatus | null;
+  lastExecutedAt: string | null;
+  passedCount: number;
+  failedCount: number;
+  blockedCount: number;
+  notRunCount: number;
+  statsUpdatedAt: string;
+}
+
 export type TestCaseVersionStatus = 'draft' | 'active' | 'deprecated';
 
 export interface TestCaseVersionStats {
@@ -72,6 +84,7 @@ export interface TestCaseVersionStats {
   passedCount: number;
   failedCount: number;
   blockedCount: number;
+  notRunCount: number;
   avgExecutionTimeMs: number | null;
 }
 
@@ -106,4 +119,16 @@ export interface TestCaseFormData {
   expectedResult: string;
   priority: 'low' | 'medium' | 'high';
   suiteId: number;
+}
+
+export interface TestSuiteStats {
+  totalTestCases: number;
+  totalExecutions: number;
+  lastExecutionStatus: TestRunStatus | null;
+  lastExecutedAt: string | null;  // ISO date string
+  passedCount: number;
+  failedCount: number;
+  blockedCount: number;
+  notRunCount: number;
+  startsUpdatedAt: string;  // ISO date string
 }

@@ -1,14 +1,4 @@
 <div class="result-detail-container">
-  <header class="header">
-    <h2>Step Execution Detail</h2>
-    <button
-      class="back-btn"
-      [routerLink]="['/projects/project-key', projectKey, 'suites', suiteId, 'testcases', testCaseIdentifier, 'versions', versionNumber, 'steps', stepId, 'action']"
-    >
-      ← Back to Executions
-    </button>
-  </header>
-
   <div *ngIf="errorMessage" class="error-state">
     <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
   </div>

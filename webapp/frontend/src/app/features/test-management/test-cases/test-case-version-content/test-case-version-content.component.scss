@@ -1,28 +1,18 @@
-// ─── test-case-version-content.component.scss ────────────────────────────────
 @use 'app/shared/styles/variables' as vars;
 @use 'app/shared/styles/mixins' as mix;
 
 .version-content-container {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: vars.$spacing-xl vars.$spacing-lg;
-
-  @media (max-width: 600px) { padding: vars.$spacing-lg vars.$spacing-md; }
+  padding: 0;
 }
 
-// ── Page header ───────────────────────────────────────────────────────────────
+// Page header
 .page-header {
-  display: flex;
-  align-items: flex-start;
-  gap: vars.$spacing-md;
   margin-bottom: vars.$spacing-lg;
-  padding-bottom: vars.$spacing-md;
-  border-bottom: 1px solid vars.$border;
 }
 
-.back-btn { @include mix.btn-ghost; flex-shrink: 0; white-space: nowrap; }
-
-.header-info { flex: 1; }
+.header-info {
+  flex: 1;
+}
 
 .header-row {
   display: flex;
@@ -56,10 +46,16 @@
   flex-wrap: wrap;
 }
 
-.meta-sep { color: vars.$border; }
-.meta-text { font-size: 12px; color: vars.$muted; }
+.meta-sep {
+  color: vars.$border;
+}
 
-// ── Stats section ─────────────────────────────────────────────────────────────
+.meta-text {
+  font-size: 12px;
+  color: vars.$muted;
+}
+
+// Stats section
 .stats-section {
   background: vars.$white;
   border: 1px solid vars.$border;
@@ -83,7 +79,10 @@
   padding-right: vars.$spacing-lg;
   border-right: 1px solid vars.$border;
 
-  &:last-child { border-right: none; padding-right: 0; }
+  &:last-child {
+    border-right: none;
+    padding-right: 0;
+  }
 
   .stat-val {
     font-size: 26px;
@@ -111,9 +110,17 @@
     margin-top: 3px;
   }
 
-  &.pass .stat-val { color: vars.$color-success; }
-  &.fail .stat-val { color: vars.$color-danger; }
-  &.block .stat-val { color: vars.$color-warning; }
+  &.pass .stat-val {
+    color: vars.$color-success;
+  }
+
+  &.fail .stat-val {
+    color: vars.$color-danger;
+  }
+
+  &.block .stat-val {
+    color: vars.$color-warning;
+  }
 }
 
 .progress-bar {
@@ -125,14 +132,26 @@
 
   .pb {
     transition: width 0.4s ease;
-    &.pass   { background: vars.$color-success; }
-    &.fail   { background: vars.$color-danger; }
-    &.block  { background: vars.$color-warning; }
-    &.notrun { background: #ccc; }
+
+    &.pass {
+      background: vars.$color-success;
+    }
+
+    &.fail {
+      background: vars.$color-danger;
+    }
+
+    &.block {
+      background: vars.$color-warning;
+    }
+
+    &.notrun {
+      background: #ccc;
+    }
   }
 }
 
-// ── Content card ──────────────────────────────────────────────────────────────
+// Content card
 .content-card {
   background: vars.$white;
   border: 1px solid vars.$border;
@@ -165,18 +184,42 @@
   }
 }
 
-// ── Steps ─────────────────────────────────────────────────────────────────────
+// Steps
 .steps-section {
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: vars.$spacing-md;
+  }
+
   h3 {
     font-size: 16px;
     font-weight: 700;
     color: vars.$text;
-    margin: 0 0 vars.$spacing-md;
+    margin: 0;
     padding-bottom: vars.$spacing-sm;
     border-bottom: 1px solid vars.$border;
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+
+  .view-runs-btn {
+    background: none;
+    border: 1px solid vars.$border;
+    border-radius: vars.$radius-sm;
+    color: vars.$accent;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: vars.$transition;
+
+    &:hover {
+      background: vars.$accent-soft;
+      border-color: vars.$accent;
+    }
   }
 }
 
@@ -205,7 +248,10 @@
   border-radius: vars.$radius-sm;
   transition: vars.$transition;
 
-  &:hover { border-color: vars.$accent-mid; background: vars.$white; }
+  &:hover {
+    border-color: vars.$accent-mid;
+    background: vars.$white;
+  }
 }
 
 .step-num {
@@ -248,7 +294,9 @@
   margin-right: 4px;
 }
 
-.step-exec-type { margin-top: 2px; }
+.step-exec-type {
+  margin-top: 2px;
+}
 
 .exec-pill {
   font-size: 10px;
@@ -259,8 +307,17 @@
   border-radius: vars.$radius-pill;
   border: 1px solid transparent;
 
-  &.manual    { background: vars.$accent-soft; color: vars.$accent-dark; border-color: vars.$accent-mid; }
-  &.automated { background: rgba(vars.$color-success, 0.1); color: vars.$color-success; border-color: rgba(vars.$color-success, 0.25); }
+  &.manual {
+    background: vars.$accent-soft;
+    color: vars.$accent-dark;
+    border-color: vars.$accent-mid;
+  }
+
+  &.automated {
+    background: rgba(vars.$color-success, 0.1);
+    color: vars.$color-success;
+    border-color: rgba(vars.$color-success, 0.25);
+  }
 }
 
 .step-history-btn {
@@ -292,7 +349,7 @@
   padding: vars.$spacing-md 0;
 }
 
-// ── Content footer ────────────────────────────────────────────────────────────
+// Content footer
 .content-meta {
   margin-top: vars.$spacing-lg;
   padding-top: vars.$spacing-md;
@@ -301,8 +358,9 @@
   color: vars.$muted;
 }
 
-// ── Loading / error ───────────────────────────────────────────────────────────
-.loading-state, .error-state {
+// Loading / error
+.loading-state,
+.error-state {
   display: flex;
   justify-content: center;
   align-items: center;

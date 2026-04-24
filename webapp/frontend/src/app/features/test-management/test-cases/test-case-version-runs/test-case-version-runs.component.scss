@@ -1,0 +1,42 @@
+@use 'app/shared/styles/variables' as vars;
+@use 'app/shared/styles/mixins' as mix;
+
+.runs-container {
+  padding: 0;
+}
+
+.page-header {
+  margin-bottom: vars.$spacing-lg;
+
+  h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: vars.$text;
+    margin: 0 0 4px;
+    line-height: 1.2;
+  }
+
+  .header-sub {
+    font-size: 13px;
+    color: vars.$muted;
+  }
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: vars.$muted;
+  font-size: 14px;
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}

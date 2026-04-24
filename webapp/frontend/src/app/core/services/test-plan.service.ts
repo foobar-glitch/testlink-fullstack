@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { TestPlan } from '../models/testexecution';
+import { TestPlan, TestPlanStats } from '../models/testexecution';
 
 @Injectable({ providedIn: 'root' })
 export class TestPlanService {
@@ -10,24 +10,39 @@ export class TestPlanService {
   private readonly apiUrl = environment.apiUrl;
 
   /**
-   * Get all test plans for a given project (by project key).
-   * Endpoint: GET /projects/project-key/{projectKey}/testplans
+   * Get all test plans for a given project.
+   * Endpoint: GET /testplans?projectKey={projectKey}
    */
   getTestPlansByProjectKey(projectKey: string): Observable<TestPlan[]> {
-    return this.http.get<TestPlan[]>(
-      `${this.apiUrl}projects/project-key/${projectKey}/testplans`,
-      { withCredentials: true }
-    );
+    const params = new HttpParams().set('projectKey', projectKey);
+    return this.http.get<TestPlan[]>(`${this.apiUrl}testplans`, {
+      withCredentials: true,
+      params
+    });
   }
 
   /**
    * Get a single test plan by its ID.
-   * Endpoint: GET /projects/project-key/{projectKey}/testplans/{testPlanId}
+   * Endpoint: GET /testplans/view?projectKey={projectKey}&testPlanId={testPlanId}
    */
   getTestPlan(projectKey: string, testPlanId: string): Observable<TestPlan> {
-    return this.http.get<TestPlan>(
-      `${this.apiUrl}projects/project-key/${projectKey}/testplans/${testPlanId}`,
-      { withCredentials: true }
-    );
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId);
+    return this.http.get<TestPlan>(`${this.apiUrl}testplans/view`, {
+      withCredentials: true,
+      params
+    });
   }
+
+  getTestPlanStats(projectKey: string, testPlanId: string): Observable<TestPlanStats> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId);
+    return this.http.get<TestPlanStats>(`${this.apiUrl}testplans/view/stats`, {
+      withCredentials: true,
+      params
+    });
+  }
+
 }

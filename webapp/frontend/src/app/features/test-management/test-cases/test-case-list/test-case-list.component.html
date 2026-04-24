@@ -6,11 +6,8 @@
         {{ suiteName }}
       </span>
     </div>
-    <button
-      class="back-btn"
-      [routerLink]="['/projects/project-key', projectKey, 'suites']"
-    >
-      ← Back to Suites
+    <button class="back-btn" (click)="backToOverview()">
+      ← Back to Overview
     </button>
   </header>
 
@@ -25,9 +22,8 @@
     <div *ngIf="testCases.length > 0; else empty" class="test-cases-grid">
       <div *ngFor="let tc of testCases" class="test-case-card" (click)="selectTestCase(tc)">
         <div class="card-header">
-          <!-- Safe navigation: project may be undefined when suite has no project context -->
           <span class="identifier">
-            {{ tc.testSuite?.project?.projectKey ?? projectKey }}-{{ tc.identifierNumber }}
+            {{ tc.testSuite?.project?.projectKey || '' }}-{{ tc.identifierNumber }}
           </span>
           <app-status-badge [status]="tc.status"></app-status-badge>
         </div>

@@ -14,11 +14,20 @@ CREATE TABLE test_case_version_stats (
     passed_count INT NOT NULL DEFAULT 0,
     failed_count INT NOT NULL DEFAULT 0,
     blocked_count INT NOT NULL DEFAULT 0,
+    not_run_count INT NOT NULL DEFAULT 0,
+    stats_updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_stats_version
         FOREIGN KEY (test_case_version_id) REFERENCES test_case_versions(test_case_version_id) ON DELETE CASCADE,
-    CONSTRAINT chk_last_execution_status CHECK (last_execution_status IN ('NOT_RUN', 'PASSED', 'FAILED', 'BLOCKED', 'SKIPPED'))
+    CONSTRAINT chk_last_execution_status CHECK (last_execution_status IN ('NOT_RUN', 'PASSED', 'FAILED', 'BLOCKED', 'SKIPPED')),
+    CONSTRAINT chk_version_counts CHECK (
+        passed_count + failed_count + blocked_count + not_run_count <= total_executions
+    )
 );
+
+-- Create an index for efficient queries
+CREATE INDEX idx_version_stats_status ON test_case_version_stats(last_execution_status);
+CREATE INDEX idx_version_stats_updated ON test_case_version_stats(stats_updated_at);
 
 -- -----------------------------------------------------------------------------
 -- 2. Trigger: create an empty stats row when a new test case version is inserted
@@ -54,6 +63,7 @@ DECLARE
     v_passed INT;
     v_failed INT;
     v_blocked INT;
+    v_not_run INT;
 BEGIN
     -- Determine the version ID affected
     IF (TG_OP = 'DELETE') THEN
@@ -67,12 +77,14 @@ BEGIN
         COUNT(*),
         COUNT(*) FILTER (WHERE status = 'PASSED'),
         COUNT(*) FILTER (WHERE status = 'FAILED'),
-        COUNT(*) FILTER (WHERE status = 'BLOCKED')
+        COUNT(*) FILTER (WHERE status = 'BLOCKED'),
+        COUNT(*) FILTER (WHERE status = 'NOT_RUN')
     INTO
         v_total,
         v_passed,
         v_failed,
-        v_blocked
+        v_blocked,
+        v_not_run
     FROM test_run_items
     WHERE test_case_version_id = v_version_id;
 
@@ -85,15 +97,17 @@ BEGIN
     ORDER BY executed_at DESC
     LIMIT 1;
 
-    -- Update the stats row
+    -- Update the stats row with timestamp
     UPDATE test_case_version_stats
     SET
         total_executions = v_total,
         passed_count = v_passed,
         failed_count = v_failed,
         blocked_count = v_blocked,
+        not_run_count = v_not_run,
         last_execution_status = v_last_status,
-        last_executed_at = v_last_executed_at
+        last_executed_at = v_last_executed_at,
+        stats_updated_at = CURRENT_TIMESTAMP
     WHERE test_case_version_id = v_version_id;
 
     RETURN NULL;
@@ -105,8 +119,10 @@ CREATE TRIGGER trg_update_version_stats
     ON test_run_items
     FOR EACH ROW
     EXECUTE FUNCTION update_test_case_version_stats();
-	
-	
+
+-- -----------------------------------------------------------------------------
+-- 4. Trigger: update run item status based on step results
+-- -----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_run_item_status_from_steps()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -136,3 +152,62 @@ CREATE TRIGGER trg_update_run_item_after_step
     FOR EACH ROW
     EXECUTE FUNCTION update_run_item_status_from_steps();
 
+-- -----------------------------------------------------------------------------
+-- 5. Initialize stats for existing test case versions
+-- -----------------------------------------------------------------------------
+DO $$
+DECLARE
+    r RECORD;
+    v_total INT;
+    v_passed INT;
+    v_failed INT;
+    v_blocked INT;
+    v_not_run INT;
+    v_last_status VARCHAR(20);
+    v_last_executed_at TIMESTAMPTZ;
+BEGIN
+    FOR r IN SELECT test_case_version_id FROM test_case_versions LOOP
+        -- Ensure stats row exists
+        INSERT INTO test_case_version_stats (test_case_version_id)
+        VALUES (r.test_case_version_id)
+        ON CONFLICT (test_case_version_id) DO NOTHING;
+        
+        -- Calculate current stats
+        SELECT
+            COUNT(*),
+            COUNT(*) FILTER (WHERE status = 'PASSED'),
+            COUNT(*) FILTER (WHERE status = 'FAILED'),
+            COUNT(*) FILTER (WHERE status = 'BLOCKED'),
+            COUNT(*) FILTER (WHERE status = 'NOT_RUN')
+        INTO
+            v_total,
+            v_passed,
+            v_failed,
+            v_blocked,
+            v_not_run
+        FROM test_run_items
+        WHERE test_case_version_id = r.test_case_version_id;
+
+        -- Get latest execution
+        SELECT status, executed_at
+        INTO v_last_status, v_last_executed_at
+        FROM test_run_items
+        WHERE test_case_version_id = r.test_case_version_id
+          AND executed_at IS NOT NULL
+        ORDER BY executed_at DESC
+        LIMIT 1;
+
+        -- Update stats with initial values
+        UPDATE test_case_version_stats
+        SET
+            total_executions = v_total,
+            passed_count = v_passed,
+            failed_count = v_failed,
+            blocked_count = v_blocked,
+            not_run_count = v_not_run,
+            last_execution_status = v_last_status,
+            last_executed_at = v_last_executed_at,
+            stats_updated_at = CURRENT_TIMESTAMP
+        WHERE test_case_version_id = r.test_case_version_id;
+    END LOOP;
+END $$;

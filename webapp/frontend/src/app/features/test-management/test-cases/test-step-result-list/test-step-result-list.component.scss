@@ -2,41 +2,7 @@
 @use 'app/shared/styles/mixins' as mix;
 
 .result-list-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: vars.$spacing-xl vars.$spacing-lg;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 2px solid vars.$text;
-  padding-bottom: 10px;
-  margin-bottom: vars.$spacing-xl;
-
-  .title-section {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-
-    h2 {
-      font-size: 22px;
-      font-weight: 800;
-      text-transform: uppercase;
-      color: vars.$text;
-    }
-
-    .step-action {
-      font-size: 14px;
-      font-weight: 600;
-      color: vars.$accent;
-    }
-  }
-}
-
-.back-btn {
-  @include mix.btn-ghost;
+  padding: 0;
 }
 
 .results-table {
@@ -59,8 +25,8 @@
 
     th {
       background: vars.$gray-light;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: vars.$muted;
@@ -68,6 +34,11 @@
 
     td {
       color: vars.$text;
+      font-size: 13px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
     }
 
     .clickable-row {
@@ -90,6 +61,13 @@
   min-height: 200px;
 }
 
+.empty-state {
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+}
+
 .empty-state p {
   color: vars.$muted;
+  font-size: 14px;
 }

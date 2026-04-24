@@ -1,22 +1,5 @@
 <div class="item-detail-container">
-  <header class="header">
-    <div class="title-section">
-      <h2>Run Item Detail</h2>
-      <span *ngIf="runName$ | async as runName" class="run-name">
-        {{ runName }}
-      </span>
-    </div>
-    <button
-      class="back-btn"
-      [routerLink]="['/projects/project-key', projectKey, 'testplans', testPlanId, 'runs', testRunId, 'items']"
-    >
-      ← Back to Items
-    </button>
-  </header>
-
-  <div *ngIf="errorMessage" class="error-state">
-    <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
-  </div>
+  <app-error-banner *ngIf="errorMessage" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
 
   <ng-container *ngIf="item$ | async as item; else loading">
     <div class="detail-card">

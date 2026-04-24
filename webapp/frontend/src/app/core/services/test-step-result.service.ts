@@ -1,9 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TestStepResult } from '../models/testexecution';
-
 
 @Injectable({ providedIn: 'root' })
 export class TestStepResultService {
@@ -12,36 +11,29 @@ export class TestStepResultService {
 
   /**
    * Get all execution results for a specific test step.
-   * Endpoint: GET /projects/project-key/{projectKey}/suite/{suiteId}/testcase-identifier/{testCaseIdentifier}/versions/{version}/content/steps/{stepId}/action
+   * Endpoint: GET /test-step-results?projectKey={projectKey}&stepId={stepId}
    */
-  getResultsByStep(
-    projectKey: string,
-    suiteId: string,
-    testCaseIdentifier: number,
-    versionNumber: number,
-    stepId: string
-  ): Observable<TestStepResult[]> {
-    return this.http.get<TestStepResult[]>(
-      `${this.apiUrl}projects/project-key/${projectKey}/suite/${suiteId}/testcase-identifier/${testCaseIdentifier}/versions/${versionNumber}/content/steps/${stepId}/action`,
-      { withCredentials: true }
-    );
+  getResultsByStep(projectKey: string, stepId: string): Observable<TestStepResult[]> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('stepId', stepId);
+    return this.http.get<TestStepResult[]>(`${this.apiUrl}test-step-results`, {
+      withCredentials: true,
+      params
+    });
   }
 
   /**
-   * Get a single execution result by ID.
-   * Endpoint: GET /projects/project-key/{projectKey}/suite/{suiteId}/testcase-identifier/{testCaseIdentifier}/versions/{version}/content/steps/{stepId}/action/{actionId}
+   * Get a single execution result by its action ID.
+   * Endpoint: GET /test-step-results/view?projectKey={projectKey}&actionId={actionId}
    */
-  getResultById(
-    projectKey: string,
-    suiteId: string,
-    testCaseIdentifier: number,
-    versionNumber: number,
-    stepId: string,
-    actionId: string
-  ): Observable<TestStepResult> {
-    return this.http.get<TestStepResult>(
-      `${this.apiUrl}projects/project-key/${projectKey}/suite/${suiteId}/testcase-identifier/${testCaseIdentifier}/versions/${versionNumber}/content/steps/${stepId}/action/${actionId}`,
-      { withCredentials: true }
-    );
+  getResultById(projectKey: string, actionId: string): Observable<TestStepResult> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('actionId', actionId);
+    return this.http.get<TestStepResult>(`${this.apiUrl}test-step-results/view`, {
+      withCredentials: true,
+      params
+    });
   }
 }

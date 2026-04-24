@@ -1,14 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { TestPlanRunItemService } from '../../../../core/services/test-plan-run-item.service';
 import { TestPlanRunService } from '../../../../core/services/test-plan-run.service';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { TestRunStatusBadgeComponent } from '../../../../shared/components/test-run-status-badge/test-run-status-badge.component';
-import { TestPlanRunItem, TestRunStatus } from '../../../../core/models/testexecution';
+import { TestPlanRunItem } from '../../../../core/models/testexecution';
 
 @Component({
   selector: 'app-test-plan-run-item-list',
@@ -23,59 +23,68 @@ import { TestPlanRunItem, TestRunStatus } from '../../../../core/models/testexec
   templateUrl: './test-plan-run-item-list.component.html',
   styleUrls: ['./test-plan-run-item-list.component.scss'],
 })
-export class TestPlanRunItemListComponent {
-  private readonly route          = inject(ActivatedRoute);
+export class TestPlanRunItemListComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly runItemService = inject(TestPlanRunItemService);
-  private readonly runService     = inject(TestPlanRunService);
-  private readonly router         = inject(Router);
+  private readonly runService = inject(TestPlanRunService);
 
-  readonly projectKey: string;
-  readonly testPlanId: string;
-  readonly testRunId:  string;
-
-  items$:   Observable<TestPlanRunItem[]>;
-  runName$: Observable<string>;
+  items$!: Observable<TestPlanRunItem[]>;
+  runName$!: Observable<string>;
   errorMessage = '';
 
-  constructor() {
-    this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
-    this.testPlanId = this.route.snapshot.paramMap.get('testPlanId')!;
-    this.testRunId  = this.route.snapshot.paramMap.get('testRunId')!;
+  projectKey!: string;
+  suiteId!: string;
+  testRunId!: string;
 
-    this.items$ = this.runItemService
-      .getRunItems(this.projectKey, this.testPlanId, this.testRunId)
-      .pipe(
-        catchError(err => {
-          this.errorMessage = err.message || 'Failed to load run items';
-          return of([]);
-        })
-      );
+  ngOnInit(): void {
+    this.items$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        const suite = params['suite'];
+        const testRunId = params['testRunId'];
+        if (!project || !testRunId) return of([]);
+        this.projectKey = project;
+        this.suiteId = suite || '';
+        this.testRunId = testRunId;
+        return this.runItemService.getRunItems(project, testRunId).pipe(
+          catchError(err => {
+            this.errorMessage = err.message || 'Failed to load run items';
+            return of([]);
+          })
+        );
+      })
+    );
 
-    this.runName$ = this.runService
-      .getTestRunById(this.projectKey, this.testPlanId, this.testRunId)
-      .pipe(
-        map(run => run.name),
-        catchError(() => of('Test Run'))
-      );
+    this.runName$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        const testRunId = params['testRunId'];
+        if (!project || !testRunId) return of('Test Run');
+        return this.runService.getTestRunById(project, testRunId).pipe(
+          map(run => run.name),
+          catchError(() => of('Test Run'))
+        );
+      })
+    );
   }
 
   getTestCaseIdentifier(item: TestPlanRunItem): string {
     const tc = item.testCase;
-    // project is optional on TestSuite — fall back to the route projectKey
     const key = tc.testSuite?.project?.projectKey ?? this.projectKey;
     return `${key}-${tc.identifierNumber}`;
   }
 
-  getBadgeStatus(status: TestRunStatus): string {
-    return status.toLowerCase();
-  }
-
   viewItem(item: TestPlanRunItem): void {
-    this.router.navigate([
-      '/projects/project-key', this.projectKey,
-      'testplans', this.testPlanId,
-      'runs', this.testRunId,
-      'items', item.testRunItemId,
-    ]);
+    this.router.navigate(['/explorer'], {
+      queryParams: {
+        project: this.projectKey,
+        suite: this.suiteId,
+        testRunId: this.testRunId,
+        runItemId: item.testRunItemId,
+        tab: 'run-detail'
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 }

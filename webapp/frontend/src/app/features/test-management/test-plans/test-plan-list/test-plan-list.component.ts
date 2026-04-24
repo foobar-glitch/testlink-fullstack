@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -16,41 +16,56 @@ import { TestPlan } from '../../../../core/models/testexecution';
   templateUrl: './test-plan-list.component.html',
   styleUrls: ['./test-plan-list.component.scss'],
 })
-export class TestPlanListComponent {
+export class TestPlanListComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly testPlanService = inject(TestPlanService);
   private readonly projectService = inject(ProjectService);
 
-  readonly projectKey: string;
-  testPlans$: Observable<TestPlan[]>;
-  projectName$: Observable<string>;
+  testPlans$!: Observable<TestPlan[]>;
+  projectName$!: Observable<string>;
   errorMessage = '';
 
-  constructor() {
-    this.projectKey = this.route.snapshot.paramMap.get('projectKey')!;
+  // Context from query params
+  projectKey!: string;
 
-    this.testPlans$ = this.testPlanService.getTestPlansByProjectKey(this.projectKey).pipe(
-      catchError(err => {
-        this.errorMessage = err.message || 'Failed to load test plans';
-        return of([]);
+  ngOnInit(): void {
+    this.testPlans$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        if (!project) return of([]);
+        this.projectKey = project;
+        return this.testPlanService.getTestPlansByProjectKey(project).pipe(
+          catchError(err => {
+            this.errorMessage = err.message || 'Failed to load test plans';
+            return of([]);
+          })
+        );
       })
     );
 
-    // Optionally fetch project name for the header
-    this.projectName$ = this.projectService.getProjectByKey(this.projectKey).pipe(
-      map(project => project.displayName),
-      catchError(() => of('Project'))
+    this.projectName$ = this.route.queryParams.pipe(
+      switchMap(params => {
+        const project = params['project'];
+        if (!project) return of('Project');
+        return this.projectService.getProjectByKey(project).pipe(
+          map(p => p.displayName),
+          catchError(() => of('Project'))
+        );
+      })
     );
   }
 
   selectTestPlan(plan: TestPlan): void {
-    this.router.navigate([
-      '/projects/project-key',
-      this.projectKey,
-      'testplans',
-      plan.testPlanId,
-      'runs'
-    ]);
+    const queryParams = {
+      project: this.projectKey,
+      plan: plan.testPlanId,
+      tab: 'runs'
+    };
+    this.router.navigate(['/explorer'], { queryParams });
+  }
+
+  backToProjects(): void {
+    this.router.navigate(['/projects']);
   }
 }
