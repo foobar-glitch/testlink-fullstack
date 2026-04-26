@@ -13,9 +13,11 @@ export class TestPlanRunItemService {
    * Get all run items for a specific test run.
    * Endpoint: GET /test-run-items?projectKey={projectKey}&testRunId={testRunId}
    */
-  getRunItems(projectKey: string, testRunId: string): Observable<TestPlanRunItem[]> {
+
+  getRunItems(projectKey: string, testRunId: string, testPlanId: string): Observable<TestPlanRunItem[]> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId)
       .set('testRunId', testRunId);
     return this.http.get<TestPlanRunItem[]>(`${this.apiUrl}test-run-items`, {
       withCredentials: true,
@@ -36,4 +38,5 @@ export class TestPlanRunItemService {
       params
     });
   }
+
 }

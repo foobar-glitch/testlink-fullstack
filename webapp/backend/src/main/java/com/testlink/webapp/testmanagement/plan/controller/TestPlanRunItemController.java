@@ -24,7 +24,8 @@ public class TestPlanRunItemController {
     private final ProjectAccessService projectAccessService;
     private final TestPlanRunItemService testPlanRunItemService;
     private final TestPlanRunItemMapper testPlanRunItemMapper;
-
+    /*
+    // all testPlans
     @GetMapping("")
     public ResponseEntity<List<TestPlanRunItemDTO>> testRunsOfTestPlan(
             @RequestParam String projectKey,
@@ -36,6 +37,21 @@ public class TestPlanRunItemController {
         return ResponseEntity.ok(testPlanRunItemMapper.toDtoList(testPlanRunItemService.findAllRunItemsOfTestPlanRun(
                 testPlanRun)));
     }
+    */
+
+    @GetMapping("")
+    public ResponseEntity<List<TestPlanRunItemDTO>> testRunsOfTestPlan(
+            @RequestParam String projectKey,
+            @RequestParam String testPlanId,
+            @RequestParam String testRunId,
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+        projectAccessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
+        TestPlanRun testPlanRun = validatePathService.getTestPlanRunOfProjectKeyAndTestPlanId(testRunId, testPlanId, projectKey);
+
+        return ResponseEntity.ok(testPlanRunItemMapper.toDtoList(testPlanRunItemService.findAllRunItemsOfTestPlanRun(
+                testPlanRun)));
+    }
+
 
     @GetMapping("/view")
     public ResponseEntity<TestPlanRunItemDTO> testRunOfIdInTestPlan(

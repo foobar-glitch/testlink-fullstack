@@ -250,7 +250,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
         if (!runs.length) return of([]);
         const selected = runs.find(run => run.testPlanRunId === selectedRunId) ?? runs[0];
         if (!selected) return of([]);
-        return this.runItemSvc.getRunItems(projectKey, selected.testPlanRunId);
+        return this.runItemSvc.getRunItems(projectKey, selected.testPlanRunId, planId);
       }),
       catchError(() => of([]))
     );

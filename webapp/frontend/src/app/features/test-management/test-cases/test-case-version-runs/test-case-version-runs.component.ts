@@ -34,6 +34,7 @@ export class TestCaseVersionRunsComponent implements OnInit {
   suiteId!: string;
   testCaseIdentifier!: number;
   versionNumber!: number;
+  testPlanId!: string;
 
   ngOnInit(): void {
     this.runs$ = this.route.queryParams.pipe(
@@ -42,6 +43,7 @@ export class TestCaseVersionRunsComponent implements OnInit {
         const suite = params['suite'];
         const testcase = params['testcase'];
         const version = params['version'];
+        const testPlanId = params['plan'];
 
         if (!project || !testcase || !version) {
           return of([]);
@@ -52,7 +54,7 @@ export class TestCaseVersionRunsComponent implements OnInit {
         this.testCaseIdentifier = +testcase;
         this.versionNumber = +version;
 
-        return this.runsService.getRunsForVersion(project, +testcase, +version).pipe(
+        return this.runsService.getRunsForVersion(project, +testcase, +version, testPlanId).pipe(
           catchError(err => {
             this.errorMessage = err.message || 'Failed to load runs';
             return of([]);

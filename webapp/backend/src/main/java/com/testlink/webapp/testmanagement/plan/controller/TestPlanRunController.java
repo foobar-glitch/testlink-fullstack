@@ -39,9 +39,11 @@ public class TestPlanRunController {
     @GetMapping("/view")
     public ResponseEntity<TestPlanRunDTO> testRunOfId(
             @RequestParam String projectKey,
-            @RequestParam String testRunId, @AuthenticationPrincipal CustomUserDetails userDetails){
+            @RequestParam String testPlanId,
+            @RequestParam String testRunId,
+            @AuthenticationPrincipal CustomUserDetails userDetails){
         projectAccessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
-        TestPlanRun testPlanRun = validatePathService.getTestPlanRunOfProjectKey(testRunId, projectKey);
+        TestPlanRun testPlanRun = validatePathService.getTestPlanRunOfProjectKeyAndTestPlanId(testRunId, testPlanId, projectKey);
         return ResponseEntity.ok(testPlanRunMapper.toDto(testPlanRun));
     }
 }

@@ -36,6 +36,7 @@ export class TestPlanRunItemListComponent implements OnInit {
   projectKey!: string;
   suiteId!: string;
   testRunId!: string;
+  testPlanId!: string;
 
   ngOnInit(): void {
     this.items$ = this.route.queryParams.pipe(
@@ -43,11 +44,12 @@ export class TestPlanRunItemListComponent implements OnInit {
         const project = params['project'];
         const suite = params['suite'];
         const testRunId = params['testRunId'];
+        const testPlanId = params['plan'];
         if (!project || !testRunId) return of([]);
         this.projectKey = project;
         this.suiteId = suite || '';
         this.testRunId = testRunId;
-        return this.runItemService.getRunItems(project, testRunId).pipe(
+        return this.runItemService.getRunItems(project, testRunId, testPlanId).pipe(
           catchError(err => {
             this.errorMessage = err.message || 'Failed to load run items';
             return of([]);
@@ -61,7 +63,7 @@ export class TestPlanRunItemListComponent implements OnInit {
         const project = params['project'];
         const testRunId = params['testRunId'];
         if (!project || !testRunId) return of('Test Run');
-        return this.runService.getTestRunById(project, testRunId).pipe(
+        return this.runService.getTestRunById(project, this.testPlanId, testRunId).pipe(
           map(run => run.name),
           catchError(() => of('Test Run'))
         );

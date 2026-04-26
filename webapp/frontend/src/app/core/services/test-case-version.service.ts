@@ -73,11 +73,14 @@ export class TestCaseVersionService {
     projectKey: string,
     testCaseIdentifier: number,
     versionNumber: number,
+    testPlanId: string,
   ): Observable<TestPlanRunItem[]> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
       .set('testCaseIdentifier', testCaseIdentifier.toString())
-      .set('versionNumber', versionNumber.toString());
+      .set('versionNumber', versionNumber.toString())
+      .set('testPlanId', testPlanId)
+    ;
     return this.http.get<TestPlanRunItem[]>(`${this.apiUrl}test-case-versions/runs`, {
       withCredentials: true,
       params,

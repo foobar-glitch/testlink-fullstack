@@ -23,4 +23,17 @@ public interface TestPlanRunRepository extends JpaRepository<TestPlanRun, Long> 
     """)
     Optional<TestPlanRun> findByPublicIdAndProject(@Param("runId") UUID runId,
                                                    @Param("project") Project project);
+
+    @Query("""
+    SELECT r FROM TestPlanRun r
+    JOIN r.testPlan tp
+    WHERE r.publicId = :runId
+      AND tp.publicId = :testPlanId
+      AND tp.project = :project
+""")
+    Optional<TestPlanRun> findByPublicIdAndTestPlanIdAndProject(
+            @Param("runId") UUID runId,
+            @Param("testPlanId") UUID testPlanId,
+            @Param("project") Project project
+    );
 }

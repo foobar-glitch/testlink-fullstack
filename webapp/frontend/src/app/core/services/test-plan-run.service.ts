@@ -27,9 +27,10 @@ export class TestPlanRunService {
    * Get a single test run by its ID.
    * Endpoint: GET /testruns/view?projectKey={projectKey}&testRunId={testRunId}
    */
-  getTestRunById(projectKey: string, testRunId: string): Observable<TestPlanRun> {
+  getTestRunById(projectKey: string, testPlanId: string,  testRunId: string): Observable<TestPlanRun> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId)
       .set('testRunId', testRunId);
     return this.http.get<TestPlanRun>(`${this.apiUrl}testruns/view`, {
       withCredentials: true,

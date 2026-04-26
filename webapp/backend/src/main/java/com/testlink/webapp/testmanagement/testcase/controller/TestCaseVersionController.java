@@ -85,12 +85,13 @@ public class TestCaseVersionController {
             @RequestParam String projectKey,
             @RequestParam Long testCaseIdentifier,
             @RequestParam Long versionNumber,
+            @RequestParam String testPlanId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         // validate path and access, then fetch run items for that test case version
         User user = userDetails.getUser();
         projectAccessService.checkAccessOfUserInProject(projectKey, user, ProjectRole.VIEWER);
         TestCaseVersion testCaseVersion = validatePathService.getTestCaseVersion(projectKey, testCaseIdentifier, versionNumber);
-        return ResponseEntity.ok(testPlanRunItemMapper.toDtoList(testPlanRunItemService.findAllRunItemsOfTestCaseVersion(testCaseVersion)));
+        return ResponseEntity.ok(testPlanRunItemMapper.toDtoList(validatePathService.getTestPlanRunItemOfTestCaseVersionAndTestPlanId(testCaseVersion, testPlanId)));
     }
 
     @GetMapping("/runs/view")

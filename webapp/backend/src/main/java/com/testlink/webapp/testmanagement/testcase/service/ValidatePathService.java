@@ -18,6 +18,8 @@ import com.testlink.webapp.testmanagement.testcase.entity.TestStepResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.testlink.webapp.shared.util.IdUtil.fromBase62;
 
 @Service
@@ -73,12 +75,17 @@ public class ValidatePathService {
         return testPlanService.findByTestPlanId(fromBase62(testPlanId), getP(projectKey));
     }
 
-    public TestPlanRun getTestPlanRunOfProjectKey(String testRunId, String projectKey){
-        return testPlanRunService.findByTestRunId(fromBase62(testRunId), getP(projectKey));
+    public TestPlanRun getTestPlanRunOfProjectKeyAndTestPlanId(String testRunId, String testPlanId, String projectKey){
+        return testPlanRunService.findByTestRunIdAndTestPlan(fromBase62(testRunId), fromBase62(testPlanId), getP(projectKey));
     }
 
     public TestPlanRunItem getTestPlanRunItemByItemIdOfProjectKey(String testRunItemId, String projectKey){
         return testPlanRunItemService.findByTestPlanRunItemId(fromBase62(testRunItemId), getP(projectKey));
+    }
+
+    //TestPlanRunItem validatePathServic(testCaseVersion, testPlanId)
+    public List<TestPlanRunItem> getTestPlanRunItemOfTestCaseVersionAndTestPlanId(TestCaseVersion testCaseVersion, String testPlanId){
+        return testPlanRunItemService.findAllRunItemsOfTestCaseVersion(testCaseVersion, fromBase62(testPlanId));
     }
 
 }

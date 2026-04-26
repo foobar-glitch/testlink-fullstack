@@ -26,5 +26,15 @@ public interface TestPlanRunItemRepository  extends JpaRepository<TestPlanRunIte
 """)
     Optional<TestPlanRunItem> findByPublicIdAndProject(@Param("itemId") UUID itemId, @Param("project") Project project);
 
-    List<TestPlanRunItem> findAllByTestCaseVersion(TestCaseVersion testCaseVersion);
+    @Query("""
+    SELECT i FROM TestPlanRunItem i
+    JOIN i.testPlanRun r
+    JOIN r.testPlan tp
+    WHERE i.testCaseVersion = :version
+      AND tp.publicId = :planId
+""")
+    List<TestPlanRunItem> findAllByTestCaseVersionAndTestPlanPublicId(
+            @Param("version") TestCaseVersion version,
+            @Param("planId") UUID planId
+    );
 }

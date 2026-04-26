@@ -23,4 +23,10 @@ public class TestPlanRunService {
     public TestPlanRun findByTestRunId(UUID testRunId, Project project){
         return testPlanRunRepository.findByPublicIdAndProject(testRunId, project).orElseThrow(() -> new ResourceNotFoundException("TestPlanRun", "testPlanRunId", testRunId));
     }
+
+    public TestPlanRun findByTestRunIdAndTestPlan(UUID testRunId, UUID testPlanId, Project project){
+        return testPlanRunRepository.findByPublicIdAndTestPlanIdAndProject(testRunId, testPlanId, project).orElseThrow(
+                () -> new ResourceNotFoundException("TestPlanRun", "testPlanRunId", testRunId)
+        );
+    }
 }
