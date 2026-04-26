@@ -78,19 +78,44 @@
 }
 
 // ── Cases list ────────────────────────────────────────────────────────────────
-.cases-list { display: block; }
+.cases-list {
+  display: block;
+  position: relative;
+  // light vertical line to visually group cases under the suite
+  &::before {
+    content: '';
+    position: absolute;
+    left: 20px; /* align with the suite’s expand toggle */
+    top: 0;
+    bottom: 8px;
+    width: 1px;
+    background: vars.$border;
+  }
+}
 
 .case-row {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  gap: 6px;
+  padding-top: 6px;
+  padding-bottom: 6px;
   padding-right: 8px;
   border-radius: vars.$radius-sm;
   cursor: pointer;
   transition: background 0.12s;
-  min-height: 28px;
+  min-height: 32px;
+  position: relative;
+
+  // small horizontal line connecting to the vertical branch
+  &::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    width: 14px;
+    height: 1px;
+    background: vars.$border;
+  }
 
   &:hover { background: vars.$accent-soft; }
 
