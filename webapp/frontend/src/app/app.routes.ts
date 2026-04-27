@@ -16,10 +16,17 @@ export const routes: Routes = [
       import('./features/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
     canActivate: [authGuard],
     children: [
-      // Default → explorer
-      { path: '', redirectTo: 'explorer', pathMatch: 'full' },
+      // Default → desktop
+      { path: '', redirectTo: 'desktop', pathMatch: 'full' },
 
-      // ── Main Test Explorer (handles all views via query params) ────────────
+      // ── Desktop (home / dashboard) ─────────────────────────────────────────
+      {
+        path: 'desktop',
+        loadComponent: () =>
+          import('./features/desktop/desktop.component').then(m => m.DesktopComponent),
+      },
+
+      // ── Test Explorer ──────────────────────────────────────────────────────
       {
         path: 'explorer',
         loadComponent: () =>
@@ -28,14 +35,35 @@ export const routes: Routes = [
           ),
       },
 
-      // ── Dashboard (optional - add if you have it) ──────────────────────────
-      // {
-      //   path: 'dashboard',
-      //   loadComponent: () =>
-      //     import('./features/dashboard/dashboard.component').then(
-      //       m => m.DashboardComponent,
-      //     ),
-      // },
+      // ── Requirements (not yet implemented – placeholder) ───────────────────
+      {
+        path: 'requirements',
+        loadComponent: () =>
+          import('./features/not-implemented/not-implemented.component').then(
+            m => m.NotImplementedComponent,
+          ),
+        data: { label: 'Requirements' },
+      },
+
+      // ── Test Specification (not yet implemented – placeholder) ─────────────
+      {
+        path: 'specification',
+        loadComponent: () =>
+          import('./features/not-implemented/not-implemented.component').then(
+            m => m.NotImplementedComponent,
+          ),
+        data: { label: 'Test Specification' },
+      },
+
+      // ── Test Reports (not yet implemented – placeholder) ───────────────────
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('./features/not-implemented/not-implemented.component').then(
+            m => m.NotImplementedComponent,
+          ),
+        data: { label: 'Test Reports' },
+      },
     ],
   },
 

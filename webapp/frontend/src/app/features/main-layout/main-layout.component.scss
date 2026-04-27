@@ -487,3 +487,73 @@ $topbar-h:  56px;
 
   &.full-width { width: 100%; }
 }
+// ── Module navigation (icon buttons) ─────────────────────────────────────────
+.module-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.module-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 10px;
+  border: none;
+  background: none;
+  color: vars.$muted;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-family: vars.$font;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: vars.$radius-sm;
+  transition: vars.$transition;
+
+  &:hover {
+    color: vars.$accent;
+    background: vars.$accent-soft;
+  }
+
+  &.active {
+    color: vars.$accent;
+    background: vars.$accent-soft;
+  }
+
+  &--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+// ── Topbar utility buttons (refresh, toggle sidebar, logout) ────────────────
+.topbar-util-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  background: none;
+  color: vars.$muted;
+  border-radius: vars.$radius-sm;
+  cursor: pointer;
+  transition: vars.$transition;
+
+  &:hover {
+    color: vars.$accent;
+    background: vars.$accent-soft;
+    border-color: vars.$accent-mid;
+  }
+
+  &--danger:hover {
+    color: vars.$red;
+    background: rgba(vars.$red, 0.08);
+    border-color: rgba(vars.$red, 0.25);
+  }
+}
