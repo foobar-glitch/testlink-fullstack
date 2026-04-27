@@ -27,10 +27,11 @@ public class TestStepResultController {
     @GetMapping("")
     public ResponseEntity<List<TestStepResultDTO>> getTestStepResults(
             @RequestParam String projectKey,
+            @RequestParam String testPlanId,
             @RequestParam String stepId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         projectAccessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
-        TestCaseVersionStep testCaseVersionStep = validatePathService.getTestCaseVersionStepOfProjectKey(stepId, projectKey);
+        TestCaseVersionStep testCaseVersionStep = validatePathService.getTestCaseVersionStepOfProjectKey(stepId, testPlanId, projectKey);
         return ResponseEntity.ok(testStepResultMapper.toDtoList(testStepResultService.findTestCaseStepsByTestCaseVersion(testCaseVersionStep)));
     }
 

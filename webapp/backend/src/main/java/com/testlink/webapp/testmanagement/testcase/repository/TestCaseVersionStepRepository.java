@@ -14,17 +14,28 @@ import java.util.UUID;
 
 @Repository
 public interface TestCaseVersionStepRepository  extends JpaRepository<TestCaseVersionStep, Long> {
-    List<TestCaseVersionStep> findAllByTestCaseVersion(TestCaseVersion testCaseVersion);
+    List<TestCaseVersionStep> findTestCaseVersionStepByTestCaseVersion(TestCaseVersion testCaseVersion);
 
     @Query("""
-        SELECT s FROM TestCaseVersionStep s
-        JOIN s.testCaseVersion v
-        JOIN v.testCase tc
-        JOIN tc.testSuite ts
-        JOIN ts.project p
-        WHERE s.publicId = :stepId AND p = :project
-    """)
-    Optional<TestCaseVersionStep> findByPublicIdAndProject(@Param("stepId") UUID stepId,
-                                                           @Param("project") Project project);
+    SELECT s FROM TestCaseVersionStep s
+    JOIN s.testCaseVersion v
+    JOIN v.testCase tc
+    JOIN tc.testSuite ts
+    JOIN ts.project p
+    WHERE s.publicId = :stepId
+      AND p = :project
+      AND EXISTS (
+          SELECT 1 FROM TestPlanRunItem ri
+          JOIN ri.testPlanRun r
+          JOIN r.testPlan tp
+          WHERE ri.testCaseVersion = v
+            AND tp.publicId = :testPlanId
+      )
+""")
+    Optional<TestCaseVersionStep> findByPublicIdAndProjectAndTestPlanId(
+            @Param("stepId") UUID stepId,
+            @Param("project") Project project,
+            @Param("testPlanId") UUID testPlanId
+    );
 
 }

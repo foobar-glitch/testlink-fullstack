@@ -32,8 +32,14 @@ export class TestCaseVersionStepService {
    * Get a single step by its public ID.
    * Endpoint: GET /test-steps/step?projectKey={projectKey}&stepId={stepId}
    */
-  getStepById(projectKey: string, stepId: string): Observable<TestCaseVersionStep> {
-    const params = new HttpParams().set('projectKey', projectKey).set('stepId', stepId);
+  getStepById(
+    projectKey: string,
+    testPlanId: string,
+    stepId: string): Observable<TestCaseVersionStep> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId)
+      .set('stepId', stepId);
     return this.http.get<TestCaseVersionStep>(`${this.apiUrl}test-steps/step`, {
       withCredentials: true,
       params,

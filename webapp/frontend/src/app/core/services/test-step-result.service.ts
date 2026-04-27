@@ -13,9 +13,10 @@ export class TestStepResultService {
    * Get all execution results for a specific test step.
    * Endpoint: GET /test-step-results?projectKey={projectKey}&stepId={stepId}
    */
-  getResultsByStep(projectKey: string, stepId: string): Observable<TestStepResult[]> {
+  getResultsByStep(projectKey: string, testPlanId: string, stepId: string): Observable<TestStepResult[]> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId)
       .set('stepId', stepId);
     return this.http.get<TestStepResult[]>(`${this.apiUrl}test-step-results`, {
       withCredentials: true,

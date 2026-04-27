@@ -17,11 +17,11 @@ public class TestCaseVersionStepService {
     private final TestCaseVersionStepRepository testCaseVersionStepRepository;
 
     public List<TestCaseVersionStep> findTestCaseVersionStepsByTestCaseVersion(TestCaseVersion testCaseVersion){
-        return testCaseVersionStepRepository.findAllByTestCaseVersion(testCaseVersion);
+        return testCaseVersionStepRepository.findTestCaseVersionStepByTestCaseVersion(testCaseVersion);
     }
 
-    public TestCaseVersionStep findTestCaseVersionByPublicIdAndProject(UUID stepId, Project project){
-        return testCaseVersionStepRepository.findByPublicIdAndProject(stepId, project).orElseThrow(
+    public TestCaseVersionStep findTestCaseVersionByPublicIdAndProject(UUID stepId, UUID testPlanId, Project project){
+        return testCaseVersionStepRepository.findByPublicIdAndProjectAndTestPlanId(stepId, project, testPlanId).orElseThrow(
                 () -> new ResourceNotFoundException("TestCaseVersionStepRepository", "stepId", stepId)
         );
     }

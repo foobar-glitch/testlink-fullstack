@@ -63,8 +63,8 @@ public class ValidatePathService {
     }
 
 
-    public TestCaseVersionStep getTestCaseVersionStepOfProjectKey(String stepId, String projectKey){
-        return testCaseVersionStepService.findTestCaseVersionByPublicIdAndProject(fromBase62(stepId), getP(projectKey));
+    public TestCaseVersionStep getTestCaseVersionStepOfProjectKey(String stepId, String testPlanId, String projectKey){
+        return testCaseVersionStepService.findTestCaseVersionByPublicIdAndProject(fromBase62(stepId), fromBase62(testPlanId), getP(projectKey));
     }
 
     public TestStepResult getTestStepResultOfProjectKey(String actionId, String projectKey){

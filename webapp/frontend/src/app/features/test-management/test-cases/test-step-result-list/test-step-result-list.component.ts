@@ -34,11 +34,12 @@ export class TestStepResultListComponent implements OnInit {
     this.results$ = this.route.queryParams.pipe(
       switchMap(params => {
         const project = params['project'];
+        const testPlanId = params['plan'];
         const stepId = params['stepId'];
         if (!project || !stepId) return of([]);
         this.projectKey = project;
         this.stepId = stepId;
-        return this.resultService.getResultsByStep(project, stepId).pipe(
+        return this.resultService.getResultsByStep(project, testPlanId, stepId).pipe(
           catchError(err => {
             this.errorMessage = err.message || 'Failed to load execution results';
             return of([]);
@@ -51,10 +52,15 @@ export class TestStepResultListComponent implements OnInit {
   viewResult(result: TestStepResult): void {
     this.router.navigate(['/explorer'], {
       queryParams: {
-        project: this.projectKey,
-        stepId: this.stepId,
-        actionId: result.testStepResultId,
-        tab: 'step-result-detail'
+        project:   this.projectKey,
+        plan:      this.route.snapshot.queryParams['plan'],
+        suite:     this.route.snapshot.queryParams['suite'],
+        testcase:  this.route.snapshot.queryParams['testcase'],
+        version:   this.route.snapshot.queryParams['version'],
+        testRunId: this.route.snapshot.queryParams['testRunId'],
+        stepId:    this.stepId,
+        actionId:  result.testStepResultId,
+        tab:       'step-result-detail'
       },
       queryParamsHandling: 'merge'
     });

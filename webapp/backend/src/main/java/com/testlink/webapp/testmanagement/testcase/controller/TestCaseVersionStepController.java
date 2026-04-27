@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.testlink.webapp.shared.util.IdUtil.fromBase62;
+
 @RestController
 @RequestMapping("/test-steps")
 @RequiredArgsConstructor
@@ -42,11 +44,12 @@ public class TestCaseVersionStepController {
     @GetMapping("/step")
     public ResponseEntity<TestCaseVersionStepDTO> getVersionStepOfId(
             @RequestParam String projectKey,
+            @RequestParam String testPlanId,
             @RequestParam String stepId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
         projectAccessService.checkAccessOfUserInProject(projectKey, userDetails.getUser(), ProjectRole.VIEWER);
-        TestCaseVersionStep testCaseVersionStep = validatePathService.getTestCaseVersionStepOfProjectKey(stepId, projectKey);
+        TestCaseVersionStep testCaseVersionStep = validatePathService.getTestCaseVersionStepOfProjectKey(stepId, testPlanId, projectKey);
         return ResponseEntity.ok(testCaseVersionStepMapper.toDto(testCaseVersionStep));
     }
 
