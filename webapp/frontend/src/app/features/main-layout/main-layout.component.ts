@@ -12,18 +12,14 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import {
   Observable,
   BehaviorSubject,
-  Subscription,
   of,
   Subject,
-  combineLatest,
 } from 'rxjs';
 import {
   switchMap,
   catchError,
   filter,
   startWith,
-  distinctUntilChanged,
-  map,
   takeUntil,
 } from 'rxjs/operators';
 
@@ -42,6 +38,8 @@ import { TestPlan } from '../../core/models/testexecution';
 import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 import { SuiteTreeNodeComponent } from '../test-explorer/test-tree-node/suite-tree-node.component';
 
+export type SidebarFrame = 'settings' | 'filters' | 'explorer';
+
 @Component({
   selector: 'app-main-layout',
   standalone: true,
@@ -57,15 +55,15 @@ import { SuiteTreeNodeComponent } from '../test-explorer/test-tree-node/suite-tr
   styleUrls: ['./main-layout.component.scss'],
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {
-  private readonly auth = inject(AuthService);
-  private readonly projects = inject(ProjectService);
+  private readonly auth      = inject(AuthService);
+  private readonly projects  = inject(ProjectService);
   private readonly suitesSvc = inject(TestSuiteService);
-  private readonly plansSvc = inject(TestPlanService);
-  private readonly ctx = inject(ContextService);
+  private readonly plansSvc  = inject(TestPlanService);
+  private readonly ctx       = inject(ContextService);
   private readonly treeState = inject(TreeStateService);
-  private readonly router = inject(Router);
-  private readonly cdr = inject(ChangeDetectorRef);
-  private readonly route = inject(ActivatedRoute);
+  private readonly router    = inject(Router);
+  private readonly cdr       = inject(ChangeDetectorRef);
+  private readonly route     = inject(ActivatedRoute);
 
   currentUser: Authentication | null = null;
 
@@ -73,15 +71,12 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     return (this.currentUser?.username ?? '').slice(0, 2).toUpperCase();
   }
 
-  // These are the single source of truth for the select [ngModel] bindings.
-  // They are updated ONLY from the URL (queryParams subscription).
+  // URL-driven context selectors
   selectedProjectKey = '';
   selectedPlanId = '';
 
   memberships$: Observable<ProjectMembership[]> = of([]);
 
-  // Use a BehaviorSubject for testPlans so the async pipe can stay subscribed
-  // to a single stable observable rather than a re-assigned reference.
   private _testPlans$ = new BehaviorSubject<TestPlan[]>([]);
   readonly testPlans$: Observable<TestPlan[]> = this._testPlans$.asObservable();
 
@@ -95,12 +90,28 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   showSidebar = true;
   sidebarCollapsed = false;
 
+  // ── Sidebar frames ────────────────────────────────────────────────────────
+  activeSidebarFrame: SidebarFrame = 'explorer';
+
+  // ── Filter panel state ────────────────────────────────────────────────────
+  filterTcId          = '';
+  filterTcTitle       = '';
+  filterKeyword       = '';
+  filterPriority      = '';
+  filterExecType      = '';
+  filterAssignedTo    = '';
+  filterResult        = '';
+  filterOnBuild       = 'latest';
+  filterSpecificBuild = 'rc1';
+  showCustomFields    = false;
+  showAdvancedFilters = false;
+
   private destroy$ = new Subject<void>();
 
   ngOnInit(): void {
     this.showSidebar = true;
 
-    // ── 1. Track authenticated user ──────────────────────────────────────────
+    // 1. Track authenticated user
     this.auth.currentUser$
       .pipe(takeUntil(this.destroy$))
       .subscribe(u => {
@@ -108,7 +119,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       });
 
-    // ── 2. Memberships list (for project dropdown options) ────────────────────
+    // 2. Memberships list (for project dropdown)
     this.memberships$ = this.auth.currentUser$.pipe(
       filter(u => u !== null),
       switchMap(() =>
@@ -117,24 +128,13 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       startWith([])
     );
 
-    // ── 3. PRIMARY SYNC: URL → component state ────────────────────────────────
-    //
-    // This is the single place that reads queryParams and drives:
-    //   • selectedProjectKey  (bound via [(ngModel)] to the project <select>)
-    //   • selectedPlanId      (bound via [(ngModel)] to the plan <select>)
-    //   • ContextService
-    //   • suite tree
-    //   • test plans list
-    //
-    // We use the router's root ActivatedRoute to make sure we always get the
-    // full query-string, regardless of which child route is active.
+    // 3. PRIMARY SYNC: URL → component state
     this.router.routerState.root.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
         const projectKey = params['project'] ?? null;
         const planId     = params['plan']    ?? null;
 
-        // ── Project changed ────────────────────────────────────────────────
         if (projectKey !== this.selectedProjectKey) {
           this.selectedProjectKey = projectKey ?? '';
           this.ctx.setProject(projectKey ?? '');
@@ -149,16 +149,12 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
           }
         }
 
-        // ── Plan changed ───────────────────────────────────────────────────
-        // Always sync — even if the project didn't change (e.g. direct URL
-        // load or manual back/forward navigation).
         const newPlanId = planId ?? '';
         if (newPlanId !== this.selectedPlanId) {
           this.selectedPlanId = newPlanId;
           if (planId) this.ctx.setPlan(planId);
         }
 
-        // ── If URL has no context but session storage does, restore it ─────
         if (!projectKey && !planId) {
           const saved = this.ctx.snapshot;
           if (saved.projectKey || saved.testPlanId) {
@@ -170,7 +166,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
               queryParamsHandling: 'merge',
               replaceUrl: true,
             });
-            return; // The navigation above will re-trigger this subscription
+            return;
           }
         }
 
@@ -183,15 +179,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ── User-initiated changes ──────────────────────────────────────────────────
-  //
-  // These handlers only update the URL. The queryParams subscription above
-  // will then react and update component state. This ensures bidirectionality
-  // without any risk of the component state diverging from the URL.
+  // ── URL-driven change handlers ────────────────────────────────────────────
 
   onProjectChange(event: Event): void {
     const key = (event.target as HTMLSelectElement).value;
-    // When project changes, clear plan/suite/testcase so stale state is gone.
     this.router.navigate([], {
       queryParams: {
         project:  key,
@@ -208,10 +199,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   onPlanChange(event: Event): void {
     const id = (event.target as HTMLSelectElement).value;
     this.router.navigate([], {
-      queryParams: {
-        plan: id,
-        testRunId: null             // ← remove the old test run
-      },
+      queryParams: { plan: id, testRunId: null },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
@@ -249,7 +237,46 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  // ── Private helpers ─────────────────────────────────────────────────────────
+  // ── Filter panel actions ──────────────────────────────────────────────────
+
+  applyFilters(): void {
+    // Wire up to your filter/query-param service here.
+    // Current values are available on all filterXxx properties.
+    this.cdr.markForCheck();
+  }
+
+  resetFilters(): void {
+    this.filterTcId          = '';
+    this.filterTcTitle       = '';
+    this.filterKeyword       = '';
+    this.filterPriority      = '';
+    this.filterExecType      = '';
+    this.filterAssignedTo    = '';
+    this.filterResult        = '';
+    this.filterOnBuild       = 'latest';
+    this.filterSpecificBuild = 'rc1';
+    this.cdr.markForCheck();
+  }
+
+  toggleCustomFields(): void {
+    this.showCustomFields = !this.showCustomFields;
+    this.cdr.markForCheck();
+  }
+
+  toggleAdvancedFilters(): void {
+    this.showAdvancedFilters = !this.showAdvancedFilters;
+    this.cdr.markForCheck();
+  }
+
+  onFilterBuildChange(value: string): void {
+    this.filterOnBuild = value;
+    if (value !== 'specific') {
+      this.filterSpecificBuild = 'rc1';
+    }
+    this.cdr.markForCheck();
+  }
+
+  // ── Private helpers ───────────────────────────────────────────────────────
 
   private loadSuites(projectKey: string): void {
     this._suiteLoading$.next(true);
@@ -257,7 +284,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       .getTestSuitesByProjectKey(projectKey)
       .pipe(catchError(() => of([])))
       .subscribe(suites => {
-        this.allSuites     = suites;
+        this.allSuites      = suites;
         this.filteredSuites = suites;
         this.treeState.setTreeData(suites);
         this._suiteLoading$.next(false);
@@ -265,13 +292,8 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Load test plans and push them into the stable BehaviorSubject so the
-   * async pipe in the template reacts without needing the observable reference
-   * to change.
-   */
   private loadPlansIntoSubject(projectKey: string): void {
-    this._testPlans$.next([]); // clear while loading
+    this._testPlans$.next([]);
     this.plansSvc
       .getTestPlansByProjectKey(projectKey)
       .pipe(catchError(() => of([])))
@@ -283,7 +305,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
   private filterSuites(suites: TestSuite[], q: string): TestSuite[] {
     return suites.reduce<TestSuite[]>((acc, s) => {
-      const nameMatch   = s.name.toLowerCase().includes(q);
+      const nameMatch    = s.name.toLowerCase().includes(q);
       const childMatches = this.filterSuites(s.children ?? [], q);
       if (nameMatch || childMatches.length) {
         acc.push({ ...s, children: childMatches.length ? childMatches : s.children });

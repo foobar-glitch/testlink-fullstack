@@ -43,11 +43,8 @@
     transition: transform 0.15s;
     &.open { transform: rotate(90deg); }
   }
-}
 
-.toggle-spacer {
-  width: 14px;
-  flex-shrink: 0;
+  &:hover { color: vars.$accent; }
 }
 
 .node-icon {
@@ -81,11 +78,10 @@
 .cases-list {
   display: block;
   position: relative;
-  // light vertical line to visually group cases under the suite
   &::before {
     content: '';
     position: absolute;
-    left: 20px; /* align with the suite’s expand toggle */
+    left: 20px;
     top: 0;
     bottom: 8px;
     width: 1px;
@@ -106,7 +102,6 @@
   min-height: 32px;
   position: relative;
 
-  // small horizontal line connecting to the vertical branch
   &::before {
     content: '';
     position: absolute;
@@ -144,6 +139,12 @@
   padding: 1px 6px;
   border-radius: vars.$radius-pill;
   flex-shrink: 0;
+}
+
+.cases-loading {
+  font-size: 12px;
+  color: vars.$muted;
+  padding: 6px 0;
 }
 
 .node-children { display: block; }

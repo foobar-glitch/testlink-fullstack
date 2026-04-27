@@ -5,11 +5,10 @@
   [style.padding-left.px]="12 + depth * 14"
   (click)="onSuiteClick()"
 >
-  <!-- Expand toggle -->
+  <!-- Expand toggle — always present on every suite folder -->
   <button
     class="toggle-btn"
     (click)="onToggle($event)"
-    *ngIf="suite.children?.length"
   >
     <svg
       width="10"
@@ -23,7 +22,6 @@
       <path d="m9 18 6-6-6-6"/>
     </svg>
   </button>
-  <span class="toggle-spacer" *ngIf="!suite.children?.length"></span>
 
   <!-- Folder icon -->
   <svg
@@ -43,7 +41,7 @@
   <span class="node-badge">{{ suite.children?.length || 0 }}</span>
 </div>
 
-<!-- Children (recursive) -->
+<!-- Sub-suite children (recursive) -->
 <div class="node-children" *ngIf="isOpen && suite.children?.length">
   <app-suite-tree-node
     *ngFor="let child of suite.children"
@@ -52,7 +50,6 @@
   ></app-suite-tree-node>
 </div>
 
-<!-- Test cases within this suite -->
 <!-- Test cases within this suite – shown when suite is open -->
 <div class="cases-list" *ngIf="isOpen">
   <ng-container *ngIf="testCases$ | async as cases; else casesLoading">
