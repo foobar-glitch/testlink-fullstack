@@ -23,7 +23,7 @@ import { TestPlan, TestPlanRun, TestPlanRunItem, TestPlanStats } from '../../../
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { TestRunStatusBadgeComponent } from '../../../shared/components/test-run-status-badge/test-run-status-badge.component';
-import { CaseTableComponent } from '../components/case-table/case-table.component';
+import { TestCaseTableComponent } from '../components/test‑case‑table/test‑case‑table.component';
 import { ExecutionTableComponent } from '../components/execution-table/execution-table.component';
 import { TestCaseDetailComponent } from '../details/test-case-detail/test-case-detail.component';
 import { TestCaseVersionContentComponent } from '../details/test-case-version-content/test-case-version-content.component';
@@ -56,7 +56,7 @@ type ExplorerTab =
     SpinnerComponent,
     StatusBadgeComponent,
     TestRunStatusBadgeComponent,
-    CaseTableComponent,
+    TestCaseTableComponent,
     ExecutionTableComponent,
     TestCaseDetailComponent,
     TestCaseVersionContentComponent,

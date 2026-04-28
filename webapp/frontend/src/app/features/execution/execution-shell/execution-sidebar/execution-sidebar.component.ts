@@ -13,7 +13,7 @@ import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
-import { SuiteTreeNodeComponent } from '../../components/suite-tree-node/suite-tree-node.component';
+import { TestSuiteTreeNodeComponent } from '../../components/test‑suite‑tree‑node/test‑suite‑tree‑node.component';
 import { ContextService } from '../../../../core/services/context.service';
 import { TestSuiteService } from '../../../../core/services/test-suite.service';
 import { TestPlanService } from '../../../../core/services/test-plan.service';
@@ -24,7 +24,7 @@ import { TestPlan } from '../../../../core/models/testexecution';
 @Component({
   selector: 'app-sidebar-test-explorer',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, SpinnerComponent, SuiteTreeNodeComponent],
+  imports: [CommonModule, FormsModule, RouterModule, SpinnerComponent, TestSuiteTreeNodeComponent],
   templateUrl: './execution-sidebar.component.html',
   styleUrls: ['./execution-sidebar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

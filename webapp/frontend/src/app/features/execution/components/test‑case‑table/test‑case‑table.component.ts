@@ -21,10 +21,10 @@ type SortDir = 'asc' | 'desc';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, StatusBadgeComponent, PriorityBadgeComponent],
-  templateUrl: './case-table.component.html',
+  templateUrl: './test‑case‑table.component.html',
   styleUrls: ['./case-table.component.scss'],
 })
-export class CaseTableComponent implements OnChanges {
+export class TestCaseTableComponent implements OnChanges {
   @Input() cases: TestCase[] = [];
   @Output() caseSelected = new EventEmitter<TestCase>();
 

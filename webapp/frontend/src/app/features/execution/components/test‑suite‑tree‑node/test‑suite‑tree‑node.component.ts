@@ -22,10 +22,10 @@ import { ContextService } from '../../../../core/services/context.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
-  templateUrl: './suite-tree-node.component.html',
+  templateUrl: './test‑suite‑tree‑node.component.html',
   styleUrls: ['./suite-tree-node.component.scss'],
 })
-export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
+export class TestSuiteTreeNodeComponent implements OnInit, OnDestroy {
   @Input() suite!: TestSuite;
   @Input() depth = 0;
 
@@ -77,7 +77,7 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  // In suite-tree-node.component.ts
+  // In test‑suite‑tree‑node.component.ts
   onSuiteClick(): void {
     this.treeState.toggle(this.suite.testSuiteId);
     if (this.treeState.isExpanded(this.suite.testSuiteId)) {
@@ -105,7 +105,7 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  // In suite-tree-node.component.ts
+  // In test‑suite‑tree‑node.component.ts
   onCaseClick(event: Event, tc: TestCase): void {
     event.stopPropagation();
 
