@@ -2,8 +2,10 @@ package com.testlink.webapp.projects.service;
 
 import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.projects.entity.ProjectMembership;
+import com.testlink.webapp.projects.entity.ProjectStats;
 import com.testlink.webapp.projects.repository.ProjectMembershipRepository;
 import com.testlink.webapp.projects.repository.ProjectRepository;
+import com.testlink.webapp.projects.repository.ProjectStatsRepository;
 import com.testlink.webapp.shared.exception.AccessDeniedException;
 import com.testlink.webapp.shared.exception.ResourceNotFoundException;
 import com.testlink.webapp.user.entity.User;
@@ -18,6 +20,7 @@ import java.util.Optional;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMembershipRepository membershipRepository;
+    private final ProjectStatsRepository projectStatsRepository;
 
     public Project getProjectById(Long id) {
         return projectRepository.findById(id)
@@ -37,9 +40,6 @@ public class ProjectService {
         return membershipRepository.findByUser(user);
     }
 
-    public boolean hasMembership(Project project, User user) {
-        return membershipRepository.existsByProjectAndUser(project, user);
-    }
 
     public ProjectMembership getMemberShipOfUserAndProject(Project project, User user){
         Optional<ProjectMembership> optionalProjectMembership = membershipRepository.findByProjectAndUser(project, user);
@@ -64,4 +64,9 @@ public class ProjectService {
         return optionalProjectMembership.get();
     }
 
+    public ProjectStats getProjectStatsOfProject(Project project){
+        return projectStatsRepository.findProjectStatsByProject(project).orElseThrow(
+                () -> new ResourceNotFoundException("ProjectStats", "ProjectId", project.getPublicId())
+        );
+    }
 }

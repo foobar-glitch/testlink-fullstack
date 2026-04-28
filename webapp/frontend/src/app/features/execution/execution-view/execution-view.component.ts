@@ -54,7 +54,6 @@ type ExplorerTab =
     CommonModule,
     RouterModule,
     SpinnerComponent,
-    StatusBadgeComponent,
     TestRunStatusBadgeComponent,
     TestCaseTableComponent,
     ExecutionTableComponent,
@@ -81,10 +80,11 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
+  private projectService = inject(ProjectService);
 
   testCasesForSuite$: Observable<TestCase[]> = of([]);
   suiteStats$: Observable<TestSuiteStats | null> = of(null);
-  planStats$: Observable<TestPlanStats | null> = of(null); // <-- NEW: plan-level stats
+  planStats$: Observable<TestPlanStats | null> = of(null);
 
   // State derived from query parameters (READ ONLY)
   readonly projectKey$ = this.route.queryParams.pipe(
@@ -139,6 +139,17 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
 
   planName = '';
   private subs = new Subscription();
+
+  readonly projectStats$ = combineLatest([this.projectKey$, this.planId$]).pipe(
+    switchMap(([projectKey, planId]) => {
+      if (projectKey && !planId) {
+        return this.projectService.getProjectStats(projectKey).pipe(
+          catchError(() => of(null))
+        );
+      }
+      return of(null);
+    })
+  );
 
   ngOnInit(): void {
     // (A) Load plan data whenever project or plan changes (only once, with distinct)

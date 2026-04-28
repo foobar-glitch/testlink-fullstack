@@ -18,6 +18,66 @@
     <p>Select a <strong>project</strong> and <strong>test plan</strong> from the top bar to get started.</p>
   </div>
 
+  <!-- PROJECT SELECTED, NO PLAN SELECTED ───────────────────────── -->
+  <div class="project-overview" *ngIf="(projectKey$ | async) && !(planId$ | async)">
+    <div class="panel-header">
+      <h1 class="panel-title">Project Overview</h1>
+      <p class="panel-subtitle">{{ (projectName$ | async) || 'Loading...' }}</p>
+    </div>
+
+    <ng-container *ngIf="projectStats$ | async as stats; else statsLoading">
+      <!-- Stat cards -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Test Suites</div>
+          <div class="stat-value">{{ stats.totalTestSuites }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Test Plans</div>
+          <div class="stat-value">{{ stats.totalTestPlans }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Test Cases</div>
+          <div class="stat-value">{{ stats.totalTestCases }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Executions</div>
+          <div class="stat-value">{{ stats.totalExecutions }}</div>
+        </div>
+      </div>
+
+      <!-- Last execution -->
+      <div class="last-execution" *ngIf="stats.lastExecutionStatus">
+        <span class="last-label">Last Execution:</span>
+        <app-test-run-status-badge [status]="stats.lastExecutionStatus"></app-test-run-status-badge>
+        <span class="last-date" *ngIf="stats.lastExecutedAt">
+          {{ stats.lastExecutedAt | date:'medium' }}
+        </span>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-card" *ngIf="stats.totalExecutions > 0">
+        <div class="progress-label">Overall Execution Progress</div>
+        <div class="progress-track">
+          <div class="pb pass"   [style.width.%]="pct(stats.passedCount, stats.totalExecutions)"></div>
+          <div class="pb fail"   [style.width.%]="pct(stats.failedCount, stats.totalExecutions)"></div>
+          <div class="pb block"  [style.width.%]="pct(stats.blockedCount, stats.totalExecutions)"></div>
+          <div class="pb notrun" [style.width.%]="pct(stats.notRunCount, stats.totalExecutions)"></div>
+        </div>
+        <div class="progress-legend">
+          <span class="leg pass">Passed {{ pct(stats.passedCount, stats.totalExecutions) }}%</span>
+          <span class="leg fail">Failed {{ pct(stats.failedCount, stats.totalExecutions) }}%</span>
+          <span class="leg block">Blocked {{ pct(stats.blockedCount, stats.totalExecutions) }}%</span>
+          <span class="leg notrun">Not Run {{ pct(stats.notRunCount, stats.totalExecutions) }}%</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #statsLoading>
+      <app-spinner label="Loading project stats..."></app-spinner>
+    </ng-template>
+  </div>
+
   <!-- CONTENT: project AND plan selected -->
   <ng-container *ngIf="(projectKey$ | async) && (planId$ | async)">
 
@@ -39,127 +99,98 @@
       planStats: planStats$ | async,
       stepId: stepId$ | async,
       actionId: actionId$ | async
-    } as ctx">
+    } as vm">
 
       <nav class="breadcrumb">
         <!-- Project -->
-        <span class="crumb link" (click)="navigateToPlanOverview()">{{ ctx.projectName }}</span>
+        <span class="crumb link" (click)="navigateToPlanOverview()">{{ vm.projectName }}</span>
         <span class="sep">›</span>
 
         <!-- Plan -->
         <span class="crumb link" (click)="navigateToPlanOverview()">{{ planName || 'Plan' }}</span>
 
         <!-- Suite (if selected) -->
-        <ng-container *ngIf="ctx.suiteId">
+        <ng-container *ngIf="vm.suiteId">
           <span class="sep">›</span>
-          <span class="crumb link" (click)="navigateToSuiteOverview(ctx.suiteId)">
-      {{ ctx.suiteName || 'Suite' }}
-    </span>
+          <span class="crumb link" (click)="navigateToSuiteOverview(vm.suiteId)">
+            {{ vm.suiteName || 'Suite' }}
+          </span>
         </ng-container>
 
         <!-- Test Case (if selected) -->
-        <ng-container *ngIf="ctx.testCaseId">
+        <ng-container *ngIf="vm.testCaseId">
           <span class="sep">›</span>
-          <span class="crumb link" (click)="navigateToDetails(ctx.suiteId, ctx.testCaseId)">
-      {{ ctx.caseLabel || 'Test Case' }}
-    </span>
+          <span class="crumb link" (click)="navigateToDetails(vm.suiteId, vm.testCaseId)">
+            {{ vm.caseLabel || 'Test Case' }}
+          </span>
         </ng-container>
 
         <!-- Version level + deeper tabs -->
-        <ng-container *ngIf="ctx.versionNumber">
+        <ng-container *ngIf="vm.versionNumber">
           <span class="sep">›</span>
 
-          <!-- Version: clickable unless we are on the Steps tab -->
-          <ng-container *ngIf="ctx.activeTab === 'steps'; else clickableVersion">
-            <span class="crumb current">Version {{ ctx.versionNumber }}</span>
+          <ng-container *ngIf="vm.activeTab === 'steps'; else clickableVersion">
+            <span class="crumb current">Version {{ vm.versionNumber }}</span>
           </ng-container>
           <ng-template #clickableVersion>
-      <span class="crumb link" (click)="navigateToVersionSteps(ctx.versionNumber)">
-        Version {{ ctx.versionNumber }}
-      </span>
+            <span class="crumb link" (click)="navigateToVersionSteps(vm.versionNumber)">
+              Version {{ vm.versionNumber }}
+            </span>
           </ng-template>
 
-          <!-- Runs tab -->
-          <ng-container *ngIf="ctx.activeTab === 'runs'">
+          <ng-container *ngIf="vm.activeTab === 'runs'">
             <span class="sep">›</span>
             <span class="crumb current">Runs</span>
           </ng-container>
 
-          <!-- Step Results tab -->
-          <ng-container *ngIf="ctx.activeTab === 'step-results'">
+          <ng-container *ngIf="vm.activeTab === 'step-results'">
             <span class="sep">›</span>
             <span class="crumb current">Step Results</span>
           </ng-container>
 
-          <!-- Step Result Detail tab -->
-          <ng-container *ngIf="ctx.activeTab === 'step-result-detail'">
+          <ng-container *ngIf="vm.activeTab === 'step-result-detail'">
             <span class="sep">›</span>
-            <span class="crumb link" (click)="navigateToStepResults(ctx.stepId)">Step Results</span>
+            <span class="crumb link" (click)="navigateToStepResults(vm.stepId)">Step Results</span>
             <span class="sep">›</span>
             <span class="crumb current">Detail</span>
           </ng-container>
         </ng-container>
       </nav>
 
-      <!-- ================================================================ -->
-      <!-- Tab bar - for switching VIEWS of current context                 -->
-      <!-- ================================================================ -->
+      <!-- Tab bar -->
       <div class="tabs">
-
-        <!-- PLAN LEVEL TABS (no suite selected) -->
-        <ng-container *ngIf="!ctx.suiteId">
-          <button class="tab" [class.active]="ctx.activeTab === 'overview'" (click)="navigateToPlanOverview()">
-            Overview
-          </button>
-          <button *ngIf="ctx.testRunId" class="tab" [class.active]="ctx.activeTab === 'run-items'" (click)="navigateToRunItems()">
-            Run Items
-          </button>
+        <ng-container *ngIf="!vm.suiteId">
+          <button class="tab" [class.active]="vm.activeTab === 'overview'" (click)="navigateToPlanOverview()">Overview</button>
+          <button *ngIf="vm.testRunId" class="tab" [class.active]="vm.activeTab === 'run-items'" (click)="navigateToRunItems()">Run Items</button>
         </ng-container>
 
-        <!-- SUITE LEVEL TABS (suite selected, no test case) -->
-        <ng-container *ngIf="ctx.suiteId && !ctx.testCaseId">
-          <button class="tab" [class.active]="ctx.activeTab === 'overview'" (click)="navigateToSuiteOverview(ctx.suiteId)">
-            Test Cases
-          </button>
-          <button *ngIf="ctx.testRunId" class="tab" [class.active]="ctx.activeTab === 'run-items'" (click)="navigateToRunItems()">
-            Run Items
-          </button>
+        <ng-container *ngIf="vm.suiteId && !vm.testCaseId">
+          <button class="tab" [class.active]="vm.activeTab === 'overview'" (click)="navigateToSuiteOverview(vm.suiteId)">Test Cases</button>
+          <button *ngIf="vm.testRunId" class="tab" [class.active]="vm.activeTab === 'run-items'" (click)="navigateToRunItems()">Run Items</button>
         </ng-container>
 
-        <!-- TEST CASE LEVEL TABS (test case selected, no version) -->
-        <ng-container *ngIf="ctx.testCaseId && !ctx.versionNumber">
-          <button class="tab" [class.active]="ctx.activeTab === 'details'" (click)="navigateToDetails(ctx.suiteId, ctx.testCaseId)">
-            Details
-          </button>
-          <button class="tab" [class.active]="ctx.activeTab === 'versions'" (click)="navigateToVersions()">
-            Versions
-          </button>
+        <ng-container *ngIf="vm.testCaseId && !vm.versionNumber">
+          <button class="tab" [class.active]="vm.activeTab === 'details'" (click)="navigateToDetails(vm.suiteId, vm.testCaseId)">Details</button>
+          <button class="tab" [class.active]="vm.activeTab === 'versions'" (click)="navigateToVersions()">Versions</button>
         </ng-container>
 
-        <!-- VERSION LEVEL TABS (version selected) -->
-        <ng-container *ngIf="ctx.versionNumber">
-          <button class="tab" [class.active]="ctx.activeTab === 'steps'" (click)="navigateToVersionSteps(ctx.versionNumber)">
-            Steps
-          </button>
-          <button class="tab" [class.active]="ctx.activeTab === 'runs'" (click)="navigateToVersionRuns()">
-            Runs
-          </button>
+        <ng-container *ngIf="vm.versionNumber">
+          <button class="tab" [class.active]="vm.activeTab === 'steps'" (click)="navigateToVersionSteps(vm.versionNumber)">Steps</button>
+          <button class="tab" [class.active]="vm.activeTab === 'runs'" (click)="navigateToVersionRuns()">Runs</button>
         </ng-container>
-
       </div>
 
       <!-- OVERVIEW TAB -->
-      <ng-container *ngIf="ctx.activeTab === 'overview'">
-        <ng-container *ngIf="ctx.suiteId; else noSuiteSelected">
+      <ng-container *ngIf="vm.activeTab === 'overview'">
+        <ng-container *ngIf="vm.suiteId; else noSuiteSelected">
           <div class="panel-header">
             <div>
-              <h1 class="panel-title">{{ ctx.suiteName || 'Test Suite' }}</h1>
+              <h1 class="panel-title">{{ vm.suiteName || 'Test Suite' }}</h1>
               <p class="panel-subtitle">Test cases in this suite</p>
             </div>
           </div>
 
-          <!-- Suite Stats Summary -->
-          <ng-container *ngIf="ctx.suiteStats as stats">
+          <ng-container *ngIf="vm.suiteStats as stats">
             <div class="suite-stats-summary">
               <div class="stat-item" [class.pass]="stats.passedCount > 0">
                 <span class="stat-value">{{ stats.passedCount }}</span>
@@ -189,17 +220,16 @@
           </ng-container>
         </ng-container>
 
-        <!-- NO SUITE SELECTED: Show plan stats -->
+        <!-- NO SUITE SELECTED: Show plan stats (inside vm scope) -->
         <ng-template #noSuiteSelected>
           <div class="panel-header">
             <div>
               <h1 class="panel-title">{{ planName || 'Test Plan Overview' }}</h1>
-              <p class="panel-subtitle">{{ ctx.testPlan?.description || 'Select a test suite from the sidebar to view test cases.' }}</p>
+              <p class="panel-subtitle">{{ vm.testPlan?.description || 'Select a test suite from the sidebar to view test cases.' }}</p>
             </div>
           </div>
 
-          <ng-container *ngIf="ctx.planStats as stats; else loading">
-            <!-- Plan Stats Grid -->
+          <ng-container *ngIf="vm.planStats as stats; else loading">
             <div class="stat-grid">
               <div class="stat-card">
                 <div class="stat-label">Total Test Cases</div>
@@ -231,7 +261,6 @@
               </div>
             </div>
 
-            <!-- Progress bar -->
             <div class="progress-card" *ngIf="stats.totalExecutions > 0">
               <div class="progress-label">Plan Execution Progress</div>
               <div class="progress-track">
@@ -248,7 +277,6 @@
               </div>
             </div>
 
-            <!-- Last execution info -->
             <div class="last-execution" *ngIf="stats.lastExecutionStatus">
               <span class="last-label">Last Execution:</span>
               <app-test-run-status-badge [status]="stats.lastExecutionStatus"></app-test-run-status-badge>
@@ -261,10 +289,10 @@
       </ng-container>
 
       <!-- RUN ITEMS TAB -->
-      <ng-container *ngIf="ctx.activeTab === 'run-items'">
+      <ng-container *ngIf="vm.activeTab === 'run-items'">
         <div class="run-selector" *ngIf="testRuns$ | async as runs">
           <span class="run-label">Test Run</span>
-          <select class="run-select" [value]="ctx.testRunId" (change)="selectTestRun($any($event.target).value)">
+          <select class="run-select" [value]="vm.testRunId" (change)="selectTestRun($any($event.target).value)">
             <option *ngFor="let run of runs" [value]="run.testPlanRunId">
               {{ run.name }} {{ run.environment ? '(' + run.environment + ')' : '' }}
             </option>
@@ -274,54 +302,48 @@
         <div class="filter-bar">
           <div class="filter-text">
             <span class="muted">Showing:</span>
-            <ng-container *ngIf="ctx.testCaseId">
-              <span class="filter-chip" *ngIf="ctx.caseLabel">Test Case: {{ ctx.caseLabel }}</span>
+            <ng-container *ngIf="vm.testCaseId">
+              <span class="filter-chip" *ngIf="vm.caseLabel">Test Case: {{ vm.caseLabel }}</span>
             </ng-container>
-            <ng-container *ngIf="!ctx.testCaseId && ctx.suiteId">
-              <span class="filter-chip" *ngIf="ctx.suiteName">Suite: {{ ctx.suiteName }}</span>
+            <ng-container *ngIf="!vm.testCaseId && vm.suiteId">
+              <span class="filter-chip" *ngIf="vm.suiteName">Suite: {{ vm.suiteName }}</span>
             </ng-container>
-            <span class="filter-chip neutral" *ngIf="!ctx.testCaseId && !ctx.suiteId">All runs</span>
+            <span class="filter-chip neutral" *ngIf="!vm.testCaseId && !vm.suiteId">All runs</span>
           </div>
-          <button class="clear-btn" *ngIf="ctx.suiteId || ctx.testCaseId" (click)="clearRunFilter()">Clear filter</button>
+          <button class="clear-btn" *ngIf="vm.suiteId || vm.testCaseId" (click)="clearRunFilter()">Clear filter</button>
         </div>
 
-        <ng-container *ngIf="ctx.filteredRunItems as items; else loading">
+        <ng-container *ngIf="vm.filteredRunItems as items; else loading">
           <app-execution-table [items]="items"></app-execution-table>
         </ng-container>
       </ng-container>
 
-      <!-- DETAILS TAB -->
-      <ng-container *ngIf="ctx.activeTab === 'details'">
+      <!-- Details, Versions, Steps, etc. -->
+      <ng-container *ngIf="vm.activeTab === 'details'">
         <app-test-case-detail></app-test-case-detail>
       </ng-container>
 
-      <!-- VERSIONS TAB -->
-      <ng-container *ngIf="ctx.activeTab === 'versions'">
+      <ng-container *ngIf="vm.activeTab === 'versions'">
         <app-test-case-version-list></app-test-case-version-list>
       </ng-container>
 
-      <!-- STEPS TAB -->
-      <ng-container *ngIf="ctx.activeTab === 'steps'">
+      <ng-container *ngIf="vm.activeTab === 'steps'">
         <app-test-case-version-content></app-test-case-version-content>
       </ng-container>
 
-      <!-- RUNS TAB -->
-      <ng-container *ngIf="ctx.activeTab === 'runs'">
+      <ng-container *ngIf="vm.activeTab === 'runs'">
         <app-test-case-version-runs></app-test-case-version-runs>
       </ng-container>
 
-      <!-- RUN DETAIL TAB -->
-      <ng-container *ngIf="ctx.activeTab === 'run-detail'">
+      <ng-container *ngIf="vm.activeTab === 'run-detail'">
         <app-test-case-version-run-detail></app-test-case-version-run-detail>
       </ng-container>
 
-      <!-- STEP RESULTS TAB -->
-      <ng-container *ngIf="ctx.activeTab === 'step-results'">
+      <ng-container *ngIf="vm.activeTab === 'step-results'">
         <app-test-step-result-list></app-test-step-result-list>
       </ng-container>
 
-      <!-- STEP RESULT DETAIL TAB -->
-      <ng-container *ngIf="ctx.activeTab === 'step-result-detail'">
+      <ng-container *ngIf="vm.activeTab === 'step-result-detail'">
         <app-test-step-result-detail></app-test-step-result-detail>
       </ng-container>
 
