@@ -46,6 +46,37 @@
         </div>
       </div>
 
+      <div class="stat-grid">
+        <div class="stat-card pass">
+          <div class="stat-label">Passed</div>
+          <div class="stat-value">{{ stats.passedCount }}</div>
+          <div class="stat-sub" *ngIf="stats.totalExecutions">
+            {{ pct(stats.passedCount, stats.totalExecutions) }}%
+          </div>
+        </div>
+        <div class="stat-card fail">
+          <div class="stat-label">Failed</div>
+          <div class="stat-value">{{ stats.failedCount }}</div>
+          <div class="stat-sub" *ngIf="stats.totalExecutions">
+            {{ pct(stats.failedCount, stats.totalExecutions) }}%
+          </div>
+        </div>
+        <div class="stat-card block">
+          <div class="stat-label">Blocked</div>
+          <div class="stat-value">{{ stats.blockedCount }}</div>
+          <div class="stat-sub" *ngIf="stats.totalExecutions">
+            {{ pct(stats.blockedCount, stats.totalExecutions) }}%
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Not Run</div>
+          <div class="stat-value">{{ stats.notRunCount }}</div>
+          <div class="stat-sub" *ngIf="stats.totalExecutions">
+            {{ pct(stats.notRunCount, stats.totalExecutions) }}%
+          </div>
+        </div>
+      </div>
+
       <!-- Last execution -->
       <div class="last-execution" *ngIf="stats.lastExecutionStatus">
         <span class="last-label">Last Execution:</span>
