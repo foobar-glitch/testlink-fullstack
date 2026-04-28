@@ -375,6 +375,27 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
     return result;
   }
 
+  navigateToProjectOverview(): void {
+    this.router.navigate([], {
+      queryParams: {
+        // keep the project from the current URL (no change)
+        project: this.route.snapshot.queryParams['project'] || this.ctx.snapshot.projectKey,
+        plan: null,          // explicitly remove plan
+        suite: null,         // also clear any sub‑selections
+        testcase: null,
+        version: null,
+        runItemId: null,
+        stepId: null,
+        actionId: null,
+        testRunId: null,
+        tab: 'overview',     // reset to the default tab
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+      preserveFragment: true,
+    });
+  }
+
   navigateToPlanOverview(): void {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({
