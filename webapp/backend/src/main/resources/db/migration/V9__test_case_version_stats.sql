@@ -211,3 +211,39 @@ BEGIN
         WHERE test_case_version_id = r.test_case_version_id;
     END LOOP;
 END $$;
+
+-- -----------------------------------------------------------------------------
+-- 6. Trigger: automatically create a default content row for every new version
+-- -----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION create_default_version_content()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO test_case_version_content (
+        test_case_version_id,
+        title,
+        description,
+        preconditions,
+        expected_result,
+        created_by
+    )
+    SELECT
+        NEW.test_case_version_id,
+        tc.title,
+        tc.description,
+        '',
+        '',
+        1
+    FROM test_cases tc
+    WHERE tc.test_case_id = NEW.test_case_id
+    ON CONFLICT (test_case_version_id) DO NOTHING;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_create_default_version_content
+    AFTER INSERT ON test_case_versions
+    FOR EACH ROW
+EXECUTE FUNCTION create_default_version_content();
