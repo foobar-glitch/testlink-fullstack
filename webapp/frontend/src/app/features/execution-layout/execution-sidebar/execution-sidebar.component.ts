@@ -75,10 +75,14 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   showCustomFields = false;
   showAdvancedFilters = false;
 
+  // In ngOnInit, call loadFiltersFromUrl
   ngOnInit(): void {
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const project = params['project'] || '';
       const plan = params['plan'] || '';
+
+      // Restore filters from URL
+      this.loadFiltersFromUrl(params);
 
       if (project !== this.projectKey) {
         this.projectKey = project;
@@ -102,6 +106,63 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private getFilterState() {
+    return {
+      tcId: this.filterTcId,
+      tcTitle: this.filterTcTitle,
+      keyword: this.filterKeyword,
+      priority: this.filterPriority,
+      execType: this.filterExecType,
+      assignedTo: this.filterAssignedTo,
+      result: this.filterResult,
+      onBuild: this.filterOnBuild,
+      specificBuild: this.filterSpecificBuild,
+    };
+  }
+
+  // Make syncFiltersToUrl public so template can call it
+  syncFiltersToUrl(): void {
+    const state = this.getFilterState();
+    const cleaned = Object.fromEntries(Object.entries(state).filter(([_, v]) => v !== ''));
+    if (Object.keys(cleaned).length === 0) {
+      this.router.navigate([], {
+        queryParams: { f: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+      return;
+    }
+    const json = JSON.stringify(cleaned);
+    const encoded = btoa(json); // base64
+    this.router.navigate([], {
+      queryParams: { f: encoded },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  // In loadFiltersFromUrl, add missing field mappings
+  private loadFiltersFromUrl(params: any): void {
+    const base64 = params['f'];
+    if (!base64) return;
+    try {
+      const json = atob(base64);
+      const state = JSON.parse(json);
+      this.filterTcId = state.tcId || '';
+      this.filterTcTitle = state.tcTitle || '';
+      this.filterKeyword = state.keyword || '';
+      this.filterPriority = state.priority || '';
+      this.filterExecType = state.execType || '';
+      this.filterAssignedTo = state.assignedTo || '';
+      this.filterResult = state.result || '';
+      this.filterOnBuild = state.onBuild || 'latest';
+      this.filterSpecificBuild = state.specificBuild || 'rc1';
+      this.cdr.markForCheck();
+    } catch (e) {
+      // ignore malformed URL
+    }
   }
 
   // ── Simple tab switching ─────────────────────────────────────────────────
@@ -142,6 +203,7 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     this.filterResult = '';
     this.filterOnBuild = 'latest';
     this.filterSpecificBuild = 'rc1';
+    this.syncFiltersToUrl(); // <-- added
     this.cdr.markForCheck();
   }
 
@@ -160,6 +222,7 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     if (value !== 'specific') {
       this.filterSpecificBuild = 'rc1';
     }
+    this.syncFiltersToUrl(); // <-- added
     this.cdr.markForCheck();
   }
 
