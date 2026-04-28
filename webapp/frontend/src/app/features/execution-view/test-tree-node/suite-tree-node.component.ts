@@ -118,6 +118,7 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
         suite: this.suite.testSuiteId,
         testcase: tc.identifierNumber,
         tab: 'details',
+        version: null, // ← clear version
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,
