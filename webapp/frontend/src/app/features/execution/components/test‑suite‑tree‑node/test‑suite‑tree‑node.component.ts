@@ -23,7 +23,7 @@ import { ContextService } from '../../../../core/services/context.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   templateUrl: './test‑suite‑tree‑node.component.html',
-  styleUrls: ['./suite-tree-node.component.scss'],
+  styleUrls: ['./test‑suite‑tree‑node.component.scss'],
 })
 export class TestSuiteTreeNodeComponent implements OnInit, OnDestroy {
   @Input() suite!: TestSuite;
@@ -45,7 +45,7 @@ export class TestSuiteTreeNodeComponent implements OnInit, OnDestroy {
   selectedCaseId: string | null = null;
 
   ngOnInit(): void {
-    this.paramsSub = this.route.queryParams.subscribe(params => {
+    this.paramsSub = this.route.queryParams.subscribe((params) => {
       this.selectedSuiteId = params['suite'] || null;
       this.selectedCaseId = params['testcase'] || null;
       this.cdr.markForCheck();

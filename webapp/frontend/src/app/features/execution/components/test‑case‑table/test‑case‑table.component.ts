@@ -22,7 +22,7 @@ type SortDir = 'asc' | 'desc';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, StatusBadgeComponent, PriorityBadgeComponent],
   templateUrl: './test‑case‑table.component.html',
-  styleUrls: ['./case-table.component.scss'],
+  styleUrls: ['./test‑case‑table.component.scss'],
 })
 export class TestCaseTableComponent implements OnChanges {
   @Input() cases: TestCase[] = [];
