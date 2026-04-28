@@ -1,11 +1,17 @@
-// ── execution-sidebar.component.scss ────────────────────────────────────
+// ─── execution-sidebar.component.scss ────────────────────────────────────
 @use 'app/shared/styles/variables' as vars;
 @use 'app/shared/styles/mixins' as mix;
+
+$sidebar-w: 272px;
 
 :host {
   display: flex;
   flex-direction: column;
-  height: 100%;          // fills the sidebar slot completely
+  height: 100%;
+  width: $sidebar-w;
+  flex-shrink: 0;
+  background: vars.$white;
+  border-right: 1px solid vars.$border;
   overflow: hidden;
 }
 
@@ -89,7 +95,14 @@
 }
 
 // ── Tree ────────────────────────────────────────────────────────────────────
+.sidebar-tree {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 2px 6px 16px;
 
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: vars.$border; border-radius: 2px; }
+}
 
 .tree-empty, .tree-loading {
   padding: 24px 12px;
@@ -101,7 +114,7 @@
   }
 }
 
-// ── Panel resizer ───────────────────────────────────────────────────────────
+// ── Panel resizer (optional, kept for compatibility) ────────────────────────
 .panel-resizer {
   height: 6px;
   cursor: row-resize;
@@ -127,6 +140,14 @@
 }
 
 // ── Filters/Settings panel ──────────────────────────────────────────────────
+.filters-settings-panel {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 1px solid vars.$border;
+  min-height: 200px;
+}
 
 .panel-toggle {
   display: flex;
@@ -158,47 +179,34 @@
   }
 }
 
-
-.panel-minitabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 8px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  background: vars.$white;
-  z-index: 1;
-  padding-bottom: 4px;
-}
-
-.minitab {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 6px;
-  border: none;
-  background: none;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: vars.$muted;
-  cursor: pointer;
-  border-radius: vars.$radius-sm;
-  transition: vars.$transition;
-  font-family: vars.$font;
-
-  svg { flex-shrink: 0; }
-
-  &:hover { color: vars.$accent; background: vars.$accent-soft; }
-  &.active { color: vars.$accent; background: vars.$accent-soft; }
-}
-
-.panel-content {
+.panel-body {
   flex: 1;
   overflow-y: auto;
+  padding: 8px 10px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Section styling (new) ────────────────────────────────────────────────────
+.panel-section {
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: vars.$muted;
+  margin: 0 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid vars.$border;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid vars.$border;
+  margin: 0 0 16px;
 }
 
 // ── Frame sections (Settings & Filters) ─────────────────────────────────────
@@ -310,46 +318,4 @@
       color: vars.$white;
     }
   }
-}
-
-$sidebar-w: 272px;
-
-:host {
-  display: flex;
-  flex-direction: column;
-  height: 100%;          // fills the parent height
-  width: $sidebar-w;     // fixed width
-  flex-shrink: 0;
-  background: vars.$white;
-  border-right: 1px solid vars.$border;
-  overflow: hidden;
-}
-
-// ── Tree – now takes up remaining space together with the panel ──────────
-.sidebar-tree {
-  flex: 1 1 auto;          // grow & shrink, but start from natural size
-  overflow-y: auto;
-  padding: 2px 6px 16px;
-
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: vars.$border; border-radius: 2px; }
-}
-
-// ── Filters/Settings panel – fills whatever space is left ──────────────
-.filters-settings-panel {
-  flex: 1 1 auto;          // share the remaining space with the tree
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-top: 1px solid vars.$border;
-  min-height: 200px;       // prevent the panel from becoming too small
-}
-
-.panel-body {
-  flex: 1;                 // take all height inside the panel
-  overflow-y: auto;        // scroll internally when content overflows
-  padding: 8px 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }

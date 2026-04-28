@@ -21,8 +21,6 @@ import { TreeStateService } from '../../../../core/services/tree-state.service';
 import { TestSuite } from '../../../../core/models/testsuite';
 import { TestPlan } from '../../../../core/models/testexecution';
 
-export type SidebarFrame = 'settings' | 'filters' | 'explorer';
-
 @Component({
   selector: 'app-sidebar-test-explorer',
   standalone: true,
@@ -57,8 +55,6 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   private _testPlans$ = new BehaviorSubject<TestPlan[]>([]);
   readonly testPlans$: Observable<TestPlan[]> = this._testPlans$.asObservable();
 
-  activeSidebarFrame: SidebarFrame = 'explorer';
-
   filterTcId = '';
   filterTcTitle = '';
   filterKeyword = '';
@@ -72,7 +68,6 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   showAdvancedFilters = false;
 
   ngOnInit(): void {
-    // Read filters from fragment on init and on every fragment change
     this.route.fragment.pipe(takeUntil(this.destroy$)).subscribe((fragment) => {
       this.loadFiltersFromFragment(fragment);
     });
@@ -103,10 +98,6 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  setActiveFrame(frame: SidebarFrame): void {
-    this.activeSidebarFrame = frame;
   }
 
   expandAll(): void {
@@ -231,10 +222,9 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     );
 
     if (Object.keys(cleaned).length === 0) {
-      // Remove fragment entirely when no filters are active
       this.router.navigate([], {
-        fragment: undefined,          // removes the fragment
-        queryParamsHandling: 'merge', // keep project/plan
+        fragment: undefined,
+        queryParamsHandling: 'merge',
         replaceUrl: true,
       });
       return;
@@ -242,11 +232,11 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
 
     const json = JSON.stringify(cleaned);
     const compressed = compressToEncodedURIComponent(json);
-    const fragment = `filters=${compressed}`;       // ← #filters=...
+    const fragment = `filters=${compressed}`;
 
     this.router.navigate([], {
       fragment,
-      queryParamsHandling: 'merge',   // keep all existing query params
+      queryParamsHandling: 'merge',
       replaceUrl: true,
     });
   }

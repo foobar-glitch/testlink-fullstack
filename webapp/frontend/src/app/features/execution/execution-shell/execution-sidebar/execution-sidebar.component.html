@@ -58,29 +58,9 @@
   </button>
 
   <div class="panel-body" *ngIf="panelExpanded">
-    <!-- Mini‑tabs for Filters / Settings -->
-    <div class="panel-minitabs">
-      <button class="minitab" [class.active]="activeSidebarFrame === 'filters'"
-              (click)="setActiveFrame('filters')"
-              title="Filters">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-        </svg>
-        Filters
-      </button>
-      <button class="minitab" [class.active]="activeSidebarFrame === 'settings'"
-              (click)="setActiveFrame('settings')"
-              title="Settings">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-        Settings
-      </button>
-    </div>
-
-    <!-- ── Settings content ────────────────────────────────────── -->
-    <div class="panel-content" *ngIf="activeSidebarFrame === 'settings'">
+    <!-- ── Settings section ─────────────────────────────────────── -->
+    <div class="panel-section">
+      <h4 class="section-title">Settings</h4>
       <div class="frame-section">
         <label class="frame-label">Test Plan</label>
         <select class="frame-select" [ngModel]="planId" (change)="onPlanChange($event)">
@@ -109,8 +89,11 @@
       </div>
     </div>
 
-    <!-- ── Filters content ─────────────────────────────────────── -->
-    <div class="panel-content sidebar-frame--filters" *ngIf="activeSidebarFrame === 'filters'">
+    <hr class="section-divider" />
+
+    <!-- ── Filters section ─────────────────────────────────────── -->
+    <div class="panel-section">
+      <h4 class="section-title">Filters</h4>
       <div class="frame-section">
         <label class="frame-label">Test Case ID</label>
         <input class="frame-input" type="text"
