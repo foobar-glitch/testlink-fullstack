@@ -72,12 +72,14 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   showAdvancedFilters = false;
 
   ngOnInit(): void {
+    // Read filters from fragment on init and on every fragment change
+    this.route.fragment.pipe(takeUntil(this.destroy$)).subscribe((fragment) => {
+      this.loadFiltersFromFragment(fragment);
+    });
+
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const project = params['project'] || '';
       const plan = params['plan'] || '';
-
-      // Restore filters from URL (lz-string)
-      this.loadFiltersFromUrl(params);
 
       if (project !== this.projectKey) {
         this.projectKey = project;
@@ -226,30 +228,41 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     const cleaned = Object.fromEntries(
       Object.entries(state).filter(([_, v]) => v !== '')
     );
+
     if (Object.keys(cleaned).length === 0) {
+      // Remove fragment entirely when no filters are active
       this.router.navigate([], {
-        queryParams: { f: null },
-        queryParamsHandling: 'merge',
+        fragment: undefined,          // removes the fragment
+        queryParamsHandling: 'merge', // keep project/plan
         replaceUrl: true,
       });
       return;
     }
+
     const json = JSON.stringify(cleaned);
-    const compressed = compressToEncodedURIComponent(json);   // ← lz-string magic
+    const compressed = compressToEncodedURIComponent(json);
+    const fragment = `filters=${compressed}`;       // ← #filters=...
+
     this.router.navigate([], {
-      queryParams: { f: compressed },
-      queryParamsHandling: 'merge',
+      fragment,
+      queryParamsHandling: 'merge',   // keep all existing query params
       replaceUrl: true,
     });
   }
 
-  private loadFiltersFromUrl(params: any): void {
-    const compressed = params['f'];
+  private loadFiltersFromFragment(fragment: string | null): void {
+    if (!fragment || !fragment.startsWith('filters=')) {
+      return;
+    }
+
+    const compressed = fragment.substring('filters='.length);
     if (!compressed) return;
+
     try {
-      const json = decompressFromEncodedURIComponent(compressed);   // ← decompress
+      const json = decompressFromEncodedURIComponent(compressed);
       if (!json) return;
       const state = JSON.parse(json);
+
       this.filterTcId = state.tcId || '';
       this.filterTcTitle = state.tcTitle || '';
       this.filterKeyword = state.keyword || '';
@@ -261,7 +274,7 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
       this.filterSpecificBuild = state.specificBuild || 'rc1';
       this.cdr.markForCheck();
     } catch (e) {
-      // ignore malformed data
+      // ignore malformed fragment
     }
   }
 }
