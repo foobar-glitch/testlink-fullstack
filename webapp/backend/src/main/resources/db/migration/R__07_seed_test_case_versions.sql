@@ -1,13 +1,33 @@
 -- ======================================================================
 -- R__07_seed_test_case_versions.sql
 -- Populates versioned test case content: versions, content, steps, images.
--- Assumes test_cases with IDs 1, 11, 14 already exist.
--- Includes audit fields (created_by, updated_at) and is fully idempotent.
+-- Ensures version 1 exists for every test case used by the seed plans.
 -- ======================================================================
 
 -- ----------------------------------------------------------------------
--- Test Case 1 (Valid credentials login) – Version 1
+-- Helper: create version 1 for any test case that doesn't yet have it
 -- ----------------------------------------------------------------------
+DO $$
+DECLARE
+rec RECORD;
+BEGIN
+FOR rec IN
+SELECT tc.test_case_id
+FROM test_cases tc
+WHERE NOT EXISTS (
+    SELECT 1 FROM test_case_versions tcv
+    WHERE tcv.test_case_id = tc.test_case_id AND tcv.version_number = 1
+)
+    LOOP
+INSERT INTO test_case_versions (test_case_id, version_number, status, created_by)
+VALUES (rec.test_case_id, 1, 'ACTIVE', 1)
+ON CONFLICT (test_case_id, version_number) DO NOTHING;
+END LOOP;
+END $$;
+
+-- NOTE: The existing detailed inserts (for cases 1, 11, 14) remain fully in place.
+-- They are left intact below for idempotent re-runs.
+
 WITH
     -- Ensure the version record exists and capture its ID
     upsert_version AS (
