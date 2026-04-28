@@ -25,13 +25,7 @@ export type SidebarFrame = 'settings' | 'filters' | 'explorer';
 @Component({
   selector: 'app-explorer-layout',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    SpinnerComponent,
-    SuiteTreeNodeComponent,
-  ],
+  imports: [CommonModule, FormsModule, RouterModule, SpinnerComponent, SuiteTreeNodeComponent],
   templateUrl: './explorer-layout.component.html',
   styleUrls: ['./explorer-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,6 +40,8 @@ export class ExplorerLayoutComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
 
   private destroy$ = new Subject<void>();
+
+  panelExpanded = false;
 
   // ── URL-derived context ──────────────────────────────────────────────────
   projectKey = '';
@@ -82,29 +78,30 @@ export class ExplorerLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Keep ContextService in sync with URL (explorer always has project & plan)
-    this.route.queryParams
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(params => {
-        const project = params['project'] || '';
-        const plan = params['plan'] || '';
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      const project = params['project'] || '';
+      const plan = params['plan'] || '';
 
-        if (project !== this.projectKey) {
-          this.projectKey = project;
-          if (project) {
-            this.loadSuites(project);
-            this.loadPlans(project);
-          } else {
-            this.allSuites = [];
-            this.filteredSuites = [];
-            this._testPlans$.next([]);
-          }
+      if (project !== this.projectKey) {
+        this.projectKey = project;
+        if (project) {
+          this.loadSuites(project);
+          this.loadPlans(project);
+        } else {
+          this.allSuites = [];
+          this.filteredSuites = [];
+          this._testPlans$.next([]);
         }
+      }
 
-        if (plan !== this.planId) {
-          this.planId = plan;
-        }
-        this.cdr.markForCheck();
-      });
+      if (plan !== this.planId) {
+        this.planId = plan;
+      }
+      this.cdr.markForCheck();
+    });
+
+    const saved = localStorage.getItem('panelHeight');
+    if (saved) this.panelHeight = +saved;
   }
 
   ngOnDestroy(): void {
@@ -176,7 +173,7 @@ export class ExplorerLayoutComponent implements OnInit, OnDestroy {
     this.suitesSvc
       .getTestSuitesByProjectKey(projectKey)
       .pipe(catchError(() => of([])))
-      .subscribe(suites => {
+      .subscribe((suites) => {
         this.allSuites = suites;
         this.filteredSuites = suites;
         this.treeState.setTreeData(suites);
@@ -189,7 +186,7 @@ export class ExplorerLayoutComponent implements OnInit, OnDestroy {
     this.plansSvc
       .getTestPlansByProjectKey(projectKey)
       .pipe(catchError(() => of([])))
-      .subscribe(plans => {
+      .subscribe((plans) => {
         this._testPlans$.next(plans);
         this.cdr.markForCheck();
       });
@@ -215,4 +212,38 @@ export class ExplorerLayoutComponent implements OnInit, OnDestroy {
       replaceUrl: true,
     });
   }
+
+  panelHeight = 320; // default height in px
+
+  private resizing = false;
+  private startY = 0;
+  private startHeight = 0;
+
+  startResize(event: MouseEvent) {
+    this.resizing = true;
+    this.startY = event.clientY;
+    this.startHeight = this.panelHeight;
+
+    document.addEventListener('mousemove', this.onResize);
+    document.addEventListener('mouseup', this.stopResize);
+
+    event.preventDefault();
+  }
+
+  onResize = (event: MouseEvent) => {
+    if (!this.resizing) return;
+
+    const delta = this.startY - event.clientY; // drag up = bigger
+    const newHeight = this.startHeight + delta;
+
+    // clamp height so it doesn't break layout
+    this.panelHeight = Math.max(180, Math.min(newHeight, 600));
+  };
+
+  stopResize = () => {
+    this.resizing = false;
+    localStorage.setItem('panelHeight', this.panelHeight.toString());
+    document.removeEventListener('mousemove', this.onResize);
+    document.removeEventListener('mouseup', this.stopResize);
+  };
 }
