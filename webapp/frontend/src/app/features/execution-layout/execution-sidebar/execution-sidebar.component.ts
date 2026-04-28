@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
+import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 import { SuiteTreeNodeComponent } from '../../execution-view/test-tree-node/suite-tree-node.component';
 import { ContextService } from '../../../core/services/context.service';
@@ -43,11 +44,9 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
 
   panelExpanded = false;
 
-  // ── URL-derived context ──────────────────────────────────────────────────
   projectKey = '';
   planId = '';
 
-  // ── Suite tree state ─────────────────────────────────────────────────────
   allSuites: TestSuite[] = [];
   filteredSuites: TestSuite[] = [];
   treeSearch = '';
@@ -55,14 +54,11 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   private _suiteLoading$ = new BehaviorSubject<boolean>(false);
   readonly suiteLoading$ = this._suiteLoading$.asObservable();
 
-  // ── Test plans (for sidebar Settings frame) ──────────────────────────────
   private _testPlans$ = new BehaviorSubject<TestPlan[]>([]);
   readonly testPlans$: Observable<TestPlan[]> = this._testPlans$.asObservable();
 
-  // ── Sidebar UI state ────────────────────────────────────────────────────
   activeSidebarFrame: SidebarFrame = 'explorer';
 
-  // ── Filter panel state ──────────────────────────────────────────────────
   filterTcId = '';
   filterTcTitle = '';
   filterKeyword = '';
@@ -75,13 +71,12 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   showCustomFields = false;
   showAdvancedFilters = false;
 
-  // In ngOnInit, call loadFiltersFromUrl
   ngOnInit(): void {
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const project = params['project'] || '';
       const plan = params['plan'] || '';
 
-      // Restore filters from URL
+      // Restore filters from URL (lz-string)
       this.loadFiltersFromUrl(params);
 
       if (project !== this.projectKey) {
@@ -108,69 +103,10 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private getFilterState() {
-    return {
-      tcId: this.filterTcId,
-      tcTitle: this.filterTcTitle,
-      keyword: this.filterKeyword,
-      priority: this.filterPriority,
-      execType: this.filterExecType,
-      assignedTo: this.filterAssignedTo,
-      result: this.filterResult,
-      onBuild: this.filterOnBuild,
-      specificBuild: this.filterSpecificBuild,
-    };
-  }
-
-  // Make syncFiltersToUrl public so template can call it
-  syncFiltersToUrl(): void {
-    const state = this.getFilterState();
-    const cleaned = Object.fromEntries(Object.entries(state).filter(([_, v]) => v !== ''));
-    if (Object.keys(cleaned).length === 0) {
-      this.router.navigate([], {
-        queryParams: { f: null },
-        queryParamsHandling: 'merge',
-        replaceUrl: true,
-      });
-      return;
-    }
-    const json = JSON.stringify(cleaned);
-    const encoded = btoa(json); // base64
-    this.router.navigate([], {
-      queryParams: { f: encoded },
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
-    });
-  }
-
-  // In loadFiltersFromUrl, add missing field mappings
-  private loadFiltersFromUrl(params: any): void {
-    const base64 = params['f'];
-    if (!base64) return;
-    try {
-      const json = atob(base64);
-      const state = JSON.parse(json);
-      this.filterTcId = state.tcId || '';
-      this.filterTcTitle = state.tcTitle || '';
-      this.filterKeyword = state.keyword || '';
-      this.filterPriority = state.priority || '';
-      this.filterExecType = state.execType || '';
-      this.filterAssignedTo = state.assignedTo || '';
-      this.filterResult = state.result || '';
-      this.filterOnBuild = state.onBuild || 'latest';
-      this.filterSpecificBuild = state.specificBuild || 'rc1';
-      this.cdr.markForCheck();
-    } catch (e) {
-      // ignore malformed URL
-    }
-  }
-
-  // ── Simple tab switching ─────────────────────────────────────────────────
   setActiveFrame(frame: SidebarFrame): void {
     this.activeSidebarFrame = frame;
   }
 
-  // ── Tree actions ─────────────────────────────────────────────────────────
   expandAll(): void {
     this.treeState.expandAll(this.allSuites);
     this.cdr.markForCheck();
@@ -188,7 +124,6 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  // ── Filter panel actions ─────────────────────────────────────────────────
   applyFilters(): void {
     this.cdr.markForCheck();
   }
@@ -203,7 +138,7 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     this.filterResult = '';
     this.filterOnBuild = 'latest';
     this.filterSpecificBuild = 'rc1';
-    this.syncFiltersToUrl(); // <-- added
+    this.syncFiltersToUrl();
     this.cdr.markForCheck();
   }
 
@@ -222,7 +157,7 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     if (value !== 'specific') {
       this.filterSpecificBuild = 'rc1';
     }
-    this.syncFiltersToUrl(); // <-- added
+    this.syncFiltersToUrl();
     this.cdr.markForCheck();
   }
 
@@ -269,5 +204,64 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
       }
       return acc;
     }, []);
+  }
+
+  // ── lz-string based filter serialization ─────────────────────────────────
+  private getFilterState() {
+    return {
+      tcId: this.filterTcId,
+      tcTitle: this.filterTcTitle,
+      keyword: this.filterKeyword,
+      priority: this.filterPriority,
+      execType: this.filterExecType,
+      assignedTo: this.filterAssignedTo,
+      result: this.filterResult,
+      onBuild: this.filterOnBuild,
+      specificBuild: this.filterSpecificBuild,
+    };
+  }
+
+  syncFiltersToUrl(): void {
+    const state = this.getFilterState();
+    const cleaned = Object.fromEntries(
+      Object.entries(state).filter(([_, v]) => v !== '')
+    );
+    if (Object.keys(cleaned).length === 0) {
+      this.router.navigate([], {
+        queryParams: { f: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+      return;
+    }
+    const json = JSON.stringify(cleaned);
+    const compressed = compressToEncodedURIComponent(json);   // ← lz-string magic
+    this.router.navigate([], {
+      queryParams: { f: compressed },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  private loadFiltersFromUrl(params: any): void {
+    const compressed = params['f'];
+    if (!compressed) return;
+    try {
+      const json = decompressFromEncodedURIComponent(compressed);   // ← decompress
+      if (!json) return;
+      const state = JSON.parse(json);
+      this.filterTcId = state.tcId || '';
+      this.filterTcTitle = state.tcTitle || '';
+      this.filterKeyword = state.keyword || '';
+      this.filterPriority = state.priority || '';
+      this.filterExecType = state.execType || '';
+      this.filterAssignedTo = state.assignedTo || '';
+      this.filterResult = state.result || '';
+      this.filterOnBuild = state.onBuild || 'latest';
+      this.filterSpecificBuild = state.specificBuild || 'rc1';
+      this.cdr.markForCheck();
+    } catch (e) {
+      // ignore malformed data
+    }
   }
 }
