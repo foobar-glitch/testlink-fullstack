@@ -334,3 +334,16 @@
     }
   }
 }
+
+$sidebar-w: 272px;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;          // fills the parent height
+  width: $sidebar-w;     // fixed width
+  flex-shrink: 0;
+  background: vars.$white;
+  border-right: 1px solid vars.$border;
+  overflow: hidden;
+}
