@@ -24,7 +24,6 @@
           <div class="card-top">
             <div class="version-badge">v{{ version.versionNumber }}</div>
 
-            <app-priority-badge [priority]="version.priority"></app-priority-badge>
             <app-status-badge [status]="version.status"></app-status-badge>
 
             <span class="latest-tag" *ngIf="version.versionNumber === latestVersionNumber(versions)">

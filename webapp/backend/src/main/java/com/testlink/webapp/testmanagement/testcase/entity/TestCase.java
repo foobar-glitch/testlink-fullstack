@@ -46,4 +46,9 @@ public class TestCase extends UserCreatedTimeStampedEntity {
     @Column(name = "status", nullable = false)
     private TestCaseStatus status = TestCaseStatus.ACTIVE;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "priority", nullable = false)
+    private TestCaseVersionPriority priority = TestCaseVersionPriority.MEDIUM;
+
+
 }

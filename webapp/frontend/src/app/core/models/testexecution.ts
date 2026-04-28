@@ -33,8 +33,6 @@ export interface TestPlanRun {
   stamp: UserCreatedTimeStamp;
 }
 
-export type ExecutionStatus = 'pass' | 'fail' | 'blocked' | 'not_run';
-
 export type TestRunStatus = 'NOT_RUN' | 'PASSED' | 'FAILED' | 'BLOCKED' | 'SKIPPED';
 
 export interface TestPlanRunItem {
@@ -48,6 +46,10 @@ export interface TestPlanRunItem {
   executedAt: string | null;
   notes: string | null;
   stamp: UserCreatedTimeStamp;
+}
+
+export interface TestPlanRunItemFilter{
+
 }
 
 export type TestExecution = 'MANUAL' | 'AUTOMATED';
@@ -73,6 +75,8 @@ export interface TestStepResult {
   notes: string;
   stamp: UserCreatedTimeStamp;
 }
+
+
 
 //TODO RunSummary
 /*

@@ -60,6 +60,7 @@ export interface TestCase {
   title: string;
   description: string;
   status: TestCaseStatus;
+  priority: TestCasePriority;
   stamp: UserCreatedTimeStamp;
 }
 
@@ -91,7 +92,6 @@ export interface TestCaseVersionStats {
 export interface TestCaseVersion {
   testCaseVersionId: string;
   testCase: TestCase;
-  priority: TestCasePriority;
   versionNumber: number;
   status: TestCaseVersionStatus;
   stamp: UserCreatedTimeStamp;

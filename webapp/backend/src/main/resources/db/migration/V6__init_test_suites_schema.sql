@@ -37,6 +37,7 @@ CREATE TABLE test_cases (
                             title VARCHAR(255) NOT NULL,
                             description TEXT,
                             status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+                            priority VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
                             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                             updated_at TIMESTAMPTZ,
                             created_by BIGINT NOT NULL,
@@ -51,7 +52,9 @@ CREATE TABLE test_cases (
                             CONSTRAINT uk_test_case_project_number
                                 UNIQUE (project_id, identifier_number),
                             CONSTRAINT chk_test_case_status
-                                CHECK (status IN ('DRAFT', 'ACTIVE', 'DEPRECATED'))
+                                CHECK (status IN ('DRAFT', 'ACTIVE', 'DEPRECATED')),
+                            CONSTRAINT chk_version_priority
+                                    CHECK (priority IN ('LOW', 'MEDIUM', 'HIGH'))
 );
 
 -- =========================
@@ -63,7 +66,6 @@ CREATE TABLE test_case_versions (
                                     test_case_id BIGINT NOT NULL,
                                     version_number INT NOT NULL,
                                     status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
-                                    priority VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
                                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                                     updated_at TIMESTAMPTZ,
                                     created_by BIGINT NOT NULL,
@@ -76,9 +78,8 @@ CREATE TABLE test_case_versions (
                                     CONSTRAINT uk_test_case_version
                                         UNIQUE (test_case_id, version_number),
                                     CONSTRAINT chk_version_status
-                                        CHECK (status IN ('DRAFT', 'ACTIVE', 'DEPRECATED')),
-                                    CONSTRAINT chk_version_priority
-                                        CHECK (priority IN ('LOW', 'MEDIUM', 'HIGH'))
+                                        CHECK (status IN ('DRAFT', 'ACTIVE', 'DEPRECATED'))
+
 );
 
 -- =========================

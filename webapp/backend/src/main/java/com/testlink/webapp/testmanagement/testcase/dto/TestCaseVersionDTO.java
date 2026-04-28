@@ -12,7 +12,6 @@ public record TestCaseVersionDTO (
         TestCaseDTO testCase,
         Long versionNumber,
         TestCaseVersionPublishStatus status,
-        TestCaseVersionPriority priority,
         UserCreatedTimeStampDTO stamp
 )
 {}
