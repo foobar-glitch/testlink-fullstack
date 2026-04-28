@@ -14,7 +14,7 @@ public class TestCaseVersionContentService {
     private final TestCaseVersionContentRepository testCaseVersionContentRepository;
 
     public TestCaseVersionContent findContentOfTestCaseVersion(TestCaseVersion testCaseVersion){
-        return testCaseVersionContentRepository.getTestCaseVersionContentByTestCaseVersion(testCaseVersion).orElseThrow(
+        return testCaseVersionContentRepository.findTestCaseVersionContentByTestCaseVersion(testCaseVersion).orElseThrow(
                 () -> new ResourceNotFoundException("TestCaseContent", "testCaseVersionNumber", testCaseVersion.getVersionNumber())
         );
     }

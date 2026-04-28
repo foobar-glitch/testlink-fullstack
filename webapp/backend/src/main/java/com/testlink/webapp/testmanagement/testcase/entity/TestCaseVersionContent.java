@@ -18,7 +18,7 @@ public class TestCaseVersionContent extends UserCreatedTimeStampedEntity{
     @Id
     private Long testCaseVersionId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
     @JoinColumn(name = "test_case_version_id")
     private TestCaseVersion testCaseVersion;
