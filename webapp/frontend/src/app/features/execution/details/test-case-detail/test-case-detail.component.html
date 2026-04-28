@@ -5,8 +5,10 @@
     <header class="detail-header">
       <div class="header-main">
         <h2>{{ testCase.title }}</h2>
-        <app-status-badge [status]="testCase.status"></app-status-badge>
-        <app-priority-badge [priority]="testCase.priority"></app-priority-badge>
+        <div class="badges">
+          <app-status-badge [status]="testCase.status"></app-status-badge>
+          <app-priority-badge [priority]="testCase.priority"></app-priority-badge>
+        </div>
       </div>
       <div class="header-sub">
         <span class="identifier">

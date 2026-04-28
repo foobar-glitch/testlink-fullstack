@@ -20,6 +20,13 @@
       color: vars.$text;
       margin: 0;
     }
+
+    // 🔹 NEW: badge group wrapper
+    .badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;                 // consistent spacing between badges
+    }
   }
 
   .header-sub {
@@ -104,6 +111,7 @@
   align-items: center;
   min-height: 200px;
 }
+
 .case-stats-summary {
   display: flex;
   gap: 24px;
