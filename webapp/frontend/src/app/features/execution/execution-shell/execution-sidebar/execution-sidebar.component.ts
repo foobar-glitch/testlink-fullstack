@@ -117,7 +117,9 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+
   applyFilters(): void {
+    this.syncFiltersToUrl();
     this.cdr.markForCheck();
   }
 
@@ -150,7 +152,7 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     if (value !== 'specific') {
       this.filterSpecificBuild = 'rc1';
     }
-    this.syncFiltersToUrl();
+    //this.syncFiltersToUrl();
     this.cdr.markForCheck();
   }
 

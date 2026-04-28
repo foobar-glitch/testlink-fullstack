@@ -48,6 +48,7 @@
 </ng-template>
 
 <!-- ── COLLAPSIBLE FILTERS / SETTINGS PANEL ────────────────────── -->
+<!-- ── COLLAPSIBLE FILTERS / SETTINGS PANEL ────────────────────── -->
 <div class="filters-settings-panel">
   <button class="panel-toggle" (click)="panelExpanded = !panelExpanded">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -98,21 +99,18 @@
         <label class="frame-label">Test Case ID</label>
         <input class="frame-input" type="text"
                [placeholder]="(projectKey || 'PRJ') + '-...'"
-               [(ngModel)]="filterTcId"
-               (ngModelChange)="syncFiltersToUrl()" />
+               [(ngModel)]="filterTcId" />
       </div>
 
       <div class="frame-section">
         <label class="frame-label">Test Case Title</label>
         <input class="frame-input" type="text" placeholder="Search title…"
-               [(ngModel)]="filterTcTitle"
-               (ngModelChange)="syncFiltersToUrl()" />
+               [(ngModel)]="filterTcTitle" />
       </div>
 
       <div class="frame-section">
         <label class="frame-label">Keyword</label>
-        <select class="frame-select" [(ngModel)]="filterKeyword"
-                (ngModelChange)="syncFiltersToUrl()">
+        <select class="frame-select" [(ngModel)]="filterKeyword">
           <option value="">Any</option>
           <option value="automated">automated</option>
           <option value="automation_desired">automation_desired</option>
@@ -126,8 +124,7 @@
 
       <div class="frame-section">
         <label class="frame-label">Priority</label>
-        <select class="frame-select" [(ngModel)]="filterPriority"
-                (ngModelChange)="syncFiltersToUrl()">
+        <select class="frame-select" [(ngModel)]="filterPriority">
           <option value="">Any</option>
           <option value="low">Low</option>
           <option value="medium">Medium</option>
@@ -137,8 +134,7 @@
 
       <div class="frame-section">
         <label class="frame-label">Execution Type</label>
-        <select class="frame-select" [(ngModel)]="filterExecType"
-                (ngModelChange)="syncFiltersToUrl()">
+        <select class="frame-select" [(ngModel)]="filterExecType">
           <option value="">Any</option>
           <option value="manual">Manual</option>
           <option value="automated">Automated</option>
@@ -147,8 +143,7 @@
 
       <div class="frame-section">
         <label class="frame-label">Assigned To</label>
-        <select class="frame-select" [(ngModel)]="filterAssignedTo"
-                (ngModelChange)="syncFiltersToUrl()">
+        <select class="frame-select" [(ngModel)]="filterAssignedTo">
           <option value="">Any</option>
           <option value="user1">user1</option>
           <option value="user2">user2</option>
@@ -157,8 +152,7 @@
 
       <div class="frame-section">
         <label class="frame-label">Result</label>
-        <select class="frame-select" [(ngModel)]="filterResult"
-                (ngModelChange)="syncFiltersToUrl()">
+        <select class="frame-select" [(ngModel)]="filterResult">
           <option value="">Any</option>
           <option value="NOT_RUN">Not Run</option>
           <option value="PASSED">Passed</option>
@@ -178,8 +172,7 @@
           <option value="specific">Specific Build</option>
         </select>
         <select class="frame-select frame-select--mt" *ngIf="filterOnBuild === 'specific'"
-                [(ngModel)]="filterSpecificBuild"
-                (ngModelChange)="syncFiltersToUrl()">
+                [(ngModel)]="filterSpecificBuild">
           <option value="rc1">rc1</option>
           <option value="rc2">rc2</option>
           <option value="final">final</option>
