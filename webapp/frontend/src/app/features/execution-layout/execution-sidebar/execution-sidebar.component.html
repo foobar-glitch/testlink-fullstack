@@ -47,11 +47,8 @@
   </div>
 </ng-template>
 
-<!-- ── RESIZE HANDLE ──────────────────────────────────────────── -->
-<div class="panel-resizer" (mousedown)="startResize($event)"></div>
-
 <!-- ── COLLAPSIBLE FILTERS / SETTINGS PANEL ────────────────────── -->
-<div class="filters-settings-panel" [style.height.px]="panelHeight">
+<div class="filters-settings-panel">
   <button class="panel-toggle" (click)="panelExpanded = !panelExpanded">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
          [class.rotated]="panelExpanded">
@@ -113,7 +110,7 @@
     </div>
 
     <!-- ── Filters content ─────────────────────────────────────── -->
-    <div class="panel-content sidebar-frame--filters" *ngIf="activeSidebarFrame === 'filters'" #filtersContentRef>
+    <div class="panel-content sidebar-frame--filters" *ngIf="activeSidebarFrame === 'filters'">
       <div class="frame-section">
         <label class="frame-label">Test Case ID</label>
         <input class="frame-input" type="text"

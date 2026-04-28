@@ -5,8 +5,6 @@ import {
   inject,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  ElementRef,
-  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -33,10 +31,6 @@ export type SidebarFrame = 'settings' | 'filters' | 'explorer';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExecutionSidebarComponent implements OnInit, OnDestroy {
-  @ViewChild('filtersContentRef') filtersContentRef: ElementRef | undefined;
-  // Track whether the user has ever manually resized
-  private userHasResized = false;
-
   private readonly ctx = inject(ContextService);
   private readonly suitesSvc = inject(TestSuiteService);
   private readonly plansSvc = inject(TestPlanService);
@@ -81,42 +75,6 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   showCustomFields = false;
   showAdvancedFilters = false;
 
-  panelHeight = +(localStorage.getItem('panelHeight') ?? 320);
-
-  // Call this when the panel is expanded and the Filters tab becomes active
-  onFiltersTabActivated(): void {
-    if (this.userHasResized) return; // respect user sizing
-    setTimeout(() => {
-      if (this.filtersContentRef?.nativeElement) {
-        const filtersHeight = this.filtersContentRef.nativeElement.scrollHeight;
-        // Add some padding/borders (e.g., 24px)
-        const desiredHeight = filtersHeight + 24;
-        if (desiredHeight > this.panelHeight) {
-          this.panelHeight = desiredHeight;
-          this.cdr.markForCheck();
-        }
-      }
-    });
-  }
-
-  setActiveFrame(frame: SidebarFrame): void {
-    this.activeSidebarFrame = frame;
-    if (frame === 'filters' && !this.userHasResized) {
-      setTimeout(() => this.adjustToFiltersContent());
-    }
-  }
-
-  adjustToFiltersContent(): void {
-    const el = this.filtersContentRef?.nativeElement;
-    if (el) {
-      const desired = el.scrollHeight + 24; // tweak padding
-      if (desired > this.panelHeight) {
-        this.panelHeight = desired;
-        this.cdr.markForCheck();
-      }
-    }
-  }
-
   ngOnInit(): void {
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const project = params['project'] || '';
@@ -144,6 +102,11 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // ── Simple tab switching ─────────────────────────────────────────────────
+  setActiveFrame(frame: SidebarFrame): void {
+    this.activeSidebarFrame = frame;
   }
 
   // ── Tree actions ─────────────────────────────────────────────────────────
@@ -208,40 +171,6 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
       replaceUrl: true,
     });
   }
-
-  // ── Resize ───────────────────────────────────────────────────────────────
-  private resizing = false;
-  private startY = 0;
-  private startHeight = 0;
-
-  startResize(event: MouseEvent): void {
-    this.resizing = true;
-    this.startY = event.clientY;
-    this.startHeight = this.panelHeight;
-
-    document.addEventListener('mousemove', this.onResize);
-    document.addEventListener('mouseup', this.stopResize);
-
-    event.preventDefault();
-  }
-
-  onResize = (event: MouseEvent): void => {
-    if (!this.resizing) return;
-
-    const delta = this.startY - event.clientY;
-    const newHeight = this.startHeight + delta;
-
-    this.panelHeight = Math.max(180, Math.min(newHeight, 600));
-    this.cdr.markForCheck();
-  };
-
-  stopResize = (): void => {
-    this.resizing = false;
-    this.userHasResized = true; // <-- add this
-    localStorage.setItem('panelHeight', this.panelHeight.toString());
-    document.removeEventListener('mousemove', this.onResize);
-    document.removeEventListener('mouseup', this.stopResize);
-  };
 
   // ── Private helpers ──────────────────────────────────────────────────────
   private loadSuites(projectKey: string): void {
