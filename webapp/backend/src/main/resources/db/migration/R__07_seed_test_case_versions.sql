@@ -396,3 +396,19 @@ ON CONFLICT (test_case_version_id, file_name) DO UPDATE SET
                                                             alt_text = EXCLUDED.alt_text,
                                                             position = EXCLUDED.position,
                                                             updated_at = NOW();
+
+-- ======================================================================
+-- Customise two test cases for sorting / filtering demos
+-- ======================================================================
+
+-- Test case 1: HIGH priority, created earlier
+UPDATE test_cases
+SET priority = 'HIGH',
+    created_at = '2024-01-20 10:00:00+00'::timestamptz
+WHERE test_case_id = 1;
+
+-- Test case 10: LOW priority, created later
+UPDATE test_cases
+SET priority = 'LOW',
+    created_at = '2024-03-01 14:00:00+00'::timestamptz
+WHERE test_case_id = 10;
