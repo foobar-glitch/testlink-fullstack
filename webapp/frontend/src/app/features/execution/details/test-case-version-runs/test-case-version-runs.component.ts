@@ -6,7 +6,7 @@ import { catchError, switchMap } from 'rxjs/operators';
 import { TestPlanRunItem } from '../../../../core/models/testexecution';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
-import { ExecutionTableComponent } from '../../../execution-view/execution-table/execution-table.component';
+import { ExecutionTableComponent } from '../../components/execution-table/execution-table.component';
 import { TestCaseVersionService } from '../../../../core/services/test-case-version.service';
 
 @Component({

@@ -1,6 +1,6 @@
 // ─── case-table.component.scss ───────────────────────────────────────────────
-@use '../../../shared/styles/variables' as vars;
-@use '../../../shared/styles/mixins' as mix;
+@use 'app/shared/styles/variables' as vars;
+@use 'app/shared/styles/mixins' as mix;
 
 :host { display: block; }
 

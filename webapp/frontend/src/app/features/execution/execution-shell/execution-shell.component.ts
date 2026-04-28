@@ -7,11 +7,11 @@ import { ExecutionSidebarComponent } from './execution-sidebar/execution-sidebar
   selector: 'app-explorer-layout',
   standalone: true,
   imports: [CommonModule, RouterModule, ExecutionSidebarComponent],
-  templateUrl: './execution-layout.component.html',
-  styleUrls: ['./execution-layout.component.scss'],
+  templateUrl: './execution-shell.component.html',
+  styleUrls: ['./execution-shell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ExecutionLayoutComponent {
+export class ExecutionShellComponent {
   sidebarCollapsed = false;
 
   toggleSidebar(): void {

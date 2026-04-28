@@ -9,8 +9,8 @@ import {
 } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TestCase } from '../../../core/models/testsuite';
-import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { TestCase } from '../../../../core/models/testsuite';
+import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 
 type SortCol = 'id' | 'title' | 'status' | 'priority';
 type SortDir = 'asc' | 'desc';

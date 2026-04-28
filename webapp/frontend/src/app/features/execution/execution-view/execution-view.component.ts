@@ -11,29 +11,29 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, Subscription, of, combineLatest } from 'rxjs';
 import { map, catchError, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
-import { ContextService } from '../../core/services/context.service';
-import { TreeStateService } from '../../core/services/tree-state.service';
-import { TestPlanService } from '../../core/services/test-plan.service';
-import { TestPlanRunService } from '../../core/services/test-plan-run.service';
-import { TestPlanRunItemService } from '../../core/services/test-plan-run-item.service';
-import { ProjectService } from '../../core/services/project.service';
-import { TestSuiteService } from '../../core/services/test-suite.service';
+import { ContextService } from '../../../core/services/context.service';
+import { TreeStateService } from '../../../core/services/tree-state.service';
+import { TestPlanService } from '../../../core/services/test-plan.service';
+import { TestPlanRunService } from '../../../core/services/test-plan-run.service';
+import { TestPlanRunItemService } from '../../../core/services/test-plan-run-item.service';
+import { ProjectService } from '../../../core/services/project.service';
+import { TestSuiteService } from '../../../core/services/test-suite.service';
 
-import { TestPlan, TestPlanRun, TestPlanRunItem, TestPlanStats } from '../../core/models/testexecution';
-import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
-import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
-import { TestRunStatusBadgeComponent } from '../../shared/components/test-run-status-badge/test-run-status-badge.component';
-import { CaseTableComponent } from './case-table/case-table.component';
-import { ExecutionTableComponent } from './execution-table/execution-table.component';
-import { TestCaseDetailComponent } from '../test-management/test-cases/test-case-detail/test-case-detail.component';
-import { TestCaseVersionContentComponent } from '../test-management/test-cases/test-case-version-content/test-case-version-content.component';
-import { TestCaseVersionListComponent } from '../test-management/test-cases/test-case-version-list/test-case-version-list.component';
-import { TestCaseVersionRunsComponent } from '../test-management/test-cases/test-case-version-runs/test-case-version-runs.component';
-import { TestCaseVersionRunDetailComponent } from '../test-management/test-cases/test-case-version-run-detail/test-case-version-run-detail.component';
-import { TestStepResultListComponent } from '../test-management/test-cases/test-step-result-list/test-step-result-list.component';
-import { TestStepResultDetailComponent } from '../test-management/test-cases/test-step-result-detail/test-step-result-detail.component';
-import { TestCase, TestSuiteStats } from '../../core/models/testsuite';
-import { TestCaseService } from '../../core/services/test-case.service';
+import { TestPlan, TestPlanRun, TestPlanRunItem, TestPlanStats } from '../../../core/models/testexecution';
+import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { TestRunStatusBadgeComponent } from '../../../shared/components/test-run-status-badge/test-run-status-badge.component';
+import { CaseTableComponent } from '../components/case-table/case-table.component';
+import { ExecutionTableComponent } from '../components/execution-table/execution-table.component';
+import { TestCaseDetailComponent } from '../details/test-case-detail/test-case-detail.component';
+import { TestCaseVersionContentComponent } from '../details/test-case-version-content/test-case-version-content.component';
+import { TestCaseVersionListComponent } from '../details/test-case-version-list/test-case-version-list.component';
+import { TestCaseVersionRunsComponent } from '../details/test-case-version-runs/test-case-version-runs.component';
+import { TestCaseVersionRunDetailComponent } from '../details/test-case-version-run-detail/test-case-version-run-detail.component';
+import { TestStepResultListComponent } from '../details/test-step-result-list/test-step-result-list.component';
+import { TestStepResultDetailComponent } from '../details/test-step-result-detail/test-step-result-detail.component';
+import { TestCase, TestSuiteStats } from '../../../core/models/testsuite';
+import { TestCaseService } from '../../../core/services/test-case.service';
 
 type ExplorerTab =
   | 'overview'

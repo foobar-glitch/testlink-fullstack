@@ -12,14 +12,14 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
-import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
-import { SuiteTreeNodeComponent } from '../../execution-view/test-tree-node/suite-tree-node.component';
-import { ContextService } from '../../../core/services/context.service';
-import { TestSuiteService } from '../../../core/services/test-suite.service';
-import { TestPlanService } from '../../../core/services/test-plan.service';
-import { TreeStateService } from '../../../core/services/tree-state.service';
-import { TestSuite } from '../../../core/models/testsuite';
-import { TestPlan } from '../../../core/models/testexecution';
+import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
+import { SuiteTreeNodeComponent } from '../../components/suite-tree-node/suite-tree-node.component';
+import { ContextService } from '../../../../core/services/context.service';
+import { TestSuiteService } from '../../../../core/services/test-suite.service';
+import { TestPlanService } from '../../../../core/services/test-plan.service';
+import { TreeStateService } from '../../../../core/services/tree-state.service';
+import { TestSuite } from '../../../../core/models/testsuite';
+import { TestPlan } from '../../../../core/models/testexecution';
 
 export type SidebarFrame = 'settings' | 'filters' | 'explorer';
 

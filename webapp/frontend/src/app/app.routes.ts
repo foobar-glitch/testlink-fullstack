@@ -15,11 +15,11 @@ export const routes: Routes = [
       },
       {
         path: 'explorer',
-        loadComponent: () => import('./features/execution-layout/execution-layout.component').then(m => m.ExecutionLayoutComponent),
+        loadComponent: () => import('./features/execution/execution-shell/execution-shell.component').then(m => m.ExecutionShellComponent),
         children: [
           {
             path: '',
-            loadComponent: () => import('./features/execution-view/execution-view.component').then(m => m.ExecutionViewComponent),
+            loadComponent: () => import('./features/execution/execution-view/execution-view.component').then(m => m.ExecutionViewComponent),
           },
         ],
       },

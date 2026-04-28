@@ -12,10 +12,10 @@ import { Observable, of, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { TestSuite, TestCase } from '../../../core/models/testsuite';
-import { TestCaseService } from '../../../core/services/test-case.service';
-import { TreeStateService } from '../../../core/services/tree-state.service';
-import { ContextService } from '../../../core/services/context.service';
+import { TestSuite, TestCase } from '../../../../core/models/testsuite';
+import { TestCaseService } from '../../../../core/services/test-case.service';
+import { TreeStateService } from '../../../../core/services/tree-state.service';
+import { ContextService } from '../../../../core/services/context.service';
 
 @Component({
   selector: 'app-suite-tree-node',

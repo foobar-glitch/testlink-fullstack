@@ -9,8 +9,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TestPlanRunItem, TestRunStatus } from '../../../core/models/testexecution';
-import { TestRunStatusBadgeComponent } from '../../../shared/components/test-run-status-badge/test-run-status-badge.component';
+import { TestPlanRunItem, TestRunStatus } from '../../../../core/models/testexecution';
+import { TestRunStatusBadgeComponent } from '../../../../shared/components/test-run-status-badge/test-run-status-badge.component';
 
 type SortCol = 'testCase' | 'assignedTo' | 'status' | 'executedAt';
 type SortDir = 'asc' | 'desc';
