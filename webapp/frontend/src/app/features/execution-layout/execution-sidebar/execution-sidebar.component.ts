@@ -11,26 +11,26 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
-import { ContextService } from '../../core/services/context.service';
-import { TestSuiteService } from '../../core/services/test-suite.service';
-import { TestPlanService } from '../../core/services/test-plan.service';
-import { TreeStateService } from '../../core/services/tree-state.service';
-import { TestSuite } from '../../core/models/testsuite';
-import { TestPlan } from '../../core/models/testexecution';
-import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
-import { SuiteTreeNodeComponent } from '../test-explorer/test-tree-node/suite-tree-node.component';
+import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
+import { SuiteTreeNodeComponent } from '../../execution-view/test-tree-node/suite-tree-node.component';
+import { ContextService } from '../../../core/services/context.service';
+import { TestSuiteService } from '../../../core/services/test-suite.service';
+import { TestPlanService } from '../../../core/services/test-plan.service';
+import { TreeStateService } from '../../../core/services/tree-state.service';
+import { TestSuite } from '../../../core/models/testsuite';
+import { TestPlan } from '../../../core/models/testexecution';
 
 export type SidebarFrame = 'settings' | 'filters' | 'explorer';
 
 @Component({
-  selector: 'app-explorer-layout',
+  selector: 'app-sidebar-test-explorer',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, SpinnerComponent, SuiteTreeNodeComponent],
-  templateUrl: './explorer-layout.component.html',
-  styleUrls: ['./explorer-layout.component.scss'],
+  templateUrl: './execution-sidebar.component.html',
+  styleUrls: ['./execution-sidebar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ExplorerLayoutComponent implements OnInit, OnDestroy {
+export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   private readonly ctx = inject(ContextService);
   private readonly suitesSvc = inject(TestSuiteService);
   private readonly plansSvc = inject(TestPlanService);
@@ -60,7 +60,6 @@ export class ExplorerLayoutComponent implements OnInit, OnDestroy {
   readonly testPlans$: Observable<TestPlan[]> = this._testPlans$.asObservable();
 
   // ── Sidebar UI state ────────────────────────────────────────────────────
-  sidebarCollapsed = false;
   activeSidebarFrame: SidebarFrame = 'explorer';
 
   // ── Filter panel state ──────────────────────────────────────────────────
@@ -76,8 +75,9 @@ export class ExplorerLayoutComponent implements OnInit, OnDestroy {
   showCustomFields = false;
   showAdvancedFilters = false;
 
+  panelHeight = +(localStorage.getItem('panelHeight') ?? 320);
+
   ngOnInit(): void {
-    // Keep ContextService in sync with URL (explorer always has project & plan)
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const project = params['project'] || '';
       const plan = params['plan'] || '';
@@ -99,9 +99,6 @@ export class ExplorerLayoutComponent implements OnInit, OnDestroy {
       }
       this.cdr.markForCheck();
     });
-
-    const saved = localStorage.getItem('panelHeight');
-    if (saved) this.panelHeight = +saved;
   }
 
   ngOnDestroy(): void {
@@ -125,10 +122,6 @@ export class ExplorerLayoutComponent implements OnInit, OnDestroy {
       ? this.filterSuites(this.allSuites, query.toLowerCase())
       : this.allSuites;
     this.cdr.markForCheck();
-  }
-
-  toggleSidebar(): void {
-    this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
   // ── Filter panel actions ─────────────────────────────────────────────────
@@ -167,6 +160,48 @@ export class ExplorerLayoutComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  onPlanChange(event: Event): void {
+    const id = (event.target as HTMLSelectElement).value;
+    this.router.navigate([], {
+      queryParams: { plan: id, testRunId: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  // ── Resize ───────────────────────────────────────────────────────────────
+  private resizing = false;
+  private startY = 0;
+  private startHeight = 0;
+
+  startResize(event: MouseEvent): void {
+    this.resizing = true;
+    this.startY = event.clientY;
+    this.startHeight = this.panelHeight;
+
+    document.addEventListener('mousemove', this.onResize);
+    document.addEventListener('mouseup', this.stopResize);
+
+    event.preventDefault();
+  }
+
+  onResize = (event: MouseEvent): void => {
+    if (!this.resizing) return;
+
+    const delta = this.startY - event.clientY;
+    const newHeight = this.startHeight + delta;
+
+    this.panelHeight = Math.max(180, Math.min(newHeight, 600));
+    this.cdr.markForCheck();
+  };
+
+  stopResize = (): void => {
+    this.resizing = false;
+    localStorage.setItem('panelHeight', this.panelHeight.toString());
+    document.removeEventListener('mousemove', this.onResize);
+    document.removeEventListener('mouseup', this.stopResize);
+  };
+
   // ── Private helpers ──────────────────────────────────────────────────────
   private loadSuites(projectKey: string): void {
     this._suiteLoading$.next(true);
@@ -202,48 +237,4 @@ export class ExplorerLayoutComponent implements OnInit, OnDestroy {
       return acc;
     }, []);
   }
-
-  // Add this method
-  onPlanChange(event: Event): void {
-    const id = (event.target as HTMLSelectElement).value;
-    this.router.navigate([], {
-      queryParams: { plan: id, testRunId: null },
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
-    });
-  }
-
-  panelHeight = 320; // default height in px
-
-  private resizing = false;
-  private startY = 0;
-  private startHeight = 0;
-
-  startResize(event: MouseEvent) {
-    this.resizing = true;
-    this.startY = event.clientY;
-    this.startHeight = this.panelHeight;
-
-    document.addEventListener('mousemove', this.onResize);
-    document.addEventListener('mouseup', this.stopResize);
-
-    event.preventDefault();
-  }
-
-  onResize = (event: MouseEvent) => {
-    if (!this.resizing) return;
-
-    const delta = this.startY - event.clientY; // drag up = bigger
-    const newHeight = this.startHeight + delta;
-
-    // clamp height so it doesn't break layout
-    this.panelHeight = Math.max(180, Math.min(newHeight, 600));
-  };
-
-  stopResize = () => {
-    this.resizing = false;
-    localStorage.setItem('panelHeight', this.panelHeight.toString());
-    document.removeEventListener('mousemove', this.onResize);
-    document.removeEventListener('mouseup', this.stopResize);
-  };
 }

@@ -1,0 +1,210 @@
+<!-- ── PERMANENT EXPLORER TREE ────────────────────────────────── -->
+<ng-container *ngIf="true">
+  <div class="sidebar-tree-header">
+    <span class="tree-label">Test Suites</span>
+    <div class="tree-actions">
+      <button class="tree-btn" (click)="expandAll()" title="Expand all">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+        </svg>
+      </button>
+      <button class="tree-btn" (click)="collapseAll()" title="Collapse all">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M4 14h6v6M14 4h6v6M4 20l7-7M20 4l-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="sidebar-search">
+    <div class="search-wrap">
+      <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input type="text" placeholder="Search test cases…"
+             [(ngModel)]="treeSearch"
+             (ngModelChange)="onSearchChange($event)"/>
+    </div>
+  </div>
+
+  <div class="sidebar-tree" *ngIf="!(suiteLoading$ | async); else treeLoading">
+    <ng-container *ngIf="filteredSuites.length > 0; else noSuites">
+      <app-suite-tree-node
+        *ngFor="let suite of filteredSuites"
+        [suite]="suite"
+        [depth]="0"
+      ></app-suite-tree-node>
+    </ng-container>
+  </div>
+
+  <ng-template #treeLoading>
+    <div class="tree-loading">
+      <app-spinner label="Loading suites…"></app-spinner>
+    </div>
+  </ng-template>
+  <ng-template #noSuites>
+    <div class="tree-empty">
+      <p>{{ projectKey ? 'No suites found' : 'Select a project to browse suites' }}</p>
+    </div>
+  </ng-template>
+</ng-container>
+
+<!-- ── RESIZE HANDLE ──────────────────────────────────────────── -->
+<div class="panel-resizer" (mousedown)="startResize($event)"></div>
+
+<!-- ── COLLAPSIBLE FILTERS / SETTINGS PANEL ────────────────────── -->
+<div class="filters-settings-panel" [style.height.px]="panelHeight">
+  <button class="panel-toggle" (click)="panelExpanded = !panelExpanded">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+         [class.rotated]="panelExpanded">
+      <path d="m9 18 6-6-6-6"/>
+    </svg>
+    <span>Filters & Settings</span>
+  </button>
+
+  <div class="panel-body" *ngIf="panelExpanded">
+    <!-- Mini‑tabs for Filters / Settings -->
+    <div class="panel-minitabs">
+      <button class="minitab" [class.active]="activeSidebarFrame === 'filters'"
+              (click)="activeSidebarFrame = 'filters'"
+              title="Filters">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+        </svg>
+        Filters
+      </button>
+      <button class="minitab" [class.active]="activeSidebarFrame === 'settings'"
+              (click)="activeSidebarFrame = 'settings'"
+              title="Settings">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        Settings
+      </button>
+    </div>
+
+    <!-- ── Settings content ────────────────────────────────────── -->
+    <div class="panel-content" *ngIf="activeSidebarFrame === 'settings'">
+      <div class="frame-section">
+        <label class="frame-label">Test Plan</label>
+        <select class="frame-select" [ngModel]="planId" (change)="onPlanChange($event)">
+          <option value="" disabled>Select plan…</option>
+          <option *ngFor="let plan of testPlans$ | async" [value]="plan.testPlanId">
+            {{ plan.name }}
+          </option>
+        </select>
+      </div>
+      <div class="frame-section">
+        <label class="frame-label">Platform</label>
+        <select class="frame-select" disabled>
+          <option value="400M">400M</option>
+          <option value="400M-2K1L">400M-2 K 1L</option>
+        </select>
+        <span class="frame-hint">Not implemented</span>
+      </div>
+      <div class="frame-section">
+        <label class="frame-label">Build</label>
+        <select class="frame-select" disabled>
+          <option value="rc1">rc1</option>
+          <option value="rc2">rc2</option>
+          <option value="final">final</option>
+        </select>
+        <span class="frame-hint">Not implemented</span>
+      </div>
+    </div>
+
+    <!-- ── Filters content ─────────────────────────────────────── -->
+    <div class="panel-content sidebar-frame--filters" *ngIf="activeSidebarFrame === 'filters'">
+      <div class="frame-section">
+        <label class="frame-label">Test Case ID</label>
+        <input class="frame-input" type="text"
+               [placeholder]="(projectKey || 'PRJ') + '-...'"
+               [(ngModel)]="filterTcId"/>
+      </div>
+
+      <div class="frame-section">
+        <label class="frame-label">Test Case Title</label>
+        <input class="frame-input" type="text" placeholder="Search title…" [(ngModel)]="filterTcTitle"/>
+      </div>
+
+      <div class="frame-section">
+        <label class="frame-label">Keyword</label>
+        <select class="frame-select" [(ngModel)]="filterKeyword">
+          <option value="">Any</option>
+          <option value="automated">automated</option>
+          <option value="automation_desired">automation_desired</option>
+          <option value="entrance-test">entrance-test</option>
+          <option value="final-test">final-test</option>
+          <option value="initial_4.9.1">initial created in 4.9.1</option>
+          <option value="initial_4.9.1.2">initial created in 4.9.1.2</option>
+          <option value="initial_4.9.1.3">initial created in 4.9.1.3</option>
+        </select>
+      </div>
+
+      <div class="frame-section">
+        <label class="frame-label">Priority</label>
+        <select class="frame-select" [(ngModel)]="filterPriority">
+          <option value="">Any</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+
+      <div class="frame-section">
+        <label class="frame-label">Execution Type</label>
+        <select class="frame-select" [(ngModel)]="filterExecType">
+          <option value="">Any</option>
+          <option value="manual">Manual</option>
+          <option value="automated">Automated</option>
+        </select>
+      </div>
+
+      <div class="frame-section">
+        <label class="frame-label">Assigned To</label>
+        <select class="frame-select" [(ngModel)]="filterAssignedTo">
+          <option value="">Any</option>
+          <option value="user1">user1</option>
+          <option value="user2">user2</option>
+        </select>
+      </div>
+
+      <div class="frame-section">
+        <label class="frame-label">Result</label>
+        <select class="frame-select" [(ngModel)]="filterResult">
+          <option value="">Any</option>
+          <option value="NOT_RUN">Not Run</option>
+          <option value="PASSED">Passed</option>
+          <option value="FAILED">Failed</option>
+          <option value="BLOCKED">Blocked</option>
+          <option value="SKIPPED">Skipped</option>
+        </select>
+      </div>
+
+      <div class="frame-section">
+        <label class="frame-label">On</label>
+        <select class="frame-select" [(ngModel)]="filterOnBuild" (ngModelChange)="onFilterBuildChange($event)">
+          <option value="latest">Latest Execution</option>
+          <option value="all">ALL Builds</option>
+          <option value="any">ANY Build</option>
+          <option value="specific">Specific Build</option>
+        </select>
+        <select class="frame-select frame-select--mt" *ngIf="filterOnBuild === 'specific'" [(ngModel)]="filterSpecificBuild">
+          <option value="rc1">rc1</option>
+          <option value="rc2">rc2</option>
+          <option value="final">final</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="filter-btn filter-btn--primary" (click)="applyFilters()">Apply</button>
+        <button class="filter-btn" (click)="resetFilters()">Reset Filters</button>
+        <button class="filter-btn" (click)="toggleCustomFields()">
+          {{ showCustomFields ? 'Hide Custom Fields' : 'Show Custom Fields' }}
+        </button>
+        <button class="filter-btn" (click)="toggleAdvancedFilters()">Advanced Filters</button>
+      </div>
+    </div>
+  </div>
+</div>

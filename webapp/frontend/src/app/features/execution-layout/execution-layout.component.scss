@@ -1,0 +1,35 @@
+@use '../../shared/styles/variables' as vars;
+
+$sidebar-w: 272px;
+
+:host {
+  display: block;
+  flex: 1;
+  overflow: hidden;
+}
+
+.body {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: $sidebar-w;
+  flex-shrink: 0;
+  background: vars.$white;
+  border-right: 1px solid vars.$border;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  &.collapsed {
+    width: 56px;
+  }
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  background: vars.$page-bg;
+}

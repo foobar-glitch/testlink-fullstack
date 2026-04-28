@@ -1,0 +1,13 @@
+<div class="body">
+
+  <!-- ── SIDEBAR ────────────────────────────────────────────────────── -->
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <app-sidebar-test-explorer></app-sidebar-test-explorer>
+  </aside>
+
+  <!-- ── MAIN CONTENT (Explorer routed component) ─────────────────── -->
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>

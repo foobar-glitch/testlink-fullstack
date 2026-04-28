@@ -66,10 +66,10 @@ type ExplorerTab =
     TestStepResultListComponent,
     TestStepResultDetailComponent,
   ],
-  templateUrl: './test-explorer.component.html',
-  styleUrls: ['./test-explorer.component.scss'],
+  templateUrl: './execution-view.component.html',
+  styleUrls: ['./execution-view.component.scss'],
 })
-export class TestExplorerComponent implements OnInit, OnDestroy {
+export class ExecutionViewComponent implements OnInit, OnDestroy {
   private readonly ctx = inject(ContextService);
   private readonly treeState = inject(TreeStateService);
   private readonly plansSvc = inject(TestPlanService);
@@ -88,44 +88,44 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
   // State derived from query parameters (READ ONLY)
   readonly projectKey$ = this.route.queryParams.pipe(
-    map(params => params['project'] || null),
-    distinctUntilChanged()
+    map((params) => params['project'] || null),
+    distinctUntilChanged(),
   );
   readonly planId$ = this.route.queryParams.pipe(
-    map(params => params['plan'] || null),
-    distinctUntilChanged()
+    map((params) => params['plan'] || null),
+    distinctUntilChanged(),
   );
   readonly suiteId$ = this.route.queryParams.pipe(
-    map(params => params['suite'] || null),
-    distinctUntilChanged()
+    map((params) => params['suite'] || null),
+    distinctUntilChanged(),
   );
   readonly testCaseId$ = this.route.queryParams.pipe(
-    map(params => params['testcase'] || null),
-    distinctUntilChanged()
+    map((params) => params['testcase'] || null),
+    distinctUntilChanged(),
   );
   readonly versionNumber$ = this.route.queryParams.pipe(
-    map(params => params['version'] ? Number(params['version']) : null),
-    distinctUntilChanged()
+    map((params) => (params['version'] ? Number(params['version']) : null)),
+    distinctUntilChanged(),
   );
   readonly activeTab$ = this.route.queryParams.pipe(
-    map(params => (params['tab'] || 'overview') as ExplorerTab),
-    distinctUntilChanged()
+    map((params) => (params['tab'] || 'overview') as ExplorerTab),
+    distinctUntilChanged(),
   );
   readonly testRunId$ = this.route.queryParams.pipe(
-    map(params => params['testRunId'] || null),
-    distinctUntilChanged()
+    map((params) => params['testRunId'] || null),
+    distinctUntilChanged(),
   );
   readonly runItemId$ = this.route.queryParams.pipe(
-    map(params => params['runItemId'] || null),
-    distinctUntilChanged()
+    map((params) => params['runItemId'] || null),
+    distinctUntilChanged(),
   );
   readonly stepId$ = this.route.queryParams.pipe(
-    map(params => params['stepId'] || null),
-    distinctUntilChanged()
+    map((params) => params['stepId'] || null),
+    distinctUntilChanged(),
   );
   readonly actionId$ = this.route.queryParams.pipe(
-    map(params => params['actionId'] || null),
-    distinctUntilChanged()
+    map((params) => params['actionId'] || null),
+    distinctUntilChanged(),
   );
 
   // Data streams
@@ -143,13 +143,13 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // (A) Load plan data whenever project or plan changes (only once, with distinct)
     this.subs.add(
-      combineLatest([this.projectKey$, this.planId$]).pipe(
-        distinctUntilChanged((prev, curr) => prev[0] === curr[0] && prev[1] === curr[1])
-      ).subscribe(([projectKey, planId]) => {
-        if (projectKey && planId) {
-          this.loadPlanData(projectKey, planId);
-        }
-      })
+      combineLatest([this.projectKey$, this.planId$])
+        .pipe(distinctUntilChanged((prev, curr) => prev[0] === curr[0] && prev[1] === curr[1]))
+        .subscribe(([projectKey, planId]) => {
+          if (projectKey && planId) {
+            this.loadPlanData(projectKey, planId);
+          }
+        }),
     );
 
     // (B) Keep ContextService in sync with the URL (separate concern)
@@ -157,7 +157,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
       combineLatest([this.projectKey$, this.planId$]).subscribe(([project, plan]) => {
         if (project) this.ctx.setProject(project);
         if (plan) this.ctx.setPlan(plan);
-      })
+      }),
     );
 
     // (C) Load suite data (test cases & suite stats) when suite changes
@@ -170,7 +170,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
           this.testCasesForSuite$ = of([]);
           this.suiteStats$ = of(null);
         }
-      })
+      }),
     );
 
     // (D) Load plan-level stats when plan is selected
@@ -181,33 +181,33 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
         } else {
           this.planStats$ = of(null);
         }
-      })
+      }),
     );
 
     // (E) Load project display name
     this.subs.add(
-      this.projectKey$.subscribe(key => {
+      this.projectKey$.subscribe((key) => {
         if (key) {
           this.projectName$ = this.projSvc.getProjectByKey(key).pipe(
-            map(p => p.displayName),
-            catchError(() => of(key))
+            map((p) => p.displayName),
+            catchError(() => of(key)),
           );
         } else {
           this.projectName$ = of('');
         }
-      })
+      }),
     );
 
     // (F) Expand tree path to selected suite when suiteId changes
     this.subs.add(
-      this.suiteId$.subscribe(suiteId => {
+      this.suiteId$.subscribe((suiteId) => {
         if (suiteId) {
           this.treeState.waitForTree().subscribe(() => {
             this.treeState.expandPathTo(suiteId);
             this.cdr.markForCheck();
           });
         }
-      })
+      }),
     );
   }
 
@@ -225,13 +225,15 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   private loadPlanData(projectKey: string, planId: string): void {
     this.testPlan$ = this.plansSvc.getTestPlan(projectKey, planId).pipe(catchError(() => of(null)));
     this.subs.add(
-      this.testPlan$.subscribe(plan => {
+      this.testPlan$.subscribe((plan) => {
         this.planName = plan?.name ?? '';
         this.cdr.markForCheck();
-      })
+      }),
     );
 
-    this.testRuns$ = this.runSvc.getTestRunsByTestPlan(projectKey, planId).pipe(catchError(() => of([])));
+    this.testRuns$ = this.runSvc
+      .getTestRunsByTestPlan(projectKey, planId)
+      .pipe(catchError(() => of([])));
 
     this.subs.add(
       combineLatest([this.testRuns$, this.testRunId$]).subscribe(([runs, selectedRunId]) => {
@@ -239,48 +241,52 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
           this.router.navigate([], {
             queryParams: { testRunId: runs[0].testPlanRunId },
             queryParamsHandling: 'merge',
-            replaceUrl: true
+            replaceUrl: true,
           });
         }
-      })
+      }),
     );
 
     this.runItems$ = combineLatest([this.testRuns$, this.testRunId$]).pipe(
       switchMap(([runs, selectedRunId]) => {
         if (!runs.length) return of([]);
-        const selected = runs.find(run => run.testPlanRunId === selectedRunId) ?? runs[0];
+        const selected = runs.find((run) => run.testPlanRunId === selectedRunId) ?? runs[0];
         if (!selected) return of([]);
         return this.runItemSvc.getRunItems(projectKey, selected.testPlanRunId, planId);
       }),
-      catchError(() => of([]))
+      catchError(() => of([])),
     );
 
     this.filteredRunItems$ = combineLatest([this.runItems$, this.suiteId$, this.testCaseId$]).pipe(
       map(([items, suiteId, testCaseId]) => {
         if (testCaseId) {
-          return items.filter(item => String(item.testCase.identifierNumber) === String(testCaseId));
+          return items.filter(
+            (item) => String(item.testCase.identifierNumber) === String(testCaseId),
+          );
         }
         if (suiteId) {
-          return items.filter(item => item.testCase.testSuite?.testSuiteId === suiteId);
+          return items.filter((item) => item.testCase.testSuite?.testSuiteId === suiteId);
         }
         return items;
-      })
+      }),
     );
 
     this.suiteName$ = this.suiteId$.pipe(
       map((suiteId) => {
         if (!suiteId) return null;
         return this.treeState.findSuiteById(suiteId)?.name ?? 'Selected suite';
-      })
+      }),
     );
 
     this.selectedCaseLabel$ = combineLatest([this.testCaseId$, this.filteredRunItems$]).pipe(
       map(([testCaseId, items]) => {
         if (!testCaseId) return null;
-        const sample = items.find(item => String(item.testCase.identifierNumber) === String(testCaseId));
+        const sample = items.find(
+          (item) => String(item.testCase.identifierNumber) === String(testCaseId),
+        );
         if (!sample) return `Test Case #${testCaseId}`;
         return `${sample.testCase.testSuite?.project?.projectKey ?? ''}-${sample.testCase.identifierNumber}`;
-      })
+      }),
     );
   }
 
@@ -297,7 +303,8 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   }
 
   private loadPlanStats(projectKey: string, planId: string): void {
-    this.planStats$ = this.plansSvc.getTestPlanStats(projectKey, planId)
+    this.planStats$ = this.plansSvc
+      .getTestPlanStats(projectKey, planId)
       .pipe(catchError(() => of(null)));
   }
 
@@ -309,16 +316,18 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
   }
 
   // Navigation methods
-  private buildQueryParams(overrides: Partial<{
-    suite: string | null;
-    testcase: string | null;
-    version: number | null;
-    tab: ExplorerTab;
-    testRunId: string | null;
-    runItemId: string | null;
-    stepId: string | null;
-    actionId: string | null;
-  }>): { [key: string]: any } {
+  private buildQueryParams(
+    overrides: Partial<{
+      suite: string | null;
+      testcase: string | null;
+      version: number | null;
+      tab: ExplorerTab;
+      testRunId: string | null;
+      runItemId: string | null;
+      stepId: string | null;
+      actionId: string | null;
+    }>,
+  ): { [key: string]: any } {
     const snapshot = this.route.snapshot;
     const params = snapshot.queryParams;
 
@@ -356,25 +365,40 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
 
   navigateToPlanOverview(): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({ suite: null, testcase: null, version: null, tab: 'overview' }),
+      queryParams: this.buildQueryParams({
+        suite: null,
+        testcase: null,
+        version: null,
+        tab: 'overview',
+      }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
   navigateToSuiteOverview(suiteId: string): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({ suite: suiteId, testcase: null, version: null, tab: 'overview' }),
+      queryParams: this.buildQueryParams({
+        suite: suiteId,
+        testcase: null,
+        version: null,
+        tab: 'overview',
+      }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
   navigateToTestCaseDetails(suiteId: string, testCaseId: string | number): void {
     this.router.navigate([], {
-      queryParams: this.buildQueryParams({ suite: suiteId, testcase: String(testCaseId), version: null, tab: 'details' }),
+      queryParams: this.buildQueryParams({
+        suite: suiteId,
+        testcase: String(testCaseId),
+        version: null,
+        tab: 'details',
+      }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
@@ -386,7 +410,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({ version: null, tab: 'versions' }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
@@ -394,7 +418,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({ version: versionNumber, tab: 'steps' }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
@@ -406,7 +430,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({ tab: 'runs' }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
@@ -418,7 +442,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({ tab: 'run-items' }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
@@ -426,7 +450,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({ runItemId, tab: 'run-detail' }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
@@ -434,7 +458,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({ stepId, tab: 'step-results' }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
@@ -442,7 +466,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({ actionId, tab: 'step-result-detail' }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
@@ -450,7 +474,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({ testRunId }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 
@@ -458,7 +482,7 @@ export class TestExplorerComponent implements OnInit, OnDestroy {
     this.router.navigate([], {
       queryParams: this.buildQueryParams({ suite: null, testcase: null }),
       queryParamsHandling: 'merge',
-      replaceUrl: true
+      replaceUrl: true,
     });
   }
 }
