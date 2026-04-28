@@ -7,17 +7,17 @@ import {
   SimpleChanges,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { CommonModule, TitleCasePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TestCase } from '../../../../core/models/testsuite';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { PriorityBadgeComponent } from '../../../../shared/components/priority-badge/priority-badge.component';
 
-type SortCol = 'id' | 'title' | 'status' | 'priority';
+type SortCol = 'id' | 'title' | 'status' | 'priority' | 'createdAt';
 type SortDir = 'asc' | 'desc';
 
 @Component({
-  selector: 'app-case-table',
+  selector: 'app-test-case-table',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, StatusBadgeComponent, PriorityBadgeComponent],
@@ -89,6 +89,14 @@ export class TestCaseTableComponent implements OnChanges {
         case 'status':
           av = a.status;
           bv = b.status;
+          break;
+        case 'priority':
+          av = a.priority;
+          bv = b.priority;
+          break;
+        case 'createdAt':
+          av = a.stamp?.timeStamp?.createdAt ?? '';
+          bv = b.stamp?.timeStamp?.createdAt ?? '';
           break;
       }
       const cmp = av.localeCompare(bv);

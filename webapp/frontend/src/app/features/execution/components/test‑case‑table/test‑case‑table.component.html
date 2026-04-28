@@ -40,7 +40,9 @@
         <th (click)="sort('priority')" [class.sorted]="sortCol==='priority'">
           Priority <span class="sort-icon">{{ getSortIcon('priority') }}</span>
         </th>
-        <th>Created</th>
+        <th (click)="sort('createdAt')" [class.sorted]="sortCol==='createdAt'">
+          Created <span class="sort-icon">{{ getSortIcon('createdAt') }}</span>
+        </th>
       </tr>
       </thead>
       <tbody>

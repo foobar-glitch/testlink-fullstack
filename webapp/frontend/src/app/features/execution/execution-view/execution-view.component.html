@@ -185,7 +185,7 @@
           </ng-container>
 
           <ng-container *ngIf="testCasesForSuite$ | async as cases; else loading">
-            <app-case-table [cases]="cases" (caseSelected)="onCaseSelected($event)"></app-case-table>
+            <app-test-case-table [cases]="cases" (caseSelected)="onCaseSelected($event)"></app-test-case-table>
           </ng-container>
         </ng-container>
 

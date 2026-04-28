@@ -9,13 +9,12 @@ import { ProjectService } from '../../core/services/project.service';
 import { ContextService } from '../../core/services/context.service';
 import { Authentication } from '../../core/models/authentication';
 import { ProjectMembership } from '../../core/models/project';
-import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, RouterModule, SpinnerComponent],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss'],
 })
