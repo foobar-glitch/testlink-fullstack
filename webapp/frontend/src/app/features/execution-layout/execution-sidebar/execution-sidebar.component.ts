@@ -169,6 +169,7 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
       queryParams: { plan: id, testRunId: null },
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 

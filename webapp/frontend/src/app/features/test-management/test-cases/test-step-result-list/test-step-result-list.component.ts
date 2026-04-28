@@ -52,17 +52,18 @@ export class TestStepResultListComponent implements OnInit {
   viewResult(result: TestStepResult): void {
     this.router.navigate(['/explorer'], {
       queryParams: {
-        project:   this.projectKey,
-        plan:      this.route.snapshot.queryParams['plan'],
-        suite:     this.route.snapshot.queryParams['suite'],
-        testcase:  this.route.snapshot.queryParams['testcase'],
-        version:   this.route.snapshot.queryParams['version'],
+        project: this.projectKey,
+        plan: this.route.snapshot.queryParams['plan'],
+        suite: this.route.snapshot.queryParams['suite'],
+        testcase: this.route.snapshot.queryParams['testcase'],
+        version: this.route.snapshot.queryParams['version'],
         testRunId: this.route.snapshot.queryParams['testRunId'],
-        stepId:    this.stepId,
-        actionId:  result.testStepResultId,
-        tab:       'step-result-detail'
+        stepId: this.stepId,
+        actionId: result.testStepResultId,
+        tab: 'step-result-detail',
       },
-      queryParamsHandling: 'merge'
+      queryParamsHandling: 'merge',
+      preserveFragment: true,
     });
   }
 }

@@ -126,7 +126,8 @@ export class TestCaseVersionListComponent implements OnInit {
         version: version.versionNumber,
         tab: 'steps'
       },
-      queryParamsHandling: 'merge'
+      queryParamsHandling: 'merge',
+      preserveFragment: true
     });
   }
 }

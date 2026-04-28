@@ -95,10 +95,11 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
         suite: this.suite.testSuiteId,
         testcase: null,
         version: null,
-        tab: 'overview',  // ← This is correct! The template will show "Test Cases" tab
+        tab: 'overview', // ← This is correct! The template will show "Test Cases" tab
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
 
     this.cdr.markForCheck();
@@ -122,6 +123,7 @@ export class SuiteTreeNodeComponent implements OnInit, OnDestroy {
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
 
     this.cdr.markForCheck(); // ← Add this

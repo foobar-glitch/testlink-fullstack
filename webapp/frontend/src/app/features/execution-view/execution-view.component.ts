@@ -242,6 +242,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
             queryParams: { testRunId: runs[0].testPlanRunId },
             queryParamsHandling: 'merge',
             replaceUrl: true,
+            preserveFragment: true,
           });
         }
       }),
@@ -373,6 +374,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 
@@ -386,6 +388,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 
@@ -399,6 +402,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 
@@ -411,6 +415,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       queryParams: this.buildQueryParams({ version: null, tab: 'versions' }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 
@@ -419,6 +424,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       queryParams: this.buildQueryParams({ version: versionNumber, tab: 'steps' }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 
@@ -431,6 +437,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       queryParams: this.buildQueryParams({ tab: 'runs' }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 
@@ -443,6 +450,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       queryParams: this.buildQueryParams({ tab: 'run-items' }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 
@@ -451,6 +459,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       queryParams: this.buildQueryParams({ runItemId, tab: 'run-detail' }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 
@@ -459,6 +468,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       queryParams: this.buildQueryParams({ stepId, tab: 'step-results' }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 
@@ -467,6 +477,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       queryParams: this.buildQueryParams({ actionId, tab: 'step-result-detail' }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 
@@ -475,6 +486,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       queryParams: this.buildQueryParams({ testRunId }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 
@@ -483,6 +495,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       queryParams: this.buildQueryParams({ suite: null, testcase: null }),
       queryParamsHandling: 'merge',
       replaceUrl: true,
+      preserveFragment: true,
     });
   }
 }

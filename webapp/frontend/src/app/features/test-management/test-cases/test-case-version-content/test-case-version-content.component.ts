@@ -155,7 +155,8 @@ export class TestCaseVersionContentComponent implements OnInit {
         version: this.versionNumber,
         tab: 'runs'
       },
-      queryParamsHandling: 'merge'
+      queryParamsHandling: 'merge',
+      preserveFragment: true,
     });
   }
 }

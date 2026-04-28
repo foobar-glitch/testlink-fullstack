@@ -84,9 +84,10 @@ export class TestPlanRunItemListComponent implements OnInit {
         suite: this.suiteId,
         testRunId: this.testRunId,
         runItemId: item.testRunItemId,
-        tab: 'run-detail'
+        tab: 'run-detail',
       },
-      queryParamsHandling: 'merge'
+      queryParamsHandling: 'merge',
+      preserveFragment: true,
     });
   }
 }

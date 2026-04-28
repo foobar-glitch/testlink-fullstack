@@ -72,9 +72,10 @@ export class TestCaseVersionRunsComponent implements OnInit {
         testcase: this.testCaseIdentifier,
         version: this.versionNumber,
         runItemId: item.testRunItemId,
-        tab: 'run-detail'
+        tab: 'run-detail',
       },
-      queryParamsHandling: 'merge'
+      queryParamsHandling: 'merge',
+      preserveFragment: true,
     });
   }
 }
