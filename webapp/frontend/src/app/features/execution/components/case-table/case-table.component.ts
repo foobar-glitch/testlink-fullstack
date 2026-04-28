@@ -11,6 +11,7 @@ import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TestCase } from '../../../../core/models/testsuite';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
+import { PriorityBadgeComponent } from '../../../../shared/components/priority-badge/priority-badge.component';
 
 type SortCol = 'id' | 'title' | 'status' | 'priority';
 type SortDir = 'asc' | 'desc';
@@ -19,7 +20,7 @@ type SortDir = 'asc' | 'desc';
   selector: 'app-case-table',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, TitleCasePipe, StatusBadgeComponent],
+  imports: [CommonModule, FormsModule, StatusBadgeComponent, PriorityBadgeComponent],
   templateUrl: './case-table.component.html',
   styleUrls: ['./case-table.component.scss'],
 })
@@ -27,7 +28,7 @@ export class CaseTableComponent implements OnChanges {
   @Input() cases: TestCase[] = [];
   @Output() caseSelected = new EventEmitter<TestCase>();
 
-  searchQuery  = '';
+  searchQuery = '';
   statusFilter = '';
   sortCol: SortCol = 'id';
   sortDir: SortDir = 'asc';
@@ -45,14 +46,13 @@ export class CaseTableComponent implements OnChanges {
 
     if (this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase();
-      result = result.filter(tc =>
-        tc.title.toLowerCase().includes(q) ||
-        String(tc.identifierNumber).includes(q),
+      result = result.filter(
+        (tc) => tc.title.toLowerCase().includes(q) || String(tc.identifierNumber).includes(q),
       );
     }
 
     if (this.statusFilter) {
-      result = result.filter(tc => tc.status === this.statusFilter);
+      result = result.filter((tc) => tc.status === this.statusFilter);
     }
 
     this.filtered = this.sortRows(result);
@@ -83,9 +83,13 @@ export class CaseTableComponent implements OnChanges {
             ? a.identifierNumber - b.identifierNumber
             : b.identifierNumber - a.identifierNumber;
         case 'title':
-          av = a.title; bv = b.title; break;
+          av = a.title;
+          bv = b.title;
+          break;
         case 'status':
-          av = a.status; bv = b.status; break;
+          av = a.status;
+          bv = b.status;
+          break;
       }
       const cmp = av.localeCompare(bv);
       return this.sortDir === 'asc' ? cmp : -cmp;
