@@ -5,6 +5,8 @@ import {
   inject,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
+  ElementRef,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -31,6 +33,10 @@ export type SidebarFrame = 'settings' | 'filters' | 'explorer';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExecutionSidebarComponent implements OnInit, OnDestroy {
+  @ViewChild('filtersContentRef') filtersContentRef: ElementRef | undefined;
+  // Track whether the user has ever manually resized
+  private userHasResized = false;
+
   private readonly ctx = inject(ContextService);
   private readonly suitesSvc = inject(TestSuiteService);
   private readonly plansSvc = inject(TestPlanService);
@@ -76,6 +82,40 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   showAdvancedFilters = false;
 
   panelHeight = +(localStorage.getItem('panelHeight') ?? 320);
+
+  // Call this when the panel is expanded and the Filters tab becomes active
+  onFiltersTabActivated(): void {
+    if (this.userHasResized) return; // respect user sizing
+    setTimeout(() => {
+      if (this.filtersContentRef?.nativeElement) {
+        const filtersHeight = this.filtersContentRef.nativeElement.scrollHeight;
+        // Add some padding/borders (e.g., 24px)
+        const desiredHeight = filtersHeight + 24;
+        if (desiredHeight > this.panelHeight) {
+          this.panelHeight = desiredHeight;
+          this.cdr.markForCheck();
+        }
+      }
+    });
+  }
+
+  setActiveFrame(frame: SidebarFrame): void {
+    this.activeSidebarFrame = frame;
+    if (frame === 'filters' && !this.userHasResized) {
+      setTimeout(() => this.adjustToFiltersContent());
+    }
+  }
+
+  adjustToFiltersContent(): void {
+    const el = this.filtersContentRef?.nativeElement;
+    if (el) {
+      const desired = el.scrollHeight + 24; // tweak padding
+      if (desired > this.panelHeight) {
+        this.panelHeight = desired;
+        this.cdr.markForCheck();
+      }
+    }
+  }
 
   ngOnInit(): void {
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
@@ -197,6 +237,7 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
 
   stopResize = (): void => {
     this.resizing = false;
+    this.userHasResized = true; // <-- add this
     localStorage.setItem('panelHeight', this.panelHeight.toString());
     document.removeEventListener('mousemove', this.onResize);
     document.removeEventListener('mouseup', this.stopResize);
