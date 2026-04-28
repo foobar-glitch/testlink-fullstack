@@ -14,7 +14,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 import { PriorityBadgeComponent } from '../../../../shared/components/priority-badge/priority-badge.component';
 import { TestRunStatusBadgeComponent } from '../../../../shared/components/test-run-status-badge/test-run-status-badge.component';
 
-import { TestCaseVersionContent } from '../../../../core/models/testsuite';
+import { TestCasePriority, TestCaseVersionContent } from '../../../../core/models/testsuite';
 import { TestCaseVersionStats } from '../../../../core/models/testsuite';
 import { TestCaseVersionStep } from '../../../../core/models/testexecution';
 
@@ -51,6 +51,7 @@ export class TestCaseVersionContentComponent implements OnInit {
   steps$!: Observable<TestCaseVersionStep[]>;
   stats$!: Observable<TestCaseVersionStats>;
   errorMessage = '';
+  testCasePriority$!: Observable<TestCasePriority>;
 
   private readonly EMPTY_STATS: TestCaseVersionStats = {
     totalExecutions: 0,
@@ -64,8 +65,20 @@ export class TestCaseVersionContentComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    this.testCasePriority$ = this.route.queryParams.pipe(
+      switchMap((params) => {
+        const project = params['project'];
+        const testcase = params['testcase'];
+        if (!project || !testcase) return of('medium' as TestCasePriority);
+        return this.testCaseService.getTestCase(project, +testcase).pipe(
+          map((tc) => tc?.priority || 'medium'),
+          catchError(() => of('medium' as TestCasePriority)),
+        );
+      }),
+    );
+
     this.content$ = this.route.queryParams.pipe(
-      switchMap(params => {
+      switchMap((params) => {
         const project = params['project'];
         const suite = params['suite'];
         const testcase = params['testcase'];
@@ -76,50 +89,50 @@ export class TestCaseVersionContentComponent implements OnInit {
         this.testCaseIdentifier = +testcase;
         this.versionNumber = +version;
         return this.contentService.getContent(project, +testcase, +version).pipe(
-          catchError(err => {
+          catchError((err) => {
             this.errorMessage = err.message || 'Failed to load content';
             return of(null as any);
-          })
+          }),
         );
-      })
+      }),
     );
 
     this.testCaseTitle$ = this.route.queryParams.pipe(
-      switchMap(params => {
+      switchMap((params) => {
         const project = params['project'];
         const testcase = params['testcase'];
         if (!project || !testcase) return of('Test Case');
         return this.testCaseService.getTestCase(project, +testcase).pipe(
-          map(tc => tc?.title || 'Test Case'),
-          catchError(() => of('Test Case'))
+          map((tc) => tc?.title || 'Test Case'),
+          catchError(() => of('Test Case')),
         );
-      })
+      }),
     );
 
     this.steps$ = this.route.queryParams.pipe(
-      switchMap(params => {
+      switchMap((params) => {
         const project = params['project'];
         const testcase = params['testcase'];
         const version = params['version'];
         if (!project || !testcase || !version) return of([]);
-        return this.stepService.getSteps(project, +testcase, +version).pipe(
-          catchError(() => of([]))
-        );
-      })
+        return this.stepService
+          .getSteps(project, +testcase, +version)
+          .pipe(catchError(() => of([])));
+      }),
     );
 
     this.stats$ = this.route.queryParams.pipe(
-      switchMap(params => {
+      switchMap((params) => {
         const project = params['project'];
         const testcase = params['testcase'];
         const version = params['version'];
         if (!project || !testcase || !version) {
           return of(this.EMPTY_STATS);
         }
-        return this.versionService.getVersionStats(project, +testcase, +version).pipe(
-          catchError(() => of(this.EMPTY_STATS))
-        );
-      })
+        return this.versionService
+          .getVersionStats(project, +testcase, +version)
+          .pipe(catchError(() => of(this.EMPTY_STATS)));
+      }),
     );
   }
 
@@ -140,9 +153,9 @@ export class TestCaseVersionContentComponent implements OnInit {
         testcase: this.testCaseIdentifier,
         version: this.versionNumber,
         stepId: step.stepId,
-        tab: 'step-results'
+        tab: 'step-results',
       },
-      queryParamsHandling: 'merge'
+      queryParamsHandling: 'merge',
     });
   }
 
@@ -153,7 +166,7 @@ export class TestCaseVersionContentComponent implements OnInit {
         suite: this.suiteId,
         testcase: this.testCaseIdentifier,
         version: this.versionNumber,
-        tab: 'runs'
+        tab: 'runs',
       },
       queryParamsHandling: 'merge',
       preserveFragment: true,

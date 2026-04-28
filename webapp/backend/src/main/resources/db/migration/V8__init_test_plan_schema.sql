@@ -50,7 +50,6 @@ CREATE TABLE test_run_items (
                                 test_run_item_id BIGSERIAL PRIMARY KEY,
                                 public_uuid UUID DEFAULT gen_random_uuid() NOT NULL,
                                 test_run_id BIGINT NOT NULL,
-                                test_case_id BIGINT NOT NULL,
                                 test_case_version_id BIGINT NOT NULL,
                                 assigned_to BIGINT,
                                 executed_by BIGINT,
@@ -64,8 +63,6 @@ CREATE TABLE test_run_items (
                                 CONSTRAINT uq_test_run_items_public_uuid UNIQUE (public_uuid),
                                 CONSTRAINT fk_run_item_run
                                     FOREIGN KEY (test_run_id) REFERENCES test_plan_runs(test_plan_run_id) ON DELETE CASCADE,
-                                CONSTRAINT fk_run_item_case
-                                    FOREIGN KEY (test_case_id) REFERENCES test_cases(test_case_id) ON DELETE CASCADE,
                                 CONSTRAINT fk_run_item_version
                                     FOREIGN KEY (test_case_version_id) REFERENCES test_case_versions(test_case_version_id) ON DELETE CASCADE,
                                 CONSTRAINT fk_run_item_assigned_to
@@ -75,7 +72,7 @@ CREATE TABLE test_run_items (
                                 CONSTRAINT fk_run_item_created_by
                                     FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE RESTRICT,
                                 CONSTRAINT uk_run_item_unique
-                                    UNIQUE (test_run_id, test_case_id),
+                                    UNIQUE (test_run_id, test_case_version_id),
                                 CONSTRAINT chk_run_item_status
                                     CHECK (status IN ('NOT_RUN', 'PASSED', 'FAILED', 'BLOCKED', 'SKIPPED'))
 );

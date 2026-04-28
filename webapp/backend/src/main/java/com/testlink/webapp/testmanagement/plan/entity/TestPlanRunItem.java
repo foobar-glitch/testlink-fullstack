@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "test_run_items",  uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"test_run_id", "test_case_id"})
+        @UniqueConstraint(columnNames = {"test_run_id", "test_case_version_id"})
 })
 @Getter
 @Setter
@@ -32,9 +32,6 @@ public class TestPlanRunItem extends UserCreatedTimeStampedEntity {
     @JoinColumn(name = "test_run_id", nullable = false)
     private TestPlanRun testPlanRun;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "test_case_id", nullable = false)
-    private TestCase testCase;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "test_case_version_id", nullable = false)

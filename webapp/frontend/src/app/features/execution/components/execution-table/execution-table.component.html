@@ -52,9 +52,9 @@
         >
           <td>
             <span class="tc-id">{{ getIdentifier(item) }}</span>
-            {{ item.testCase?.title }}
+            {{ item.testCaseVersion.testCase?.title }}
           </td>
-          <td class="muted">{{ item.testCase?.testSuite?.name || '—' }}</td>
+          <td class="muted">{{ item.testCaseVersion.testCase?.testSuite?.name || '—' }}</td>
           <td class="muted">{{ item.assignedTo?.username || '—' }}</td>
           <td><app-test-run-status-badge [status]="item.status"></app-test-run-status-badge></td>
           <td class="muted">{{ item.executedAt | date:'mediumDate' }}</td>

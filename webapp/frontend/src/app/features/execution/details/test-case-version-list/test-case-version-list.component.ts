@@ -12,7 +12,11 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 import { PriorityBadgeComponent } from '../../../../shared/components/priority-badge/priority-badge.component';
 import { TestRunStatusBadgeComponent } from '../../../../shared/components/test-run-status-badge/test-run-status-badge.component';
 
-import { TestCaseVersion, TestCaseVersionStats } from '../../../../core/models/testsuite';
+import {
+  TestCasePriority,
+  TestCaseVersion,
+  TestCaseVersionStats,
+} from '../../../../core/models/testsuite';
 
 @Component({
   selector: 'app-test-case-version-list',
@@ -40,6 +44,7 @@ export class TestCaseVersionListComponent implements OnInit {
   suiteId!: string;
 
   versions$!: Observable<TestCaseVersion[]>;
+  testCasePriority$!: Observable<TestCasePriority>;
   testCaseTitle$!: Observable<string>;
   errorMessage = '';
 
@@ -58,7 +63,7 @@ export class TestCaseVersionListComponent implements OnInit {
 
   ngOnInit(): void {
     this.versions$ = this.route.queryParams.pipe(
-      switchMap(params => {
+      switchMap((params) => {
         const project = params['project'];
         const testcase = params['testcase'];
         const suite = params['suite'];
@@ -67,24 +72,36 @@ export class TestCaseVersionListComponent implements OnInit {
         this.testCaseIdentifier = +testcase;
         this.suiteId = suite || '';
         return this.versionService.getVersionsByTestCase(project, +testcase).pipe(
-          catchError(err => {
+          catchError((err) => {
             this.errorMessage = err.message || 'Failed to load versions';
             return of([]);
-          })
+          }),
         );
-      })
+      }),
+    );
+
+    this.testCasePriority$ = this.route.queryParams.pipe(
+      switchMap((params) => {
+        const project = params['project'];
+        const testcase = params['testcase'];
+        if (!project || !testcase) return of('medium' as TestCasePriority);
+        return this.testCaseService.getTestCase(project, +testcase).pipe(
+          map((tc) => tc?.priority || 'medium'),
+          catchError(() => of('medium' as TestCasePriority)),
+        );
+      }),
     );
 
     this.testCaseTitle$ = this.route.queryParams.pipe(
-      switchMap(params => {
+      switchMap((params) => {
         const project = params['project'];
         const testcase = params['testcase'];
         if (!project || !testcase) return of('Test Case');
         return this.testCaseService.getTestCase(project, +testcase).pipe(
-          map(tc => tc?.title || 'Test Case'),
-          catchError(() => of('Test Case'))
+          map((tc) => tc?.title || 'Test Case'),
+          catchError(() => of('Test Case')),
         );
-      })
+      }),
     );
   }
 
@@ -100,7 +117,7 @@ export class TestCaseVersionListComponent implements OnInit {
 
   latestVersionNumber(versions: TestCaseVersion[]): number {
     if (!versions.length) return 0;
-    return Math.max(...versions.map(v => v.versionNumber));
+    return Math.max(...versions.map((v) => v.versionNumber));
   }
 
   pct(n: number, total: number): number {
@@ -124,10 +141,10 @@ export class TestCaseVersionListComponent implements OnInit {
         suite: this.suiteId,
         testcase: this.testCaseIdentifier,
         version: version.versionNumber,
-        tab: 'steps'
+        tab: 'steps',
       },
       queryParamsHandling: 'merge',
-      preserveFragment: true
+      preserveFragment: true,
     });
   }
 }

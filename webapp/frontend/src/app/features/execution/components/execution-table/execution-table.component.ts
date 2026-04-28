@@ -27,7 +27,7 @@ export class ExecutionTableComponent implements OnChanges {
   @Input() items: TestPlanRunItem[] = [];
   @Output() itemSelected = new EventEmitter<TestPlanRunItem>();
 
-  searchQuery  = '';
+  searchQuery = '';
   statusFilter = '';
   sortCol: SortCol = 'executedAt';
   sortDir: SortDir = 'desc';
@@ -45,14 +45,15 @@ export class ExecutionTableComponent implements OnChanges {
 
     if (this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase();
-      result = result.filter(i =>
-        i.testCase?.title?.toLowerCase().includes(q) ||
-        i.assignedTo?.username?.toLowerCase().includes(q),
+      result = result.filter(
+        (i) =>
+          i.testCaseVersion.testCase?.title?.toLowerCase().includes(q) ||
+          i.assignedTo?.username?.toLowerCase().includes(q),
       );
     }
 
     if (this.statusFilter) {
-      result = result.filter(i => i.status === this.statusFilter);
+      result = result.filter((i) => i.status === this.statusFilter);
     }
 
     this.filtered = this.sortRows(result);
@@ -74,7 +75,7 @@ export class ExecutionTableComponent implements OnChanges {
   }
 
   getIdentifier(item: TestPlanRunItem): string {
-    const tc = item.testCase;
+    const tc = item.testCaseVersion?.testCase;
     if (!tc) return '';
     return `${tc.testSuite?.project?.projectKey ?? ''}-${tc.identifierNumber}`;
   }
@@ -85,13 +86,21 @@ export class ExecutionTableComponent implements OnChanges {
       let bv = '';
       switch (this.sortCol) {
         case 'testCase':
-          av = a.testCase?.title ?? ''; bv = b.testCase?.title ?? ''; break;
+          av = a.testCaseVersion.testCase?.title ?? '';
+          bv = b.testCaseVersion.testCase?.title ?? '';
+          break;
         case 'assignedTo':
-          av = a.assignedTo?.username ?? ''; bv = b.assignedTo?.username ?? ''; break;
+          av = a.assignedTo?.username ?? '';
+          bv = b.assignedTo?.username ?? '';
+          break;
         case 'status':
-          av = a.status; bv = b.status; break;
+          av = a.status;
+          bv = b.status;
+          break;
         case 'executedAt':
-          av = a.executedAt ?? ''; bv = b.executedAt ?? ''; break;
+          av = a.executedAt ?? '';
+          bv = b.executedAt ?? '';
+          break;
       }
       const cmp = av.localeCompare(bv);
       return this.sortDir === 'asc' ? cmp : -cmp;

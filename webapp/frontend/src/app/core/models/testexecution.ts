@@ -38,7 +38,6 @@ export type TestRunStatus = 'NOT_RUN' | 'PASSED' | 'FAILED' | 'BLOCKED' | 'SKIPP
 export interface TestPlanRunItem {
   testRunItemId: string;
   testPlanRun: TestPlanRun;
-  testCase: TestCase;
   testCaseVersion: TestCaseVersion;
   assignedTo: UserSummary | null;
   executedBy: UserSummary | null;

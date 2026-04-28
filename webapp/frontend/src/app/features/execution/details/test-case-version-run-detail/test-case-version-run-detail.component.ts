@@ -59,7 +59,7 @@ export class TestCaseVersionRunDetailComponent implements OnInit {
   }
 
   getTestCaseIdentifier(item: TestPlanRunItem): string {
-    const tc = item.testCase;
+    const tc = item.testCaseVersion.testCase;
     const key = tc.testSuite?.project?.projectKey ?? this.projectKey;
     return `${key}-${tc.identifierNumber}`;
   }

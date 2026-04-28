@@ -3,6 +3,7 @@
   <header class="page-header">
     <div class="header-title">
       <h1 *ngIf="testCaseTitle$ | async as title">{{ title }}</h1>
+      <app-priority-badge *ngIf="testCasePriority$ | async as priority" [priority]="priority"></app-priority-badge>
       <p class="header-sub">Version history · {{ projectKey }}-{{ testCaseIdentifier }}</p>
     </div>
   </header>

@@ -262,11 +262,11 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       map(([items, suiteId, testCaseId]) => {
         if (testCaseId) {
           return items.filter(
-            (item) => String(item.testCase.identifierNumber) === String(testCaseId),
+            (item) => String(item.testCaseVersion.testCase.identifierNumber) === String(testCaseId),
           );
         }
         if (suiteId) {
-          return items.filter((item) => item.testCase.testSuite?.testSuiteId === suiteId);
+          return items.filter((item) => item.testCaseVersion.testCase.testSuite?.testSuiteId === suiteId);
         }
         return items;
       }),
@@ -283,10 +283,10 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       map(([testCaseId, items]) => {
         if (!testCaseId) return null;
         const sample = items.find(
-          (item) => String(item.testCase.identifierNumber) === String(testCaseId),
+          (item) => String(item.testCaseVersion.testCase.identifierNumber) === String(testCaseId),
         );
         if (!sample) return `Test Case #${testCaseId}`;
-        return `${sample.testCase.testSuite?.project?.projectKey ?? ''}-${sample.testCase.identifierNumber}`;
+        return `${sample.testCaseVersion.testCase.testSuite?.project?.projectKey ?? ''}-${sample.testCaseVersion.testCase.identifierNumber}`;
       }),
     );
   }

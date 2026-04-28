@@ -7,6 +7,7 @@
         <span class="version-pill">v{{ versionNumber }}</span>
       </div>
       <div class="header-meta" *ngIf="content$ | async as content">
+        <app-priority-badge *ngIf="testCasePriority$ | async as priority" [priority]="priority"></app-priority-badge>
         <app-status-badge [status]="content.testCaseVersion.status"></app-status-badge>
         <span class="meta-sep">·</span>
         <span class="meta-text">

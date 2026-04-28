@@ -64,6 +64,12 @@ export interface TestCase {
   stamp: UserCreatedTimeStamp;
 }
 
+export type PriorityFilter = 'any' | TestCasePriority;
+
+export interface TestCaseFilter {
+  priority: PriorityFilter;
+}
+
 export interface TestCaseStats {
   totalVersions: number;
   totalExecutions: number;
