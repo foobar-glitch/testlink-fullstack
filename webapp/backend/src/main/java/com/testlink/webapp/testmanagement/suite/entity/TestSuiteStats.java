@@ -23,6 +23,9 @@ public class TestSuiteStats {
     @JoinColumn(name = "test_suite_id")
     private TestSuite testSuite;
 
+    @Column(name = "total_child_suites", nullable = false)
+    private Integer totalChildSuites = 0;
+
     @Column(name = "total_test_cases", nullable = false)
     private Integer totalTestCases = 0;
 
