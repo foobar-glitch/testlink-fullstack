@@ -11,7 +11,7 @@ import com.testlink.webapp.testmanagement.suite.dto.TestSuiteHierarchyDTO;
 import com.testlink.webapp.testmanagement.suite.dto.TestSuiteStatsDTO;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.mapper.TestSuiteMapper;
-import com.testlink.webapp.testmanagement.suite.mapper.TestSuiteStatsMapper;
+import com.testlink.webapp.testmanagement.suite.mapper.TestSuitePlanStatsMapper;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteHierarchyService;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
@@ -41,7 +41,7 @@ public class TestSuiteController {
     private final ProjectAccessService projectAccessService;
     private final ProjectService projectService;
 
-    private final TestSuiteStatsMapper testSuiteStatsMapper;
+    private final TestSuitePlanStatsMapper testSuiteStatsMapper;
 
     @GetMapping("/all")
     public ResponseEntity<List<TestSuiteHierarchyDTO>> getTestSuitesOfProductKey(
@@ -151,7 +151,8 @@ public class TestSuiteController {
         TestPlan testPlan = testPlanService.findByTestPlanId(fromBase62(testPlanId), project);
         TestSuite testSuite = testSuiteService.findBySuiteId(fromBase62(suiteId));
 
-        return ResponseEntity.ok(testSuiteService.findSuiteStatsByTestPlanAndSuite(testPlan, testSuite));
+        return ResponseEntity.ok(testSuiteStatsMapper.toDto(
+                testSuiteService.findSuiteStatsByTestPlanAndSuite(testPlan, testSuite)));
     }
 
     @GetMapping("/view/stats/testplan/tree")
@@ -170,7 +171,9 @@ public class TestSuiteController {
         List<TestSuite> testSuites = suiteIds.stream().map(IdUtil::fromBase62).map(testSuiteService::findBySuiteId).toList();
 
 
-        return ResponseEntity.ok(testSuiteService.findSuiteStatsByTestPlanAndSuites(testPlan, testSuites));
+        return ResponseEntity.ok(
+                testSuiteStatsMapper.toDtoList(testSuiteService.findSuiteStatsByTestPlanAndSuites(testPlan, testSuites))
+        );
     }
 
 }

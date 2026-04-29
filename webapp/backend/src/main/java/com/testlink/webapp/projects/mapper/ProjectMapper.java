@@ -17,10 +17,6 @@ import java.util.List;
 public abstract class ProjectMapper extends BaseAuditMapper {
 
     @Mapping(target = "projectId", source = "publicId")
-    @Mapping(target = "projectKey", source = "projectKey")
-    @Mapping(target = "displayName", source = "displayName")
-    @Mapping(target = "description", source = "description")
-    @Mapping(target = "status", source = "status")
     @Mapping(target = "stamp", expression = "java(mapAudit(project))")
     public abstract ProjectDTO toDto(Project project);
 
