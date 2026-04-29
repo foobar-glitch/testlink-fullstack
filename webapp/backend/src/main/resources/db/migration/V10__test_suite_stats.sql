@@ -39,16 +39,9 @@ CREATE INDEX IF NOT EXISTS idx_sps_suite_id ON test_suite_plan_stats(test_suite_
 -- ----------------------------------------------------------------------
 -- 2. recalc function
 --
--- FIX: The original function used three separate SQL statements that all
--- referenced the CTEs suite_tree and plan_runs. In PostgreSQL (and
--- PL/pgSQL), a WITH clause only lives for the single statement it is
--- attached to. Once that statement finishes, the CTE name ceases to
--- exist, so any subsequent bare SELECT that tries to JOIN suite_tree
--- fails with "relation suite_tree does not exist".
---
--- Solution: merge all aggregation work into one statement by using
--- additional CTEs (exec_agg, latest_exec) so the whole computation
--- runs inside a single SELECT … INTO.
+-- Recalculates stats for a single suite (p_suite_id) within a plan.
+-- It always counts the full subtree rooted at p_suite_id, so calling
+-- this on a parent suite automatically includes all descendant data.
 -- ----------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION recalc_suite_plan_stats(
     p_suite_id UUID,
@@ -69,24 +62,19 @@ DECLARE
     v_child_suites      INT;
     v_suite_internal_id BIGINT;
 BEGIN
-    -- Resolve the internal (bigint) PK for the target suite once.
     SELECT test_suite_id
     INTO   v_suite_internal_id
     FROM   test_suites
     WHERE  public_uuid = p_suite_id;
 
-    -- One single statement that keeps suite_tree and plan_runs alive
-    -- for every sub-query that needs them.
     WITH RECURSIVE
     suite_tree AS (
-        -- anchor: the suite itself
         SELECT test_suite_id
         FROM   test_suites
         WHERE  public_uuid = p_suite_id
 
         UNION ALL
 
-        -- recursive: all descendants
         SELECT ts.test_suite_id
         FROM   test_suites ts
         JOIN   suite_tree  st ON ts.parent_id = st.test_suite_id
@@ -97,7 +85,6 @@ BEGIN
         JOIN   test_plans     tp  ON tp.test_plan_id = tpr.test_plan_id
         WHERE  tp.public_uuid = p_plan_id
     ),
-    -- Counts: total test cases in the subtree + direct child suites
     case_agg AS (
         SELECT
             COUNT(DISTINCT tc.test_case_id) AS total_cases,
@@ -109,20 +96,18 @@ BEGIN
         JOIN      suite_tree  st ON st.test_suite_id = tc.test_suite_id
         LEFT JOIN test_suites ts ON ts.test_suite_id = tc.test_suite_id
     ),
-    -- Execution aggregation across all runs in this plan
     exec_agg AS (
         SELECT
-            COUNT(DISTINCT tri.test_run_item_id)                     AS total_execs,
-            COUNT(*) FILTER (WHERE tri.status = 'PASSED')            AS passed,
-            COUNT(*) FILTER (WHERE tri.status = 'FAILED')            AS failed,
-            COUNT(*) FILTER (WHERE tri.status = 'BLOCKED')           AS blocked
+            COUNT(DISTINCT tri.test_run_item_id)           AS total_execs,
+            COUNT(*) FILTER (WHERE tri.status = 'PASSED')  AS passed,
+            COUNT(*) FILTER (WHERE tri.status = 'FAILED')  AS failed,
+            COUNT(*) FILTER (WHERE tri.status = 'BLOCKED') AS blocked
         FROM  test_run_items      tri
         JOIN  test_case_versions  tcv ON tcv.test_case_version_id = tri.test_case_version_id
         JOIN  test_cases          tc  ON tc.test_case_id          = tcv.test_case_id
         JOIN  suite_tree          st  ON st.test_suite_id         = tc.test_suite_id
         JOIN  plan_runs           pr  ON pr.test_plan_run_id      = tri.test_run_id
     ),
-    -- Latest executed run item in this suite/plan
     latest_exec AS (
         SELECT tri.status, tri.executed_at
         FROM  test_run_items      tri
@@ -152,8 +137,8 @@ BEGIN
         v_blocked,
         v_last_status,
         v_last_exec_at
-    FROM       case_agg   ca
-    CROSS JOIN exec_agg   ea
+    FROM       case_agg    ca
+    CROSS JOIN exec_agg    ea
     LEFT JOIN  latest_exec le ON TRUE;
 
     v_not_run := GREATEST(
@@ -162,7 +147,6 @@ BEGIN
         0
     );
 
-    -- Upsert the result
     INSERT INTO test_suite_plan_stats AS t (
         test_suite_id, test_plan_id,
         total_child_suites, total_test_cases, total_executions,
@@ -191,38 +175,78 @@ END;
 $$;
 
 -- ----------------------------------------------------------------------
--- 3. Trigger: update suite-plan stats when a test run item changes
+-- 3. Helper: recalc a suite AND every ancestor up to the root
+--
+-- Walks the parent_id chain upward from the given suite (by internal
+-- bigint PK) and calls recalc_suite_plan_stats for each node.
+-- Because recalc always counts the full subtree, a parent row will
+-- automatically reflect everything below it after being recalculated.
+-- ----------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION recalc_suite_and_ancestors(
+    p_suite_internal_id BIGINT,
+    p_plan_id           UUID
+)
+RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    ancestor RECORD;
+BEGIN
+    FOR ancestor IN
+        WITH RECURSIVE ancestors AS (
+            SELECT test_suite_id, parent_id, public_uuid
+            FROM   test_suites
+            WHERE  test_suite_id = p_suite_internal_id
+
+            UNION ALL
+
+            SELECT ts.test_suite_id, ts.parent_id, ts.public_uuid
+            FROM   test_suites ts
+            JOIN   ancestors   a  ON ts.test_suite_id = a.parent_id
+        )
+        SELECT public_uuid FROM ancestors
+    LOOP
+        PERFORM recalc_suite_plan_stats(ancestor.public_uuid, p_plan_id);
+    END LOOP;
+END;
+$$;
+
+-- ----------------------------------------------------------------------
+-- 4. Trigger function: fires on test_run_items INSERT/UPDATE/DELETE
+--
+-- Finds the directly affected suite + plan, then recalcs that suite
+-- and every ancestor so every level of the tree stays up to date.
 -- ----------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_suite_plan_stats_on_run_item_change()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_plan_id  UUID;
-    v_suite_id UUID;
+    v_plan_id           UUID;
+    v_suite_internal_id BIGINT;
 BEGIN
     IF (TG_OP = 'DELETE') THEN
-        SELECT tp.public_uuid, ts.public_uuid INTO v_plan_id, v_suite_id
-        FROM   test_plan_runs    tpr
-        JOIN   test_plans        tp  ON tpr.test_plan_id             = tp.test_plan_id
-        JOIN   test_run_items    tri ON tri.test_run_id              = tpr.test_plan_run_id
-        JOIN   test_case_versions tcv ON tcv.test_case_version_id   = tri.test_case_version_id
-        JOIN   test_cases         tc  ON tc.test_case_id             = tcv.test_case_id
-        JOIN   test_suites        ts  ON ts.test_suite_id            = tc.test_suite_id
+        SELECT tp.public_uuid, tc.test_suite_id
+        INTO   v_plan_id, v_suite_internal_id
+        FROM   test_plan_runs     tpr
+        JOIN   test_plans         tp  ON tpr.test_plan_id          = tp.test_plan_id
+        JOIN   test_run_items     tri ON tri.test_run_id           = tpr.test_plan_run_id
+        JOIN   test_case_versions tcv ON tcv.test_case_version_id = tri.test_case_version_id
+        JOIN   test_cases         tc  ON tc.test_case_id           = tcv.test_case_id
         WHERE  tri.test_run_item_id = OLD.test_run_item_id;
     ELSE
-        SELECT tp.public_uuid, ts.public_uuid INTO v_plan_id, v_suite_id
-        FROM   test_plan_runs    tpr
-        JOIN   test_plans        tp  ON tpr.test_plan_id             = tp.test_plan_id
-        JOIN   test_run_items    tri ON tri.test_run_id              = tpr.test_plan_run_id
-        JOIN   test_case_versions tcv ON tcv.test_case_version_id   = tri.test_case_version_id
-        JOIN   test_cases         tc  ON tc.test_case_id             = tcv.test_case_id
-        JOIN   test_suites        ts  ON ts.test_suite_id            = tc.test_suite_id
+        SELECT tp.public_uuid, tc.test_suite_id
+        INTO   v_plan_id, v_suite_internal_id
+        FROM   test_plan_runs     tpr
+        JOIN   test_plans         tp  ON tpr.test_plan_id          = tp.test_plan_id
+        JOIN   test_run_items     tri ON tri.test_run_id           = tpr.test_plan_run_id
+        JOIN   test_case_versions tcv ON tcv.test_case_version_id = tri.test_case_version_id
+        JOIN   test_cases         tc  ON tc.test_case_id           = tcv.test_case_id
         WHERE  tri.test_run_item_id = NEW.test_run_item_id;
     END IF;
 
-    IF v_plan_id IS NOT NULL AND v_suite_id IS NOT NULL THEN
-        PERFORM recalc_suite_plan_stats(v_suite_id, v_plan_id);
+    IF v_plan_id IS NOT NULL AND v_suite_internal_id IS NOT NULL THEN
+        PERFORM recalc_suite_and_ancestors(v_suite_internal_id, v_plan_id);
     END IF;
 
     RETURN NULL;
@@ -236,15 +260,31 @@ CREATE TRIGGER trg_update_suite_plan_stats_on_run_item
     EXECUTE FUNCTION update_suite_plan_stats_on_run_item_change();
 
 -- ----------------------------------------------------------------------
--- 4. Initialise stats for all existing suite/plan combinations
+-- 5. Initialise stats for all existing suite/plan combinations
+--
+-- Process leaves before parents (ORDER BY depth DESC) so that when a
+-- parent is recalculated its children already have fresh rows.
 -- ----------------------------------------------------------------------
 DO $$
 DECLARE
-    suite_rec RECORD;
     plan_rec  RECORD;
+    suite_rec RECORD;
 BEGIN
-    FOR suite_rec IN SELECT public_uuid FROM test_suites LOOP
-        FOR plan_rec IN SELECT public_uuid FROM test_plans LOOP
+    FOR plan_rec IN SELECT public_uuid FROM test_plans LOOP
+        FOR suite_rec IN
+            WITH RECURSIVE tree AS (
+                SELECT test_suite_id, parent_id, public_uuid, 0 AS depth
+                FROM   test_suites
+                WHERE  parent_id IS NULL
+
+                UNION ALL
+
+                SELECT ts.test_suite_id, ts.parent_id, ts.public_uuid, t.depth + 1
+                FROM   test_suites ts
+                JOIN   tree        t  ON ts.parent_id = t.test_suite_id
+            )
+            SELECT public_uuid FROM tree ORDER BY depth DESC
+        LOOP
             PERFORM recalc_suite_plan_stats(suite_rec.public_uuid, plan_rec.public_uuid);
         END LOOP;
     END LOOP;
