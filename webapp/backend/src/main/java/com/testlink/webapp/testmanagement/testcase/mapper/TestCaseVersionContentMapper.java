@@ -12,13 +12,8 @@ import java.util.List;
         componentModel = "spring",
         uses = {TestCaseVersionMapper.class}
 )
-public abstract class TestCaseVersionContentMapper extends BaseAuditMapper {
-    @Mapping(target = "testCaseVersionId", source = "testCaseVersionId")
-    @Mapping(target = "testCaseVersion", source = "testCaseVersion")
-    @Mapping(target = "title", source = "title")
-    @Mapping(target = "preconditions", source = "preconditions")
-    @Mapping(target = "expectedResult", source = "expectedResult")
+public interface TestCaseVersionContentMapper extends BaseAuditMapper {
     @Mapping(target = "stamp", expression = "java(mapAudit(testCaseVersionContent))")
-    public abstract TestCaseVersionContentDTO toDto(TestCaseVersionContent testCaseVersionContent);
-    public abstract List<TestCaseVersionContentDTO> toDtoList(List<TestCaseVersionContent> testCaseVersions);
+    TestCaseVersionContentDTO toDto(TestCaseVersionContent testCaseVersionContent);
+    List<TestCaseVersionContentDTO> toDtoList(List<TestCaseVersionContent> testCaseVersions);
 }

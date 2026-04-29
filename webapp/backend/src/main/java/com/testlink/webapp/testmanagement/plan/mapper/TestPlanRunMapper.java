@@ -13,10 +13,9 @@ import java.util.List;
         componentModel = "spring",
         uses = {TestPlanMapper.class, IdMapper.class}
 )
-public abstract class TestPlanRunMapper extends BaseAuditMapper {
+public interface TestPlanRunMapper extends BaseAuditMapper {
     @Mapping(target = "testPlanRunId", source = "publicId")
     @Mapping(target = "stamp", expression = "java(mapAudit(testPlan))")
-    public abstract TestPlanRunDTO toDto(TestPlanRun testPlan);
-
-    public abstract List<TestPlanRunDTO> toDtoList(List<TestPlanRun> testPlans);
+    TestPlanRunDTO toDto(TestPlanRun testPlan);
+    List<TestPlanRunDTO> toDtoList(List<TestPlanRun> testPlans);
 }

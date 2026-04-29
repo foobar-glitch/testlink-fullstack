@@ -9,7 +9,7 @@ import java.util.List;
 
 
 @Mapper(componentModel = "spring", uses = { IdMapper.class })
-public abstract class TestPlanStatsMapper {
-    public abstract TestPlanStatsDTO toDto(TestPlanStats stats);
-    public abstract List<TestPlanStatsDTO> toDtoList(List<TestPlanStats> statsList);
+public interface TestPlanStatsMapper {
+    TestPlanStatsDTO toDto(TestPlanStats stats);
+    List<TestPlanStatsDTO> toDtoList(List<TestPlanStats> statsList);
 }

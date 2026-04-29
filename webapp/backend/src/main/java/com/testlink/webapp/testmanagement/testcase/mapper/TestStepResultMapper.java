@@ -16,10 +16,9 @@ import java.util.List;
         uses = {TestPlanRunItemMapper.class, TestCaseVersionStepMapper.class,
                 IdMapper.class}
 )
-public abstract class TestStepResultMapper extends BaseAuditMapper {
+public interface TestStepResultMapper extends BaseAuditMapper {
     @Mapping(target = "testStepResultId", source = "publicId")
     @Mapping(target = "stamp", expression = "java(mapAudit(testStepResult))")
-    public abstract TestStepResultDTO toDto(TestStepResult testStepResult);
-
-    public abstract List<TestStepResultDTO> toDtoList(List<TestStepResult> testCaseVersionSteps);
+    TestStepResultDTO toDto(TestStepResult testStepResult);
+    List<TestStepResultDTO> toDtoList(List<TestStepResult> testCaseVersionSteps);
 }

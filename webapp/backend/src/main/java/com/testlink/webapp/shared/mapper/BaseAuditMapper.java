@@ -15,9 +15,9 @@ import org.mapstruct.Mapping;
         componentModel = "spring",
         uses = {UserSummaryMapper.class, TimeStampMapper.class}
 )
-public abstract class BaseAuditMapper {
+public interface  BaseAuditMapper {
 
     @Mapping(target = "createdBy", source = "createdBy")
     @Mapping(target = "timeStamp", source = ".")
-    public abstract UserCreatedTimeStampDTO mapAudit(UserCreatedTimeStampedEntity entity);
+    UserCreatedTimeStampDTO mapAudit(UserCreatedTimeStampedEntity entity);
 }

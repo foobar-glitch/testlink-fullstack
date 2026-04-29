@@ -21,11 +21,10 @@ import java.util.List;
                 IdMapper.class
         }
 )
-public abstract class TestPlanRunItemMapper extends BaseAuditMapper {
+public interface TestPlanRunItemMapper extends BaseAuditMapper {
 
     @Mapping(target = "testRunItemId", source = "publicId")
     @Mapping(target = "stamp", expression = "java(mapAudit(testPlanRunItem))")
-    public abstract TestPlanRunItemDTO toDto(TestPlanRunItem testPlanRunItem);
-
-    public abstract List<TestPlanRunItemDTO> toDtoList(List<TestPlanRunItem> items);
+    TestPlanRunItemDTO toDto(TestPlanRunItem testPlanRunItem);
+    List<TestPlanRunItemDTO> toDtoList(List<TestPlanRunItem> items);
 }

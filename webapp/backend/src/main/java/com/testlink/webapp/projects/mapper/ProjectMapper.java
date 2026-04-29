@@ -14,19 +14,19 @@ import org.mapstruct.Mapping;
 import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {UserSummaryMapper.class, IdMapper.class})
-public abstract class ProjectMapper extends BaseAuditMapper {
+public interface ProjectMapper extends BaseAuditMapper {
 
     @Mapping(target = "projectId", source = "publicId")
     @Mapping(target = "stamp", expression = "java(mapAudit(project))")
-    public abstract ProjectDTO toDto(Project project);
+    ProjectDTO toDto(Project project);
 
-    public abstract List<ProjectDTO> toDtoList(List<Project> projects);
+    List<ProjectDTO> toDtoList(List<Project> projects);
 
 
     @Mapping(target = "user", source = "user")
     @Mapping(target = "project", source = "project")
     @Mapping(target = "role", source = "role")
-    public abstract ProjectMembershipDTO toMembershipDto(ProjectMembership membership);
+    ProjectMembershipDTO toMembershipDto(ProjectMembership membership);
 
-    public abstract List<ProjectMembershipDTO> toMembershipDtoList(List<ProjectMembership> memberships);
+    List<ProjectMembershipDTO> toMembershipDtoList(List<ProjectMembership> memberships);
 }
