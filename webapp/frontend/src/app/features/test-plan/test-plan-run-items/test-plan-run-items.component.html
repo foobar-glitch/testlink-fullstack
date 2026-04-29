@@ -1,18 +1,18 @@
-<!-- test-plan-run-item-detail.component.html -->
-<div class="item-detail-container">
+<!-- test-plan-run-items.component.html -->
+<div class="run-item-list-container">
   <header class="header">
     <div class="title-section">
-      <h2>Run Item Detail</h2>
+      <h2>Run Items</h2>
       <span *ngIf="runName$ | async as runName" class="run-name">
         {{ runName }}
       </span>
     </div>
     <button
       class="back-btn"
-      [routerLink]="['/test-plans/run-items']"
-      [queryParams]="{ project: projectKey, plan: testPlanId, run: testRunId }"
+      [routerLink]="['/test-plans/detail']"
+      [queryParams]="{ project: projectKey, plan: testPlanId }"
     >
-      ← Back to Items
+      ← Back to Runs
     </button>
   </header>
 
@@ -20,83 +20,46 @@
     <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
   </div>
 
-  <ng-container *ngIf="item$ | async as item; else loading">
-    <div class="detail-card">
-      <!-- Test Case Info -->
-      <div class="section">
-        <h3>Test Case</h3>
-        <div class="info-row">
-          <span class="label">Identifier</span>
-          <span class="value identifier">{{ getTestCaseIdentifier(item) }}</span>
-        </div>
-        <div class="info-row">
-          <span class="label">Title</span>
-          <span class="value">{{ item.testCaseVersion.testCase.title }}</span>
-        </div>
-        <div class="info-row">
-          <span class="label">Description</span>
-          <span class="value">{{ item.testCaseVersion.testCase.description || '—' }}</span>
-        </div>
-      </div>
-
-      <!-- Version Info -->
-      <div class="section">
-        <h3>Version</h3>
-        <div class="info-row">
-          <span class="label">Version Number</span>
-          <span class="value">v{{ item.testCaseVersion.versionNumber }}</span>
-        </div>
-        <div class="info-row">
-          <span class="label">Status</span>
-          <span class="value">
-            <app-status-badge [status]="item.testCaseVersion.status"></app-status-badge>
-          </span>
-        </div>
-      </div>
-
-      <!-- Execution Details -->
-      <div class="section">
-        <h3>Execution</h3>
-        <div class="info-row">
-          <span class="label">Status</span>
-          <span class="value">
+  <ng-container *ngIf="items$ | async as items; else loading">
+    <div *ngIf="items.length > 0; else empty" class="items-table">
+      <table>
+        <thead>
+        <tr>
+          <th>Test Case</th>
+          <th>Version</th>
+          <th>Status</th>
+          <th>Assigned To</th>
+          <th>Executed By</th>
+          <th>Executed At</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let item of items" class="clickable-row" (click)="viewItem(item)">
+          <td>
+            <span class="identifier">{{ getTestCaseIdentifier(item) }}</span>
+            <span class="title">{{ item.testCaseVersion.testCase.title }}</span>
+          </td>
+          <td>v{{ item.testCaseVersion.versionNumber }}</td>
+          <td>
             <app-test-run-status-badge [status]="item.status"></app-test-run-status-badge>
-          </span>
-        </div>
-        <div class="info-row">
-          <span class="label">Assigned To</span>
-          <span class="value">{{ item.assignedTo?.username || '—' }}</span>
-        </div>
-        <div class="info-row">
-          <span class="label">Executed By</span>
-          <span class="value">{{ item.executedBy?.username || '—' }}</span>
-        </div>
-        <div class="info-row">
-          <span class="label">Executed At</span>
-          <span class="value">{{ item.executedAt | date:'medium' }}</span>
-        </div>
-      </div>
-
-      <!-- Notes -->
-      <div class="section" *ngIf="item.notes">
-        <h3>Notes</h3>
-        <p class="notes">{{ item.notes }}</p>
-      </div>
-
-      <!-- Metadata -->
-      <div class="meta">
-        Created by {{ item.stamp.createdBy.username }} on
-        {{ item.stamp.timeStamp.createdAt | date:'medium' }}
-        <span *ngIf="item.stamp.timeStamp.updatedAt">
-          · Updated {{ item.stamp.timeStamp.updatedAt | date:'medium' }}
-        </span>
-      </div>
+          </td>
+          <td>{{ item.assignedTo?.username || '—' }}</td>
+          <td>{{ item.executedBy?.username || '—' }}</td>
+          <td>{{ item.executedAt | date:'medium' }}</td>
+        </tr>
+        </tbody>
+      </table>
     </div>
+    <ng-template #empty>
+      <div class="empty-state">
+        <p>No run items found for this test run.</p>
+      </div>
+    </ng-template>
   </ng-container>
 
   <ng-template #loading>
     <div class="loading-state">
-      <app-spinner label="Loading run item details..."></app-spinner>
+      <app-spinner label="Loading run items..."></app-spinner>
     </div>
   </ng-template>
 </div>

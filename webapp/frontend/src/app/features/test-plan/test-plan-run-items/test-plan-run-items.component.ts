@@ -1,12 +1,11 @@
-// src/app/features/test-plan-run-item-detail/test-plan-run-item-detail.component.ts
+// src/app/features/test-plan-run-items/test-plan-run-items.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../shared/components/error-banner/error-banner.component';
-import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 import {
   TestRunStatusBadgeComponent
 } from '../../../shared/components/test-run-status-badge/test-run-status-badge.component';
@@ -16,30 +15,29 @@ import { TestPlanRunItem } from '../../../core/models/testexecution';
 
 
 @Component({
-  selector: 'app-test-plan-run-item-detail',
+  selector: 'app-test-plan-run-items',
   standalone: true,
   imports: [
     CommonModule,
     RouterModule,
     SpinnerComponent,
     ErrorBannerComponent,
-    StatusBadgeComponent,
     TestRunStatusBadgeComponent,
   ],
-  templateUrl: './test-plan-run-item-detail.component.html',
-  styleUrls: ['./test-plan-run-item-detail.component.scss'],
+  templateUrl: './test-plan-run-items.component.html',
+  styleUrls: ['./test-plan-run-items.component.scss'],
 })
-export class TestPlanRunItemDetailComponent implements OnInit {
+export class TestPlanRunItemsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly itemService = inject(TestPlanRunItemService);
+  private readonly runItemService = inject(TestPlanRunItemService);
   private readonly runService = inject(TestPlanRunService);
+  private readonly router = inject(Router);
 
   projectKey!: string;
   testPlanId!: string;
   testRunId!: string;
-  runItemId!: string;
 
-  item$!: Observable<TestPlanRunItem>;
+  items$!: Observable<TestPlanRunItem[]>;
   runName$!: Observable<string>;
   errorMessage = '';
 
@@ -48,22 +46,23 @@ export class TestPlanRunItemDetailComponent implements OnInit {
       this.projectKey = params['project'] || '';
       this.testPlanId = params['plan'] || '';
       this.testRunId = params['run'] || '';
-      this.runItemId = params['runItemId'] || '';
 
-      if (!this.projectKey || !this.runItemId) {
+      if (!this.projectKey || !this.testPlanId || !this.testRunId) {
         this.errorMessage = 'Missing required parameters.';
-        this.item$ = of(null as any);
+        this.items$ = of([]);
         this.runName$ = of('Test Run');
         return;
       }
 
-      // Correct service call: only projectKey and itemId (no testPlanId/testRunId needed)
-      this.item$ = this.itemService.getRunItemById(this.projectKey, this.runItemId).pipe(
-        catchError(err => {
-          this.errorMessage = err.message || 'Failed to load run item';
-          return of(null as any);
-        })
-      );
+      // The service method expects (projectKey, testRunId, testPlanId) – adjust order
+      this.items$ = this.runItemService
+        .getRunItems(this.projectKey, this.testRunId, this.testPlanId)
+        .pipe(
+          catchError(err => {
+            this.errorMessage = err.message || 'Failed to load run items';
+            return of([]);
+          })
+        );
 
       this.runName$ = this.runService
         .getTestRunById(this.projectKey, this.testPlanId, this.testRunId)
@@ -76,7 +75,19 @@ export class TestPlanRunItemDetailComponent implements OnInit {
 
   getTestCaseIdentifier(item: TestPlanRunItem): string {
     const tc = item.testCaseVersion.testCase;
-    const key = tc.testSuite?.project?.projectKey || this.projectKey;
+    const proj = tc.testSuite?.project;
+    const key = proj ? proj.projectKey : this.projectKey;
     return `${key}-${tc.identifierNumber}`;
+  }
+
+  viewItem(item: TestPlanRunItem): void {
+    this.router.navigate(['/test-plans/run-item-detail'], {
+      queryParams: {
+        project: this.projectKey,
+        plan: this.testPlanId,
+        run: this.testRunId,
+        runItemId: item.testRunItemId,
+      }
+    });
   }
 }

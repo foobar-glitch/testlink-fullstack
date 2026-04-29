@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
-import { TestPlanRunItemDetailComponent } from './features/test-plan/test-plan-run-items/test-plan-run-items.component';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
@@ -52,7 +51,7 @@ export const routes: Routes = [
       },
       {
         path: 'test-plans/run-items',
-        loadComponent: () => import('./features/test-plan/test-plan-run-items/test-plan-run-items.component').then(m => m.TestPlanRunItemDetailComponent),
+        loadComponent: () => import('./features/test-plan/test-plan-run-items/test-plan-run-items.component').then(m => m.TestPlanRunItemsComponent),
         canActivate: [authGuard],
       },
     ],
