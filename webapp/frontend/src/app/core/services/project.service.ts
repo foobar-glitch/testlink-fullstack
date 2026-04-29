@@ -21,7 +21,7 @@ export class ProjectService {
   getProjectByKey(projectKey: string): Observable<Project> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
-    return this.http.get<Project>(`${this.apiUrl}projects/project-key/${projectKey}`, {
+    return this.http.get<Project>(`${this.apiUrl}projects/project-key`, {
       params,
       withCredentials: true,
     });

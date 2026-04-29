@@ -164,7 +164,7 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
       queryParams: {
         plan: id,
         testRunId: null,
-        suite: null,   
+        suite: null,
         testcase: null,
         version: null,
         runItemId: null,
