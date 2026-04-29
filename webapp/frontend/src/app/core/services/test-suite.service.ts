@@ -19,32 +19,27 @@ export class TestSuiteService {
       .set('projectKey', projectKey)
       .set('testPlan', testPlan);
     return this.http
-      .get<TestSuiteHierarchyDTO[]>(`${this.apiUrl}projects`, { withCredentials: true, params })
+      .get<TestSuiteHierarchyDTO[]>(`${this.apiUrl}test-suites`, { withCredentials: true, params })
       .pipe(
-        map(dtos => dtos.map(dto => this.dtoToFilteredTreeNode(dto.current, dto.children, dto.testCases ?? [])))
+        map(dtos => this.buildSuiteTree(dtos))
       );
   }
 
-  private dtoToFilteredTreeNode(item: TestSuiteItem, children: TestSuiteItem[], cases: TestCase[]): TestSuite {
+  private normalizeSuite(node: any): TestSuite {
     return {
-      ...item,
-      children: children.map(child => this.itemToTreeNode(child)), // children from hierarchy never have preloaded cases
+      ...node.current,
       expanded: false,
-      testCases: cases,
+      testCases: node.testCases ?? [],
+      children: (node.children ?? []).map((child: any) =>
+        this.normalizeSuite(child)
+      )
     };
   }
 
-
-  /**
-   * Convert a bare TestSuiteItem into a leaf tree node (no children loaded yet).
-   */
-  private itemToTreeNode(item: TestSuiteItem): TestSuite {
-    return {
-      ...item,
-      children: [],
-      expanded: false,
-    };
+  private buildSuiteTree(dtos: TestSuiteHierarchyDTO[]): TestSuite[] {
+    return dtos.map(dto => this.normalizeSuite(dto));
   }
+
 
 
   /**
@@ -56,7 +51,7 @@ export class TestSuiteService {
       .set('projectKey', projectKey)
       .set('suiteId', suiteId);
 
-    return this.http.get<TestSuiteStats>(`${this.apiUrl}projects/view/stats`, {
+    return this.http.get<TestSuiteStats>(`${this.apiUrl}test-suites/view/stats`, {
       withCredentials: true,
       params
     });

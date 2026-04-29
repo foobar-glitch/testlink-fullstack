@@ -43,11 +43,13 @@
 </ng-template>
 <ng-template #noSuites>
   <div class="tree-empty">
-    <p>{{ projectKey ? 'No suites found' : 'Select a project to browse suites' }}</p>
+    <p *ngIf="projectKey; else noProject">No test plans available. Create a plan first.</p>
+    <ng-template #noProject>
+      <p>Select a project to browse suites.</p>
+    </ng-template>
   </div>
 </ng-template>
 
-<!-- ── COLLAPSIBLE FILTERS / SETTINGS PANEL ────────────────────── -->
 <!-- ── COLLAPSIBLE FILTERS / SETTINGS PANEL ────────────────────── -->
 <div class="filters-settings-panel">
   <button class="panel-toggle" (click)="panelExpanded = !panelExpanded">

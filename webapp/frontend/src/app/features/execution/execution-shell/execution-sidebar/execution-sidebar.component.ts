@@ -40,7 +40,7 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  panelExpanded = false;
+  panelExpanded = true;
 
   projectKey = '';
   planId = '';
@@ -175,6 +175,15 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
       .pipe(catchError(() => of([])))
       .subscribe((plans) => {
         this._testPlans$.next(plans);
+        // Option C: auto‑select the first plan if none is active
+        if (!this.planId && plans.length > 0) {
+          this.router.navigate([], {
+            queryParams: { plan: plans[0].testPlanId },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+            preserveFragment: true,
+          });
+        }
         this.cdr.markForCheck();
       });
   }

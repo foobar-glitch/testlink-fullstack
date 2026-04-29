@@ -26,7 +26,7 @@ import java.util.UUID;
 import static com.testlink.webapp.shared.util.IdUtil.fromBase62;
 
 @RestController
-@RequestMapping("/projects")
+@RequestMapping("/test-suites")
 @RequiredArgsConstructor
 public class TestSuiteController {
     private final TestSuiteService testSuiteService;
