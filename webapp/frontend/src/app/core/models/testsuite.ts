@@ -28,6 +28,7 @@ export interface TestSuiteHierarchyDTO {
   current: TestSuiteItem;
   parent: TestSuiteItem | null;
   children: TestSuiteItem[];
+  testCases: TestCase[];          // <-- add this
 }
 
 /**
@@ -36,8 +37,9 @@ export interface TestSuiteHierarchyDTO {
  * `expanded` is UI-only state.
  */
 export interface TestSuite extends TestSuiteItem {
-  children: TestSuite[]; // always populated, never undefined
-  expanded: boolean; // UI state only
+  children: TestSuite[];
+  expanded: boolean;
+  testCases?: TestCase[];
 }
 
 /**

@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { TestSuite, TestSuiteHierarchy, TestSuiteHierarchyDTO, TestSuiteItem, TestSuiteStats } from '../models/testsuite';
+import { TestCase, TestSuite, TestSuiteHierarchy, TestSuiteHierarchyDTO, TestSuiteItem, TestSuiteStats } from '../models/testsuite';
 
 @Injectable({ providedIn: 'root' })
 export class TestSuiteService {
@@ -11,52 +11,29 @@ export class TestSuiteService {
   private readonly apiUrl = environment.apiUrl;
 
   /**
-   * Fetch test suite tree using the project's business key.
-   * Endpoint: GET /projects?projectKey={projectKey}
+   * Fetch suite hierarchy filtered by a specific test plan.
+   * Endpoint: GET /projects/testplan?projectKey={projectKey}&testPlan={testPlan}
    */
-  getTestSuitesByProjectKey(projectKey: string): Observable<TestSuite[]> {
-    const params = new HttpParams().set('projectKey', projectKey);
-    return this.http
-      .get<TestSuiteHierarchyDTO[]>(`${this.apiUrl}projects`, {
-        withCredentials: true,
-        params
-      })
-      .pipe(map(dtos => dtos.map(dto => this.dtoToTreeNode(dto.current, dto.children))));
-  }
-
-  /**
-   * Fetch a single test suite hierarchy by project key and suite ID.
-   * Endpoint: GET /projects/view?projectKey={projectKey}&suiteId={suiteId}
-   */
-  getTestSuiteByProjectKeyAndId(projectKey: string, suiteId: string): Observable<TestSuiteHierarchy> {
+  getFilteredSuites(projectKey: string, testPlan: string): Observable<TestSuite[]> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
-      .set('suiteId', suiteId);
+      .set('testPlan', testPlan);
     return this.http
-      .get<TestSuiteHierarchyDTO>(`${this.apiUrl}projects/view`, {
-        withCredentials: true,
-        params
-      })
+      .get<TestSuiteHierarchyDTO[]>(`${this.apiUrl}projects`, { withCredentials: true, params })
       .pipe(
-        map(dto => ({
-          current: this.itemToTreeNode(dto.current),
-          parent: dto.parent ? this.itemToTreeNode(dto.parent) : null,
-          children: (dto.children || []).map(child => this.itemToTreeNode(child)),
-        }))
+        map(dtos => dtos.map(dto => this.dtoToFilteredTreeNode(dto.current, dto.children, dto.testCases ?? [])))
       );
   }
 
-
-  /**
-   * Convert a flat DTO item and its raw children into a full tree node.
-   */
-  private dtoToTreeNode(item: TestSuiteItem, children: TestSuiteItem[]): TestSuite {
+  private dtoToFilteredTreeNode(item: TestSuiteItem, children: TestSuiteItem[], cases: TestCase[]): TestSuite {
     return {
       ...item,
-      children: children.map(child => this.itemToTreeNode(child)),
+      children: children.map(child => this.itemToTreeNode(child)), // children from hierarchy never have preloaded cases
       expanded: false,
+      testCases: cases,
     };
   }
+
 
   /**
    * Convert a bare TestSuiteItem into a leaf tree node (no children loaded yet).

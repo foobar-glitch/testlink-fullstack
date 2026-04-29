@@ -50,6 +50,11 @@ export class TestSuiteTreeNodeComponent implements OnInit, OnDestroy {
       this.selectedCaseId = params['testcase'] || null;
       this.cdr.markForCheck();
     });
+    if (this.suite.testCases) {
+      this.casesLoaded = true;
+      this.testCases$ = of(this.suite.testCases);
+      this.cdr.markForCheck();
+    }
   }
 
   ngOnDestroy(): void {
@@ -71,7 +76,7 @@ export class TestSuiteTreeNodeComponent implements OnInit, OnDestroy {
   onToggle(event: Event): void {
     event.stopPropagation();
     this.treeState.toggle(this.suite.testSuiteId);
-    if (this.treeState.isExpanded(this.suite.testSuiteId)) {
+    if (this.treeState.isExpanded(this.suite.testSuiteId) && !this.casesLoaded) {
       this.loadCases();
     }
     this.cdr.markForCheck();

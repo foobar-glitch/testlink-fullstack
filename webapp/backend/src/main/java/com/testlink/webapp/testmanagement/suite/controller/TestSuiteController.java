@@ -10,6 +10,7 @@ import com.testlink.webapp.testmanagement.suite.dto.TestSuiteStatsDTO;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.mapper.TestSuiteMapper;
 import com.testlink.webapp.testmanagement.suite.mapper.TestSuiteStatsMapper;
+import com.testlink.webapp.testmanagement.suite.service.TestSuiteHierarchyService;
 import com.testlink.webapp.testmanagement.suite.service.TestSuiteService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static com.testlink.webapp.shared.util.IdUtil.fromBase62;
 
@@ -28,36 +31,48 @@ import static com.testlink.webapp.shared.util.IdUtil.fromBase62;
 public class TestSuiteController {
     private final TestSuiteService testSuiteService;
     private final TestSuiteMapper testSuiteMapper;
+    private final TestSuiteHierarchyService testSuiteHierarchyService;
 
     private final ProjectAccessService projectAccessService;
     private final ProjectService projectService;
 
     private final TestSuiteStatsMapper testSuiteStatsMapper;
 
-    @GetMapping("")
+    @GetMapping("/all")
     public ResponseEntity<List<TestSuiteHierarchyDTO>> getTestSuitesOfProductKey(
             @RequestParam String projectKey,
             @AuthenticationPrincipal CustomUserDetails customUserDetails){
+
         Project project = projectService.getProjectByKey(projectKey);
+
+        projectAccessService.checkAccessOfUserInProject(
+                projectKey, customUserDetails.getUser(), ProjectRole.VIEWER
+        );
+
+        List<TestSuiteHierarchyDTO> hierarchy =
+                testSuiteHierarchyService.getFullHierarchy(project);
+
+        return ResponseEntity.ok(hierarchy);
+    }
+
+    @GetMapping("")
+    public ResponseEntity<List<TestSuiteHierarchyDTO>> getTestSuitesOfProductKeyTestPlan(
+            @RequestParam String projectKey,
+            @RequestParam String testPlan,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        Project project = projectService.getProjectByKey(projectKey);
+
         projectAccessService.checkAccessOfUserInProject(
                 project, customUserDetails.getUser(), ProjectRole.VIEWER
         );
 
-        List<TestSuite> rootTree = testSuiteService.findProjectTestSuiteRootTree(project);
-        List<TestSuiteHierarchyDTO> hierarchyDTO = new ArrayList<>();
+        UUID planUuid = fromBase62(testPlan);
 
-        for(TestSuite item: rootTree){
-            TestSuiteHierarchyDTO itemHierarchyDTO = TestSuiteHierarchyDTO.builder()
-                    .current(testSuiteMapper.toDto(item))
-                    .parent(null)
-                    .children(testSuiteMapper.toDtoList(
-                            testSuiteService.findChildrenOfTestSuiteInProject(project, item)))
-                    .build();
-            hierarchyDTO.add(itemHierarchyDTO);
-        }
+        List<TestSuiteHierarchyDTO> hierarchy =
+                testSuiteHierarchyService.getFilteredHierarchy(project, planUuid);
 
-        return ResponseEntity.ok(hierarchyDTO);
-
+        return ResponseEntity.ok(hierarchy);
     }
 
 
@@ -68,18 +83,35 @@ public class TestSuiteController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         Project project = projectService.getProjectByKey(projectKey);
+
         projectAccessService.checkAccessOfUserInProject(
                 project, customUserDetails.getUser(), ProjectRole.VIEWER
         );
+
         TestSuite testSuite = testSuiteService.findBySuiteId(fromBase62(suiteId));
-        TestSuiteHierarchyDTO hierarchyDTO = TestSuiteHierarchyDTO.builder()
-                .current(testSuiteMapper.toDto(testSuite))
-                .parent(testSuiteMapper.toDto(testSuite.getParentTestSuite()))
-                .children(testSuiteMapper.toDtoList(
-                        testSuiteService.findChildrenOfTestSuiteInProject(project, testSuite))
+
+        List<TestSuiteHierarchyDTO> children = testSuiteService
+                .findChildrenOfTestSuiteInProject(project, testSuite)
+                .stream()
+                .map(child -> TestSuiteHierarchyDTO.builder()
+                        .current(testSuiteMapper.toDto(child))
+                        .parent(testSuiteMapper.toDto(testSuite))
+                        .children(Collections.emptyList())
+                        .testCases(Collections.emptyList())
+                        .build()
                 )
+                .toList();
+
+        TestSuiteHierarchyDTO dto = TestSuiteHierarchyDTO.builder()
+                .current(testSuiteMapper.toDto(testSuite))
+                .parent(testSuite.getParentTestSuite() != null
+                        ? testSuiteMapper.toDto(testSuite.getParentTestSuite())
+                        : null)
+                .children(children)
+                .testCases(Collections.emptyList())
                 .build();
-        return ResponseEntity.ok(hierarchyDTO);
+
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/view/stats")

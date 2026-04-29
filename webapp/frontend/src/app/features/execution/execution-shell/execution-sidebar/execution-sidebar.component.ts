@@ -76,22 +76,23 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
       const project = params['project'] || '';
       const plan = params['plan'] || '';
 
-      if (project !== this.projectKey) {
+      // When project changes (even without a plan), load the available test plans
+      if (project && project !== this.projectKey) {
         this.projectKey = project;
-        if (project) {
-          this.loadSuites(project);
-          this.loadPlans(project);
-        } else {
-          this.allSuites = [];
-          this.filteredSuites = [];
-          this._testPlans$.next([]);
-        }
+        this.loadPlans(project);
       }
 
-      if (plan !== this.planId) {
+      if (project && plan && (project !== this.projectKey || plan !== this.planId)) {
+        this.projectKey = project;
         this.planId = plan;
+        this.loadFilteredSuites(project, plan);
+      } else if (!project || !plan) {
+        this.allSuites = [];
+        this.filteredSuites = [];
+        this.treeState.setTreeData([]);
+        this._suiteLoading$.next(false);
+        this.cdr.markForCheck();
       }
-      this.cdr.markForCheck();
     });
   }
 
@@ -104,6 +105,7 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     this.treeState.expandAll(this.allSuites);
     this.cdr.markForCheck();
   }
+
 
   collapseAll(): void {
     this.treeState.collapseAll();
@@ -166,20 +168,6 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Private helpers ──────────────────────────────────────────────────────
-  private loadSuites(projectKey: string): void {
-    this._suiteLoading$.next(true);
-    this.suitesSvc
-      .getTestSuitesByProjectKey(projectKey)
-      .pipe(catchError(() => of([])))
-      .subscribe((suites) => {
-        this.allSuites = suites;
-        this.filteredSuites = suites;
-        this.treeState.setTreeData(suites);
-        this._suiteLoading$.next(false);
-        this.cdr.markForCheck();
-      });
-  }
 
   private loadPlans(projectKey: string): void {
     this.plansSvc
@@ -269,5 +257,20 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
     } catch (e) {
       // ignore malformed fragment
     }
+  }
+
+  private loadFilteredSuites(projectKey: string, planId: string): void {
+    this._suiteLoading$.next(true);
+    this.suitesSvc.getFilteredSuites(projectKey, planId)
+      .pipe(catchError(() => of([])))
+      .subscribe(suites => {
+        this.allSuites = suites;
+        this.filteredSuites = this.treeSearch.trim()
+          ? this.filterSuites(suites, this.treeSearch.toLowerCase())
+          : suites;
+        this.treeState.setTreeData(suites);
+        this._suiteLoading$.next(false);
+        this.cdr.markForCheck();
+      });
   }
 }

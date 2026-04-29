@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Project, ProjectMembership, ProjectStats } from '../models/project';
@@ -19,13 +19,19 @@ export class ProjectService {
   }
 
   getProjectByKey(projectKey: string): Observable<Project> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
     return this.http.get<Project>(`${this.apiUrl}projects/project-key/${projectKey}`, {
+      params,
       withCredentials: true,
     });
   }
 
   getProjectStats(projectKey: string): Observable<ProjectStats> {
-    return this.http.get<ProjectStats>(`${this.apiUrl}projects/project-key/${projectKey}/stats`, {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+    return this.http.get<ProjectStats>(`${this.apiUrl}projects/project-key/stats`, {
+      params,
       withCredentials: true,
     });
   }

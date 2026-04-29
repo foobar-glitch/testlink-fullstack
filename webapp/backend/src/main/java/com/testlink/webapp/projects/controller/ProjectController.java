@@ -13,10 +13,7 @@ import com.testlink.webapp.user.entity.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -37,19 +34,19 @@ public class ProjectController {
     }
 
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProjectDTO> getProject(@PathVariable Long id) {
-        Project project = projectService.getProjectById(id);
+    @GetMapping("/id")
+    public ResponseEntity<ProjectDTO> getProject(@RequestParam Long projectId) {
+        Project project = projectService.getProjectById(projectId);
         return ResponseEntity.ok(projectMapper.toDto(project));
     }
 
-    @GetMapping("/project-key/{projectKey}")
-    public ResponseEntity<ProjectDTO> getProjectByKey(@PathVariable String projectKey){
+    @GetMapping("/project-key")
+    public ResponseEntity<ProjectDTO> getProjectByKey(@RequestParam String projectKey){
         return ResponseEntity.ok(projectMapper.toDto(projectService.getProjectByKey(projectKey)));
     }
 
-    @GetMapping("/project-key/{projectKey}/stats")
-    public ResponseEntity<ProjectStatsDTO> getProjectStatsOfKey(@PathVariable String projectKey){
+    @GetMapping("/project-key/stats")
+    public ResponseEntity<ProjectStatsDTO> getProjectStatsOfKey(@RequestParam String projectKey){
         Project project = projectService.getProjectByKey(projectKey);
         return ResponseEntity.ok(projectStatsMapper.toDto(projectService.getProjectStatsOfProject(project)));
     }

@@ -64,12 +64,15 @@
       <h4 class="section-title">Settings</h4>
       <div class="frame-section">
         <label class="frame-label">Test Plan</label>
-        <select class="frame-select" [ngModel]="planId" (change)="onPlanChange($event)">
+        <select class="frame-select" [ngModel]="planId" (change)="onPlanChange($event)" *ngIf="(testPlans$ | async)?.length; else planLoading">
           <option value="" disabled>Select plan…</option>
           <option *ngFor="let plan of testPlans$ | async" [value]="plan.testPlanId">
             {{ plan.name }}
           </option>
         </select>
+        <ng-template #planLoading>
+          <span class="frame-hint">Loading plans...</span>
+        </ng-template>
       </div>
       <div class="frame-section">
         <label class="frame-label">Platform</label>
