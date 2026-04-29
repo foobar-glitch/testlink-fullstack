@@ -17,6 +17,14 @@
           <span class="label">Description</span>
           <span class="value">{{ item.testCaseVersion.testCase.description || '—' }}</span>
         </div>
+        <div class="info-row">
+          <span class="label">Environment</span>
+          <span class="value badge">{{ item.testPlanRun.environment || '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Build</span>
+          <span class="value badge">{{ item.testPlanRun.build || '—' }}</span>
+        </div>
       </div>
 
       <div class="section">
