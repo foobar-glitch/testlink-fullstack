@@ -1,0 +1,383 @@
+<div class="explorer">
+
+  <!-- Shared loading template -->
+  <ng-template #loading>
+    <div class="loading-state">
+      <app-spinner label="Loading..."></app-spinner>
+    </div>
+  </ng-template>
+
+  <!-- NO PROJECT SELECTED -->
+  <div class="welcome" *ngIf="(projectKey$ | async) === null">
+    <div class="welcome-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="1.5">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>
+    </div>
+    <h2>Welcome to TestFlow</h2>
+    <p>Select a <strong>project</strong> and <strong>test plan</strong> from the top bar to get started.</p>
+  </div>
+
+  <!-- PROJECT SELECTED, NO PLAN SELECTED ───────────────────────── -->
+  <div class="project-overview" *ngIf="(projectKey$ | async) && !(planId$ | async)">
+    <div class="panel-header">
+      <h1 class="panel-title">Project Overview</h1>
+      <p class="panel-subtitle">{{ (projectName$ | async) || 'Loading...' }}</p>
+    </div>
+
+    <ng-container *ngIf="projectStats$ | async as stats; else statsLoading">
+      <!-- Stat cards -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Test Suites</div>
+          <div class="stat-value">{{ stats.totalTestSuites }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Test Plans</div>
+          <div class="stat-value">{{ stats.totalTestPlans }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Test Cases</div>
+          <div class="stat-value">{{ stats.totalTestCases }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Executions</div>
+          <div class="stat-value">{{ stats.totalExecutions }}</div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card pass">
+          <div class="stat-label">Passed</div>
+          <div class="stat-value">{{ stats.passedCount }}</div>
+          <div class="stat-sub" *ngIf="stats.totalExecutions">
+            {{ pct(stats.passedCount, stats.totalExecutions) }}%
+          </div>
+        </div>
+        <div class="stat-card fail">
+          <div class="stat-label">Failed</div>
+          <div class="stat-value">{{ stats.failedCount }}</div>
+          <div class="stat-sub" *ngIf="stats.totalExecutions">
+            {{ pct(stats.failedCount, stats.totalExecutions) }}%
+          </div>
+        </div>
+        <div class="stat-card block">
+          <div class="stat-label">Blocked</div>
+          <div class="stat-value">{{ stats.blockedCount }}</div>
+          <div class="stat-sub" *ngIf="stats.totalExecutions">
+            {{ pct(stats.blockedCount, stats.totalExecutions) }}%
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Not Run</div>
+          <div class="stat-value">{{ stats.notRunCount }}</div>
+          <div class="stat-sub" *ngIf="stats.totalExecutions">
+            {{ pct(stats.notRunCount, stats.totalExecutions) }}%
+          </div>
+        </div>
+      </div>
+
+      <!-- Last execution -->
+      <div class="last-execution" *ngIf="stats.lastExecutionStatus">
+        <span class="last-label">Last Execution:</span>
+        <app-test-run-status-badge [status]="stats.lastExecutionStatus"></app-test-run-status-badge>
+        <span class="last-date" *ngIf="stats.lastExecutedAt">
+          {{ stats.lastExecutedAt | date:'medium' }}
+        </span>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-card" *ngIf="stats.totalExecutions > 0">
+        <div class="progress-label">Overall Execution Progress</div>
+        <div class="progress-track">
+          <div class="pb pass"   [style.width.%]="pct(stats.passedCount, stats.totalExecutions)"></div>
+          <div class="pb fail"   [style.width.%]="pct(stats.failedCount, stats.totalExecutions)"></div>
+          <div class="pb block"  [style.width.%]="pct(stats.blockedCount, stats.totalExecutions)"></div>
+          <div class="pb notrun" [style.width.%]="pct(stats.notRunCount, stats.totalExecutions)"></div>
+        </div>
+        <div class="progress-legend">
+          <span class="leg pass">Passed {{ pct(stats.passedCount, stats.totalExecutions) }}%</span>
+          <span class="leg fail">Failed {{ pct(stats.failedCount, stats.totalExecutions) }}%</span>
+          <span class="leg block">Blocked {{ pct(stats.blockedCount, stats.totalExecutions) }}%</span>
+          <span class="leg notrun">Not Run {{ pct(stats.notRunCount, stats.totalExecutions) }}%</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #statsLoading>
+      <app-spinner label="Loading project stats..."></app-spinner>
+    </ng-template>
+  </div>
+
+  <!-- CONTENT: project AND plan selected -->
+  <ng-container *ngIf="(projectKey$ | async) && (planId$ | async)">
+
+    <ng-container *ngIf="{
+      projectKey: projectKey$ | async,
+      planId: planId$ | async,
+      suiteId: suiteId$ | async,
+      testCaseId: testCaseId$ | async,
+      versionNumber: versionNumber$ | async,
+      testRunId: testRunId$ | async,
+      activeTab: activeTab$ | async,
+      projectName: projectName$ | async,
+      suiteName: suiteName$ | async,
+      caseLabel: selectedCaseLabel$ | async,
+      testPlan: testPlan$ | async,
+      runItems: runItems$ | async,
+      filteredRunItems: filteredRunItems$ | async,
+      suiteStats: suiteStats$ | async,
+      planStats: planStats$ | async,
+      stepId: stepId$ | async,
+      actionId: actionId$ | async
+    } as vm">
+
+      <nav class="breadcrumb">
+        <!-- Project -->
+        <span class="crumb link" (click)="navigateToProjectOverview()">{{ vm.projectName }}</span>
+        <span class="sep">›</span>
+
+        <!-- Plan -->
+        <span class="crumb link" (click)="navigateToPlanOverview()">{{ planName || 'Plan' }}</span>
+
+        <!-- Suite (if selected) -->
+        <ng-container *ngIf="vm.suiteId">
+          <span class="sep">›</span>
+          <span class="crumb link" (click)="navigateToSuiteOverview(vm.suiteId)">
+            {{ vm.suiteName || 'Suite' }}
+          </span>
+        </ng-container>
+
+        <!-- Test Case (if selected) -->
+        <ng-container *ngIf="vm.testCaseId">
+          <span class="sep">›</span>
+          <span class="crumb link" (click)="navigateToDetails(vm.suiteId, vm.testCaseId)">
+            {{ vm.caseLabel || 'Test Case' }}
+          </span>
+        </ng-container>
+
+        <!-- Version level + deeper tabs -->
+        <ng-container *ngIf="vm.versionNumber">
+          <span class="sep">›</span>
+
+          <ng-container *ngIf="vm.activeTab === 'steps'; else clickableVersion">
+            <span class="crumb current">Version {{ vm.versionNumber }}</span>
+          </ng-container>
+          <ng-template #clickableVersion>
+            <span class="crumb link" (click)="navigateToVersionSteps(vm.versionNumber)">
+              Version {{ vm.versionNumber }}
+            </span>
+          </ng-template>
+
+          <ng-container *ngIf="vm.activeTab === 'runs'">
+            <span class="sep">›</span>
+            <span class="crumb current">Runs</span>
+          </ng-container>
+
+          <ng-container *ngIf="vm.activeTab === 'step-results'">
+            <span class="sep">›</span>
+            <span class="crumb current">Step Results</span>
+          </ng-container>
+
+          <ng-container *ngIf="vm.activeTab === 'step-result-detail'">
+            <span class="sep">›</span>
+            <span class="crumb link" (click)="navigateToStepResults(vm.stepId)">Step Results</span>
+            <span class="sep">›</span>
+            <span class="crumb current">Detail</span>
+          </ng-container>
+        </ng-container>
+      </nav>
+
+      <!-- Tab bar -->
+      <div class="tabs">
+        <ng-container *ngIf="!vm.suiteId">
+          <button class="tab" [class.active]="vm.activeTab === 'overview'" (click)="navigateToPlanOverview()">Overview</button>
+          <button *ngIf="vm.testRunId" class="tab" [class.active]="vm.activeTab === 'run-items'" (click)="navigateToRunItems()">Run Items</button>
+        </ng-container>
+
+        <ng-container *ngIf="vm.suiteId && !vm.testCaseId">
+          <button class="tab" [class.active]="vm.activeTab === 'overview'" (click)="navigateToSuiteOverview(vm.suiteId)">Test Cases</button>
+          <button *ngIf="vm.testRunId" class="tab" [class.active]="vm.activeTab === 'run-items'" (click)="navigateToRunItems()">Run Items</button>
+        </ng-container>
+
+        <ng-container *ngIf="vm.testCaseId && !vm.versionNumber">
+          <button class="tab" [class.active]="vm.activeTab === 'details'" (click)="navigateToDetails(vm.suiteId, vm.testCaseId)">Details</button>
+          <button class="tab" [class.active]="vm.activeTab === 'versions'" (click)="navigateToVersions()">Versions</button>
+        </ng-container>
+
+        <ng-container *ngIf="vm.versionNumber">
+          <button class="tab" [class.active]="vm.activeTab === 'steps'" (click)="navigateToVersionSteps(vm.versionNumber)">Steps</button>
+          <button class="tab" [class.active]="vm.activeTab === 'runs'" (click)="navigateToVersionRuns()">Runs</button>
+        </ng-container>
+      </div>
+
+      <!-- OVERVIEW TAB -->
+      <ng-container *ngIf="vm.activeTab === 'overview'">
+        <ng-container *ngIf="vm.suiteId; else noSuiteSelected">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">{{ vm.suiteName || 'Test Suite' }}</h1>
+              <p class="panel-subtitle">Test cases in this suite</p>
+            </div>
+          </div>
+
+          <ng-container *ngIf="vm.suiteStats as stats">
+            <div class="suite-stats-summary">
+              <div class="stat-item" [class.pass]="stats.passedCount > 0">
+                <span class="stat-value">{{ stats.passedCount }}</span>
+                <span class="stat-label">Passed</span>
+              </div>
+              <div class="stat-item" [class.fail]="stats.failedCount > 0">
+                <span class="stat-value">{{ stats.failedCount }}</span>
+                <span class="stat-label">Failed</span>
+              </div>
+              <div class="stat-item" [class.block]="stats.blockedCount > 0">
+                <span class="stat-value">{{ stats.blockedCount }}</span>
+                <span class="stat-label">Blocked</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ stats.notRunCount }}</span>
+                <span class="stat-label">Not Run</span>
+              </div>
+              <div class="stat-item" *ngIf="stats.lastExecutionStatus">
+                <app-test-run-status-badge [status]="stats.lastExecutionStatus"></app-test-run-status-badge>
+                <span class="stat-label">Last Run</span>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="testCasesForSuite$ | async as cases; else loading">
+            <app-test-case-table [cases]="cases" (caseSelected)="onCaseSelected($event)"></app-test-case-table>
+          </ng-container>
+        </ng-container>
+
+        <!-- NO SUITE SELECTED: Show plan stats (inside vm scope) -->
+        <ng-template #noSuiteSelected>
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">{{ planName || 'Test Plan Overview' }}</h1>
+              <p class="panel-subtitle">{{ vm.testPlan?.description || 'Select a test suite from the sidebar to view test cases.' }}</p>
+            </div>
+          </div>
+
+          <ng-container *ngIf="vm.planStats as stats; else loading">
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-label">Total Test Cases</div>
+                <div class="stat-value">{{ stats.totalTestCases }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Total Executions</div>
+                <div class="stat-value">{{ stats.totalExecutions }}</div>
+              </div>
+              <div class="stat-card pass">
+                <div class="stat-label">Passed</div>
+                <div class="stat-value">{{ stats.passedCount }}</div>
+                <div class="stat-sub">{{ pct(stats.passedCount, stats.totalExecutions) }}%</div>
+              </div>
+              <div class="stat-card fail">
+                <div class="stat-label">Failed</div>
+                <div class="stat-value">{{ stats.failedCount }}</div>
+                <div class="stat-sub">{{ pct(stats.failedCount, stats.totalExecutions) }}%</div>
+              </div>
+              <div class="stat-card block">
+                <div class="stat-label">Blocked</div>
+                <div class="stat-value">{{ stats.blockedCount }}</div>
+                <div class="stat-sub">{{ pct(stats.blockedCount, stats.totalExecutions) }}%</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Not Run</div>
+                <div class="stat-value">{{ stats.notRunCount }}</div>
+                <div class="stat-sub">{{ pct(stats.notRunCount, stats.totalExecutions) }}%</div>
+              </div>
+            </div>
+
+            <div class="progress-card" *ngIf="stats.totalExecutions > 0">
+              <div class="progress-label">Plan Execution Progress</div>
+              <div class="progress-track">
+                <div class="pb pass" [style.width.%]="pct(stats.passedCount, stats.totalExecutions)"></div>
+                <div class="pb fail" [style.width.%]="pct(stats.failedCount, stats.totalExecutions)"></div>
+                <div class="pb block" [style.width.%]="pct(stats.blockedCount, stats.totalExecutions)"></div>
+                <div class="pb notrun" [style.width.%]="pct(stats.notRunCount, stats.totalExecutions)"></div>
+              </div>
+              <div class="progress-legend">
+                <span class="leg pass">Passed {{ pct(stats.passedCount, stats.totalExecutions) }}%</span>
+                <span class="leg fail">Failed {{ pct(stats.failedCount, stats.totalExecutions) }}%</span>
+                <span class="leg block">Blocked {{ pct(stats.blockedCount, stats.totalExecutions) }}%</span>
+                <span class="leg notrun">Not Run {{ pct(stats.notRunCount, stats.totalExecutions) }}%</span>
+              </div>
+            </div>
+
+            <div class="last-execution" *ngIf="stats.lastExecutionStatus">
+              <span class="last-label">Last Execution:</span>
+              <app-test-run-status-badge [status]="stats.lastExecutionStatus"></app-test-run-status-badge>
+              <span class="last-date" *ngIf="stats.lastExecutedAt">
+                {{ stats.lastExecutedAt | date:'medium' }}
+              </span>
+            </div>
+          </ng-container>
+        </ng-template>
+      </ng-container>
+
+      <!-- RUN ITEMS TAB -->
+      <ng-container *ngIf="vm.activeTab === 'run-items'">
+        <div class="run-selector" *ngIf="testRuns$ | async as runs">
+          <span class="run-label">Test Run</span>
+          <select class="run-select" [value]="vm.testRunId" (change)="selectTestRun($any($event.target).value)">
+            <option *ngFor="let run of runs" [value]="run.testPlanRunId">
+              {{ run.name }} {{ run.environment ? '(' + run.environment + ')' : '' }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-bar">
+          <div class="filter-text">
+            <span class="muted">Showing:</span>
+            <ng-container *ngIf="vm.testCaseId">
+              <span class="filter-chip" *ngIf="vm.caseLabel">Test Case: {{ vm.caseLabel }}</span>
+            </ng-container>
+            <ng-container *ngIf="!vm.testCaseId && vm.suiteId">
+              <span class="filter-chip" *ngIf="vm.suiteName">Suite: {{ vm.suiteName }}</span>
+            </ng-container>
+            <span class="filter-chip neutral" *ngIf="!vm.testCaseId && !vm.suiteId">All runs</span>
+          </div>
+          <button class="clear-btn" *ngIf="vm.suiteId || vm.testCaseId" (click)="clearRunFilter()">Clear filter</button>
+        </div>
+
+        <ng-container *ngIf="vm.filteredRunItems as items; else loading">
+          <app-execution-table [items]="items"></app-execution-table>
+        </ng-container>
+      </ng-container>
+
+      <!-- Details, Versions, Steps, etc. -->
+      <ng-container *ngIf="vm.activeTab === 'details'">
+        <app-test-case-detail></app-test-case-detail>
+      </ng-container>
+
+      <ng-container *ngIf="vm.activeTab === 'versions'">
+        <app-test-case-version-list></app-test-case-version-list>
+      </ng-container>
+
+      <ng-container *ngIf="vm.activeTab === 'steps'">
+        <app-test-case-version-content></app-test-case-version-content>
+      </ng-container>
+
+      <ng-container *ngIf="vm.activeTab === 'runs'">
+        <app-test-case-version-runs></app-test-case-version-runs>
+      </ng-container>
+
+      <ng-container *ngIf="vm.activeTab === 'run-detail'">
+        <app-test-case-version-run-detail></app-test-case-version-run-detail>
+      </ng-container>
+
+      <ng-container *ngIf="vm.activeTab === 'step-results'">
+        <app-test-step-result-list></app-test-step-result-list>
+      </ng-container>
+
+      <ng-container *ngIf="vm.activeTab === 'step-result-detail'">
+        <app-test-step-result-detail></app-test-step-result-detail>
+      </ng-container>
+
+    </ng-container>
+  </ng-container>
+</div>

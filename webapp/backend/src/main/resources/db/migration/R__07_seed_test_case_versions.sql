@@ -1,15 +1,75 @@
 -- ======================================================================
 -- R__07_seed_test_case_versions.sql
 -- Populates versioned test case content: versions, content, steps, images.
--- Assumes test_cases with IDs 1, 11, 14 already exist.
--- Includes audit fields (created_by, updated_at) and is fully idempotent.
+-- Ensures version 1 exists for every test case and that every version‑1
+-- has a content row (no more 404 on missing content).
 -- ======================================================================
+
+-- ----------------------------------------------------------------------
+-- Helper: create version 1 for any test case that doesn't yet have it
+-- ----------------------------------------------------------------------
+DO $$
+    DECLARE
+        rec RECORD;
+    BEGIN
+        FOR rec IN
+            SELECT tc.test_case_id
+            FROM test_cases tc
+            WHERE NOT EXISTS (
+                SELECT 1 FROM test_case_versions tcv
+                WHERE tcv.test_case_id = tc.test_case_id AND tcv.version_number = 1
+            )
+            LOOP
+                INSERT INTO test_case_versions (test_case_id, version_number, status, created_by)
+                VALUES (rec.test_case_id, 1, 'ACTIVE', 1)
+                ON CONFLICT (test_case_id, version_number) DO NOTHING;
+            END LOOP;
+    END $$;
+
+-- ----------------------------------------------------------------------
+-- Ensure every version‑1 has at least a basic content row
+-- ----------------------------------------------------------------------
+DO $$
+    DECLARE
+        rec RECORD;
+    BEGIN
+        FOR rec IN
+            SELECT tcv.test_case_version_id, tc.title, tc.description
+            FROM test_case_versions tcv
+                     JOIN test_cases tc ON tc.test_case_id = tcv.test_case_id
+            WHERE tcv.version_number = 1
+              AND NOT EXISTS (
+                SELECT 1 FROM test_case_version_content tvc
+                WHERE tvc.test_case_version_id = tcv.test_case_version_id
+            )
+            LOOP
+                INSERT INTO test_case_version_content (
+                    test_case_version_id,
+                    title,
+                    description,
+                    preconditions,
+                    expected_result,
+                    created_by
+                ) VALUES (
+                             rec.test_case_version_id,
+                             rec.title,
+                             rec.description,
+                             '',
+                             '',
+                             1
+                         )
+                ON CONFLICT (test_case_version_id) DO NOTHING;
+            END LOOP;
+    END $$;
+
+-- NOTE: The existing detailed inserts (for cases 1, 11, 14) remain fully in place.
+-- They are kept below for idempotent re-runs and will override the basic rows
+-- where applicable.
 
 -- ----------------------------------------------------------------------
 -- Test Case 1 (Valid credentials login) – Version 1
 -- ----------------------------------------------------------------------
 WITH
-    -- Ensure the version record exists and capture its ID
     upsert_version AS (
         INSERT INTO test_case_versions (test_case_id, version_number, status, created_by)
             VALUES (1, 1, 'ACTIVE', 1)
@@ -376,3 +436,19 @@ ON CONFLICT (test_case_version_id, file_name) DO UPDATE SET
                                                             alt_text = EXCLUDED.alt_text,
                                                             position = EXCLUDED.position,
                                                             updated_at = NOW();
+
+-- ======================================================================
+-- Customise two test cases for sorting / filtering demos
+-- ======================================================================
+
+-- Test case 1: HIGH priority, created earlier
+UPDATE test_cases
+SET priority = 'HIGH',
+    created_at = '2024-01-20 10:00:00+00'::timestamptz
+WHERE test_case_id = 1;
+
+-- Test case 10: LOW priority, created later
+UPDATE test_cases
+SET priority = 'LOW',
+    created_at = '2024-03-01 14:00:00+00'::timestamptz
+WHERE test_case_id = 10;

@@ -28,6 +28,7 @@ export interface TestSuiteHierarchyDTO {
   current: TestSuiteItem;
   parent: TestSuiteItem | null;
   children: TestSuiteItem[];
+  testCases: TestCase[];          // <-- add this
 }
 
 /**
@@ -36,8 +37,9 @@ export interface TestSuiteHierarchyDTO {
  * `expanded` is UI-only state.
  */
 export interface TestSuite extends TestSuiteItem {
-  children: TestSuite[]; // always populated, never undefined
-  expanded: boolean; // UI state only
+  children: TestSuite[];
+  expanded: boolean;
+  testCases?: TestCase[];
 }
 
 /**
@@ -60,11 +62,19 @@ export interface TestCase {
   title: string;
   description: string;
   status: TestCaseStatus;
+  priority: TestCasePriority;
   stamp: UserCreatedTimeStamp;
 }
 
-export interface TestCaseStats {
-  totalVersions: number;
+export type PriorityFilter = 'any' | TestCasePriority;
+
+export interface TestCaseFilter {
+  priority: PriorityFilter;
+}
+
+export interface TestCasePlanStats {
+  testCaseId: string;          // UUID as string
+  testPlanId: string;          // UUID as string
   totalExecutions: number;
   lastExecutionStatus: TestRunStatus | null;
   lastExecutedAt: string | null;
@@ -77,7 +87,9 @@ export interface TestCaseStats {
 
 export type TestCaseVersionStatus = 'draft' | 'active' | 'deprecated';
 
-export interface TestCaseVersionStats {
+export interface TestCaseVersionPlanStats {
+  testCaseVersionId: string;   // UUID as string
+  testPlanId: string;          // UUID as string
   totalExecutions: number;
   lastExecutionStatus: TestRunStatus | null;
   lastExecutedAt: string | null;
@@ -85,13 +97,12 @@ export interface TestCaseVersionStats {
   failedCount: number;
   blockedCount: number;
   notRunCount: number;
-  avgExecutionTimeMs: number | null;
+  statsUpdatedAt: string;
 }
 
 export interface TestCaseVersion {
   testCaseVersionId: string;
   testCase: TestCase;
-  priority: TestCasePriority;
   versionNumber: number;
   status: TestCaseVersionStatus;
   stamp: UserCreatedTimeStamp;
@@ -121,7 +132,10 @@ export interface TestCaseFormData {
   suiteId: number;
 }
 
-export interface TestSuiteStats {
+export interface TestSuitePlanStats {
+  testSuiteId: string,
+  testPlanId: string,
+  totalChildSuites: number;
   totalTestCases: number;
   totalExecutions: number;
   lastExecutionStatus: TestRunStatus | null;
@@ -132,3 +146,4 @@ export interface TestSuiteStats {
   notRunCount: number;
   startsUpdatedAt: string;  // ISO date string
 }
+

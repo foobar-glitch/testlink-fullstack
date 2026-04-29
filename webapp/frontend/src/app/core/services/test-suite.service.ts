@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { TestSuite, TestSuiteHierarchy, TestSuiteHierarchyDTO, TestSuiteItem, TestSuiteStats } from '../models/testsuite';
+import { TestSuite, TestSuiteHierarchyDTO, TestSuitePlanStats } from '../models/testsuite';
 
 @Injectable({ providedIn: 'root' })
 export class TestSuiteService {
@@ -11,77 +11,66 @@ export class TestSuiteService {
   private readonly apiUrl = environment.apiUrl;
 
   /**
-   * Fetch test suite tree using the project's business key.
-   * Endpoint: GET /projects?projectKey={projectKey}
+   * Fetch suite hierarchy filtered by a specific test plan.
+   * Endpoint: GET /projects/testplan?projectKey={projectKey}&testPlan={testPlan}
    */
-  getTestSuitesByProjectKey(projectKey: string): Observable<TestSuite[]> {
-    const params = new HttpParams().set('projectKey', projectKey);
-    return this.http
-      .get<TestSuiteHierarchyDTO[]>(`${this.apiUrl}projects`, {
-        withCredentials: true,
-        params
-      })
-      .pipe(map(dtos => dtos.map(dto => this.dtoToTreeNode(dto.current, dto.children))));
-  }
-
-  /**
-   * Fetch a single test suite hierarchy by project key and suite ID.
-   * Endpoint: GET /projects/view?projectKey={projectKey}&suiteId={suiteId}
-   */
-  getTestSuiteByProjectKeyAndId(projectKey: string, suiteId: string): Observable<TestSuiteHierarchy> {
+  getFilteredSuites(projectKey: string, testPlan: string): Observable<TestSuite[]> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
-      .set('suiteId', suiteId);
+      .set('testPlan', testPlan);
     return this.http
-      .get<TestSuiteHierarchyDTO>(`${this.apiUrl}projects/view`, {
-        withCredentials: true,
-        params
-      })
+      .get<TestSuiteHierarchyDTO[]>(`${this.apiUrl}test-suites`, { withCredentials: true, params })
       .pipe(
-        map(dto => ({
-          current: this.itemToTreeNode(dto.current),
-          parent: dto.parent ? this.itemToTreeNode(dto.parent) : null,
-          children: (dto.children || []).map(child => this.itemToTreeNode(child)),
-        }))
+        map(dtos => this.buildSuiteTree(dtos))
       );
   }
 
-
-  /**
-   * Convert a flat DTO item and its raw children into a full tree node.
-   */
-  private dtoToTreeNode(item: TestSuiteItem, children: TestSuiteItem[]): TestSuite {
+  private normalizeSuite(node: any): TestSuite {
     return {
-      ...item,
-      children: children.map(child => this.itemToTreeNode(child)),
+      ...node.current,
       expanded: false,
+      testCases: node.testCases ?? [],
+      children: (node.children ?? []).map((child: any) =>
+        this.normalizeSuite(child)
+      )
     };
   }
 
-  /**
-   * Convert a bare TestSuiteItem into a leaf tree node (no children loaded yet).
-   */
-  private itemToTreeNode(item: TestSuiteItem): TestSuite {
-    return {
-      ...item,
-      children: [],
-      expanded: false,
-    };
+  private buildSuiteTree(dtos: TestSuiteHierarchyDTO[]): TestSuite[] {
+    return dtos.map(dto => this.normalizeSuite(dto));
   }
+
 
 
   /**
    * Get statistics for a specific test suite.
    * Endpoint: GET /projects/view/stats?projectKey={projectKey}&suiteId={suiteId}
    */
-  getTestSuiteStats(projectKey: string, suiteId: string): Observable<TestSuiteStats> {
+  getTestSuiteTreeStats(projectKey: string, testPlanId: string, suiteIds: string[]): Observable<TestSuitePlanStats[]> {
+    let params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId);
+
+    // Append each suite ID individually so the backend receives a list
+    suiteIds.forEach(id => {
+      params = params.append('suiteIds', id);
+    });
+
+    return this.http.get<TestSuitePlanStats[]>(`${this.apiUrl}test-suites/view/stats/testplan/tree`, {
+      withCredentials: true,
+      params,
+    });
+  }
+
+  getTestSuiteStats(projectKey: string, testPlanId: string, suiteId: string): Observable<TestSuitePlanStats> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId)
       .set('suiteId', suiteId);
 
-    return this.http.get<TestSuiteStats>(`${this.apiUrl}projects/view/stats`, {
+    return this.http.get<TestSuitePlanStats>(`${this.apiUrl}test-suites/view/stats/testplan`, {
       withCredentials: true,
-      params
+      params,
     });
   }
 }

@@ -4,6 +4,7 @@ import com.testlink.webapp.projects.dto.ProjectDTO;
 import com.testlink.webapp.shared.dto.UserCreatedTimeStampDTO;
 import com.testlink.webapp.testmanagement.suite.dto.TestSuiteItemDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseStatus;
+import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersionPriority;
 import lombok.Builder;
 
 @Builder
@@ -14,6 +15,7 @@ public record TestCaseDTO (
         String title,
         String description,
         TestCaseStatus status,
+        TestCaseVersionPriority priority,
         UserCreatedTimeStampDTO stamp
 )
 {}

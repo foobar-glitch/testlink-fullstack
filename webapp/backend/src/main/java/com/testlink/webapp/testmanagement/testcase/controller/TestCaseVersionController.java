@@ -1,17 +1,21 @@
 package com.testlink.webapp.testmanagement.testcase.controller;
 
+import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
+import com.testlink.webapp.projects.service.ProjectService;
 import com.testlink.webapp.testmanagement.plan.dto.TestPlanRunItemDTO;
+import com.testlink.webapp.testmanagement.plan.entity.TestPlan;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlanRunItem;
 import com.testlink.webapp.testmanagement.plan.mapper.TestPlanRunItemMapper;
 import com.testlink.webapp.testmanagement.plan.service.TestPlanRunItemService;
+import com.testlink.webapp.testmanagement.plan.service.TestPlanService;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionDTO;
-import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionStatsDTO;
+import com.testlink.webapp.testmanagement.testcase.dto.TestCaseVersionPlanStatsDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseVersionMapper;
-import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseVersionStatsMapper;
+import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseVersionPlanStatsMapper;
 import com.testlink.webapp.testmanagement.testcase.service.TestCaseVersionService;
 import com.testlink.webapp.testmanagement.testcase.service.ValidatePathService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
@@ -23,20 +27,24 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.testlink.webapp.shared.util.IdUtil.fromBase62;
+
 @RestController
 @RequestMapping("/test-case-versions")
 @RequiredArgsConstructor
 public class TestCaseVersionController {
+    private final ProjectService projectService;
     private final ProjectAccessService projectAccessService;
 
     private final TestCaseVersionService testCaseVersionService;
     private final TestCaseVersionMapper testCaseVersionMapper;
-    private final TestCaseVersionStatsMapper testCaseVersionStatsMapper;
+    private final TestCaseVersionPlanStatsMapper testCaseVersionPlanStatsMapper;
 
     private final TestPlanRunItemService testPlanRunItemService;
     private final TestPlanRunItemMapper testPlanRunItemMapper;
 
     private final ValidatePathService validatePathService;
+    private final TestPlanService testPlanService;
 
     @GetMapping("")
     public ResponseEntity<List<TestCaseVersionDTO>> getVersions(
@@ -64,19 +72,23 @@ public class TestCaseVersionController {
         return ResponseEntity.ok(testCaseVersionMapper.toDto(testCaseVersion));
     }
 
-    @GetMapping("/view/stats")
-    public ResponseEntity<TestCaseVersionStatsDTO> getStatsOfVersion(
+    @GetMapping("/view/stats/testplan")
+    public ResponseEntity<TestCaseVersionPlanStatsDTO> getStatsOfVersion(
             @RequestParam String projectKey,
+            @RequestParam String testPlanId,
             @RequestParam Long testCaseIdentifier,
             @RequestParam Long versionNumber,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         User user = userDetails.getUser();
-        projectAccessService.checkAccessOfUserInProject(projectKey, user, ProjectRole.VIEWER);
-        TestCaseVersion testCaseVersion = validatePathService.getTestCaseVersion(projectKey, testCaseIdentifier, versionNumber);
+        Project project = projectService.getProjectByKey(projectKey);
+        projectAccessService.checkAccessOfUserInProject(project, user, ProjectRole.VIEWER);
 
-        return ResponseEntity.ok(testCaseVersionStatsMapper.toDto(
-                testCaseVersionService.findTestCaseVersionStatsByTestCaseVersion(testCaseVersion))
+        TestCaseVersion testCaseVersion = validatePathService.getTestCaseVersion(projectKey, testCaseIdentifier, versionNumber);
+        TestPlan testPlan = testPlanService.findByTestPlanId(fromBase62(testPlanId), project);
+
+        return ResponseEntity.ok(testCaseVersionPlanStatsMapper.toDto(
+                testCaseVersionService.findTestCaseVersionStatsByTestCaseVersion(testCaseVersion,testPlan))
         );
     }
 

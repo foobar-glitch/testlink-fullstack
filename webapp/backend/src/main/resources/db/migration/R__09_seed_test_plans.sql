@@ -2,7 +2,7 @@
 -- R__09_seed_test_plans.sql
 -- Populates test plans, runs, run items, and step results with sample data.
 -- Assumes existing data: projects (1-4), users (1-3), test_cases (1-16),
--- and test_case_versions (test_case_id 1,11,14 have versions).
+-- and test_case_versions for each test case (version 1 must exist for all).
 -- Also assumes test_case_version_steps exist for these versions.
 -- ======================================================================
 
@@ -14,7 +14,7 @@ VALUES
     (1, 1, 'Sprint 12 – Regression', 'Full regression after Sprint 12 release', 1),
     (2, 1, 'Hotfix – Checkout Bug', 'Targeted testing after checkout hotfix', 2),
     (3, 1, 'Sprint 13 – Search Module', 'New search feature acceptance tests', 1)
-ON CONFLICT (test_plan_id) DO NOTHING;
+    ON CONFLICT (test_plan_id) DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('test_plans', 'test_plan_id'), (SELECT MAX(test_plan_id) FROM test_plans));
 
@@ -27,7 +27,7 @@ VALUES
     (2, 1, 'Safari – Staging', 'Staging', 'build-12.3.1', 1),
     (3, 2, 'Chrome – Production Hotfix', 'Production', 'hotfix-4.2.0', 2),
     (4, 3, 'Firefox – Dev', 'Development', 'sprint-13-rc1', 1)
-ON CONFLICT (test_plan_run_id) DO NOTHING;
+    ON CONFLICT (test_plan_run_id) DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('test_plan_runs', 'test_plan_run_id'), (SELECT MAX(test_plan_run_id) FROM test_plan_runs));
 
@@ -35,33 +35,46 @@ SELECT setval(pg_get_serial_sequence('test_plan_runs', 'test_plan_run_id'), (SEL
 -- Test Run Items
 -- ----------------------------------------------------------------------
 WITH
-    v1 AS (SELECT test_case_version_id FROM test_case_versions WHERE test_case_id = 1 AND version_number = 1),
-    v2 AS (SELECT test_case_version_id FROM test_case_versions WHERE test_case_id = 1 AND version_number = 2),
-    v11 AS (SELECT test_case_version_id FROM test_case_versions WHERE test_case_id = 11 AND version_number = 1),
-    v14 AS (SELECT test_case_version_id FROM test_case_versions WHERE test_case_id = 14 AND version_number = 1),
-    -- Define which test cases belong to which run along with their version IDs
-    run_item_mapping AS (
-        -- Run 1: Login Flow cases 1-10 (using version 1 for all)
-        SELECT 1 AS run_id, tc.test_case_id, (SELECT test_case_version_id FROM v1) AS version_id
-        FROM generate_series(1,10) AS tc(test_case_id)
-        UNION ALL
-        -- Run 2: Login Flow cases 1-10 (Safari) – version 1
-        SELECT 2, tc.test_case_id, (SELECT test_case_version_id FROM v1)
-        FROM generate_series(1,10) AS tc(test_case_id)
-        UNION ALL
-        -- Run 3: Cart cases 14-16 (version 1) + a couple login (version 1)
-        SELECT 3, 14, (SELECT test_case_version_id FROM v14) UNION ALL
-        SELECT 3, 15, (SELECT test_case_version_id FROM v14) UNION ALL
-        SELECT 3, 16, (SELECT test_case_version_id FROM v14) UNION ALL
-        SELECT 3, 1, (SELECT test_case_version_id FROM v1) UNION ALL
-        SELECT 3, 2, (SELECT test_case_version_id FROM v1)
-        UNION ALL
-        -- Run 4: Search cases 11-13 (version 1)
-        SELECT 4, 11, (SELECT test_case_version_id FROM v11) UNION ALL
-        SELECT 4, 12, (SELECT test_case_version_id FROM v11) UNION ALL
-        SELECT 4, 13, (SELECT test_case_version_id FROM v11)
+    -- Map each test_case_id to its version 1 id
+    version_map AS (
+        SELECT
+            tcv.test_case_id,
+            tcv.test_case_version_id
+        FROM test_case_versions tcv
+        WHERE tcv.version_number = 1
     ),
-    -- Compute status, assigned_to, executed_by, notes based on run_id and test_case_id
+    -- Define which test cases belong to which run
+    run_item_mapping AS (
+        -- Run 1: Login Flow cases 1-10
+        SELECT 1 AS run_id, tc.test_case_id
+        FROM generate_series(1,10) AS tc(test_case_id)
+        UNION ALL
+        -- Run 2: Login Flow cases 1-10 (Safari)
+        SELECT 2, tc.test_case_id
+        FROM generate_series(1,10) AS tc(test_case_id)
+        UNION ALL
+        -- Run 3: Cart cases 14-16 + login 1,2
+        SELECT 3, 14 UNION ALL
+        SELECT 3, 15 UNION ALL
+        SELECT 3, 16 UNION ALL
+        SELECT 3, 1  UNION ALL
+        SELECT 3, 2
+        UNION ALL
+        -- Run 4: Search cases 11-13
+        SELECT 4, 11 UNION ALL
+        SELECT 4, 12 UNION ALL
+        SELECT 4, 13
+    ),
+    -- Join with version_map to get the correct version_id for each test case
+    run_item_with_version AS (
+        SELECT
+            rim.run_id,
+            rim.test_case_id,
+            vm.test_case_version_id AS version_id
+        FROM run_item_mapping rim
+                 JOIN version_map vm ON vm.test_case_id = rim.test_case_id
+    ),
+    -- Compute status, assigned_to, executed_by, notes
     with_status AS (
         SELECT
             run_id,
@@ -115,15 +128,20 @@ WITH
                 WHEN run_id = 3 AND test_case_id = 15 THEN 'Total does not update when currency is EUR'
                 ELSE ''
                 END AS notes
-        FROM run_item_mapping
+        FROM run_item_with_version
     )
 INSERT INTO test_run_items (
-    test_run_id, test_case_id, test_case_version_id,
-    status, assigned_to, executed_by, executed_at, notes, created_by
+    test_run_id,
+    test_case_version_id,
+    status,
+    assigned_to,
+    executed_by,
+    executed_at,
+    notes,
+    created_by
 )
 SELECT
     run_id,
-    test_case_id,
     version_id,
     status,
     assigned_to,
@@ -141,27 +159,24 @@ SELECT
     notes,
     1  -- created_by (admin)
 FROM with_status
-ON CONFLICT (test_run_id, test_case_id) DO UPDATE SET
-                                                      status = EXCLUDED.status,
-                                                      assigned_to = EXCLUDED.assigned_to,
-                                                      executed_by = EXCLUDED.executed_by,
-                                                      executed_at = EXCLUDED.executed_at,
-                                                      notes = EXCLUDED.notes,
-                                                      updated_at = NOW();
+    ON CONFLICT (test_run_id, test_case_version_id) DO UPDATE SET
+    status = EXCLUDED.status,
+                                                           assigned_to = EXCLUDED.assigned_to,
+                                                           executed_by = EXCLUDED.executed_by,
+                                                           executed_at = EXCLUDED.executed_at,
+                                                           notes = EXCLUDED.notes,
+                                                           updated_at = NOW();
 
 SELECT setval(pg_get_serial_sequence('test_run_items', 'test_run_item_id'), (SELECT MAX(test_run_item_id) FROM test_run_items));
 
 -- ----------------------------------------------------------------------
 -- Test Step Results (optional, but adds realistic detail)
 -- ----------------------------------------------------------------------
--- For each run item, we insert step results based on the steps of the corresponding test case version.
--- We'll generate a simplified mapping: if the test case passed, all steps passed; if failed, the last step failed.
 WITH
     run_items_with_steps AS (
         SELECT
             tri.test_run_item_id,
             tri.test_run_id,
-            tri.test_case_id,
             tri.test_case_version_id,
             tri.status AS item_status,
             tvs.step_id,
@@ -172,35 +187,35 @@ WITH
         WHERE tri.status != 'NOT_RUN'   -- only insert steps for executed items
     ),
     step_results_data AS (
-        SELECT
-            test_run_item_id,
-            step_id,
-            CASE
-                WHEN item_status = 'PASSED' THEN 'PASSED'
-                WHEN item_status = 'FAILED' AND step_number = (
-                    SELECT MAX(step_number) FROM test_case_version_steps WHERE test_case_version_id = ris.test_case_version_id
-                ) THEN 'FAILED'   -- only last step fails
-                ELSE 'PASSED'
-                END AS step_status,
-            CASE
-                WHEN item_status = 'FAILED' AND step_number = (
-                    SELECT MAX(step_number) FROM test_case_version_steps WHERE test_case_version_id = ris.test_case_version_id
-                ) THEN 'Actual result did not match expected: ' || expected_result
-                ELSE NULL
-                END AS actual_result,
-            CASE
-                WHEN item_status = 'FAILED' AND step_number = (
-                    SELECT MAX(step_number) FROM test_case_version_steps WHERE test_case_version_id = ris.test_case_version_id
-                ) THEN 'Step failed, see actual result'
-                ELSE NULL
-                END AS notes,
-            CASE
-                WHEN item_status IN ('PASSED','FAILED') THEN
-                    (SELECT executed_at FROM test_run_items WHERE test_run_item_id = ris.test_run_item_id) +
-                    (step_number * interval '5 seconds')
-                ELSE NULL
-                END AS executed_at
-        FROM run_items_with_steps ris
+SELECT
+    test_run_item_id,
+    step_id,
+    CASE
+    WHEN item_status = 'PASSED' THEN 'PASSED'
+    WHEN item_status = 'FAILED' AND step_number = (
+    SELECT MAX(step_number) FROM test_case_version_steps WHERE test_case_version_id = ris.test_case_version_id
+    ) THEN 'FAILED'   -- only last step fails
+    ELSE 'PASSED'
+    END AS step_status,
+    CASE
+    WHEN item_status = 'FAILED' AND step_number = (
+    SELECT MAX(step_number) FROM test_case_version_steps WHERE test_case_version_id = ris.test_case_version_id
+    ) THEN 'Actual result did not match expected: ' || expected_result
+    ELSE NULL
+    END AS actual_result,
+    CASE
+    WHEN item_status = 'FAILED' AND step_number = (
+    SELECT MAX(step_number) FROM test_case_version_steps WHERE test_case_version_id = ris.test_case_version_id
+    ) THEN 'Step failed, see actual result'
+    ELSE NULL
+    END AS notes,
+    CASE
+    WHEN item_status IN ('PASSED','FAILED') THEN
+    (SELECT executed_at FROM test_run_items WHERE test_run_item_id = ris.test_run_item_id) +
+    (step_number * interval '5 seconds')
+    ELSE NULL
+    END AS executed_at
+FROM run_items_with_steps ris
     )
 INSERT INTO test_step_results (
     test_run_item_id,
@@ -224,4 +239,4 @@ SELECT
     NOW(),
     1
 FROM step_results_data
-ON CONFLICT (test_run_item_id, test_case_version_step_id) DO NOTHING;
+    ON CONFLICT (test_run_item_id, test_case_version_step_id) DO NOTHING;

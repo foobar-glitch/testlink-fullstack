@@ -4,6 +4,8 @@ import com.testlink.webapp.projects.dto.ProjectDTO;
 import com.testlink.webapp.shared.dto.UserCreatedTimeStampDTO;
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
 public record TestSuiteItemDTO(
         String testSuiteId,

@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 public record TestPlanRunItemDTO(
         String testRunItemId,
         TestPlanRunDTO testPlanRun,
-        TestCaseDTO testCase,
         TestCaseVersionDTO testCaseVersion,
         UserSummaryDTO assignedTo,
         UserSummaryDTO executedBy,

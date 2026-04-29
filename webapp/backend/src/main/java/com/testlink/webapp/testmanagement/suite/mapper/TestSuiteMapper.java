@@ -16,9 +16,6 @@ import java.util.List;
 )
 public abstract class TestSuiteMapper extends BaseAuditMapper {
     @Mapping(target = "testSuiteId", source = "publicId")
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "description", source = "description")
-    @Mapping(target = "project", source = "project")
     @Mapping(target = "stamp", expression = "java(mapAudit(testSuite))")
     public abstract TestSuiteItemDTO toDto(TestSuite testSuite);
 

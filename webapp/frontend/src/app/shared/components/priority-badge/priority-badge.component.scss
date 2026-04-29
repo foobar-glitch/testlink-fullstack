@@ -3,7 +3,8 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px;
+  gap: 5px;                     // space between dot and text
+  padding: 5px 12px;            // a little taller
   border-radius: vars.$radius-pill;
   font-size: 11px;
   font-weight: 700;
@@ -11,22 +12,42 @@
   letter-spacing: 0.4px;
   border: 1px solid transparent;
   white-space: nowrap;
+  background-clip: padding-box;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);   // subtle lift
+  transition: all 0.15s ease;
+
+  // optional: a small coloured dot before the text
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
 
   &.high {
-    background: rgba(#d94040, 0.10);
-    color: #b02828;
-    border-color: rgba(#d94040, 0.25);
+    background: rgba(vars.$color-danger, 0.10);
+    color: vars.$color-danger;
+    border-color: rgba(vars.$color-danger, 0.25);
   }
 
   &.medium {
-    background: rgba(#c49a00, 0.10);
-    color: #9a7800;
-    border-color: rgba(#c49a00, 0.25);
+    background: rgba(vars.$color-warning, 0.10);
+    color: vars.$color-warning;
+    border-color: rgba(vars.$color-warning, 0.25);
   }
 
   &.low {
-    background: rgba(#18a76a, 0.10);
-    color: #0d7a4e;
-    border-color: rgba(#18a76a, 0.25);
+    background: rgba(vars.$color-success, 0.10);
+    color: vars.$color-success;
+    border-color: rgba(vars.$color-success, 0.25);
+  }
+
+  // hover effect only if the badge is inside something clickable
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   }
 }

@@ -4,6 +4,7 @@ package com.testlink.webapp.testmanagement.plan.repository;
 import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlanRun;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlanRunItem;
+import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -37,4 +38,18 @@ public interface TestPlanRunItemRepository  extends JpaRepository<TestPlanRunIte
             @Param("version") TestCaseVersion version,
             @Param("planId") UUID planId
     );
+
+    @Query("""
+    SELECT DISTINCT tc FROM TestPlanRunItem tri
+    JOIN tri.testPlanRun run
+    JOIN run.testPlan plan
+    JOIN tri.testCaseVersion cv
+    JOIN cv.testCase tc
+    JOIN FETCH tc.testSuite
+    WHERE plan.publicId = :planId
+""")
+    List<TestCase> findAllTestCasesByPlanId(@Param("planId") UUID planId);
+
+
+
 }

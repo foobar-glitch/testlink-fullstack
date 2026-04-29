@@ -16,7 +16,6 @@ import java.util.List;
 )
 public abstract class TestPlanMapper extends BaseAuditMapper {
     @Mapping(target = "testPlanId", source = "publicId")
-    @Mapping(target = "project", source = "project")
     @Mapping(target = "stamp", expression = "java(mapAudit(testPlan))")
     public abstract TestPlanDTO toDto(TestPlan testPlan);
 

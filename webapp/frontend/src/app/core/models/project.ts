@@ -1,6 +1,7 @@
 // ─── Project ─────────────────────────────────────────────────────────────────
 import { UserSummary } from './authentication';
 import { UserCreatedTimeStamp } from './tablemetadata';
+import { TestRunStatus } from './testexecution';
 
 export interface Project {
   projectId: string;
@@ -21,7 +22,15 @@ export interface ProjectMembership {
 // TODO projectStats like testCaseStats
 // SuiteStats
 export interface ProjectStats {
-  suiteCount: number;
-  testCaseCount: number;
-  testRunCount: number;
+  totalTestSuites: number;
+  totalTestPlans: number;
+  totalTestCases: number;
+  totalExecutions: number;
+  lastExecutionStatus: TestRunStatus | null;
+  lastExecutedAt: string | null;
+  passedCount: number;
+  failedCount: number;
+  blockedCount: number;
+  notRunCount: number;
+  startsUpdatedAt: string; // note: backend field name is "startsUpdatedAt" (typo, but keep same)
 }

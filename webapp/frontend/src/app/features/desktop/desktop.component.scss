@@ -1,0 +1,143 @@
+// ─── desktop.component.scss ──────────────────────────────────────────────────
+@use '../../shared/styles/variables' as vars;
+
+:host { display: block; }
+
+.desktop {
+  padding: 28px 32px;
+  max-width: 1200px;
+}
+
+// ── Page heading ──────────────────────────────────────────────────────────────
+.desktop-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid vars.$border;
+}
+
+.desktop-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: vars.$text;
+  margin: 0;
+}
+
+.desktop-sub {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: vars.$muted;
+  background: vars.$page-bg;
+  border: 1px solid vars.$border;
+  padding: 4px 10px;
+  border-radius: vars.$radius-pill;
+
+  svg { flex-shrink: 0; color: vars.$accent; }
+}
+
+// ── Module grid ───────────────────────────────────────────────────────────────
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+// ── Module card ───────────────────────────────────────────────────────────────
+.module-card {
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+  overflow: hidden;
+  box-shadow: vars.$shadow-sm;
+  transition: box-shadow 0.15s;
+
+  &:hover { box-shadow: vars.$shadow-md; }
+}
+
+.module-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 2px solid vars.$border;
+  background: vars.$page-bg;
+}
+
+.module-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: vars.$radius-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg { display: block; }
+
+  &--plan     { background: rgba(108, 99, 255, 0.12); color: #6c63ff; }
+  &--spec     { background: rgba(34, 197, 94,  0.12); color: #16a34a; }
+  &--exec     { background: rgba(249, 115, 22, 0.12); color: #ea580c; }
+  &--req      { background: rgba(59, 130, 246,  0.12); color: #2563eb; }
+  &--reports  { background: rgba(168, 85, 247,  0.12); color: #9333ea; }
+  &--system   { background: rgba(100, 116, 139, 0.12); color: #475569; }
+}
+
+.module-title {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: vars.$text;
+  margin: 0;
+}
+
+// ── Module link list ──────────────────────────────────────────────────────────
+.module-links {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.module-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: vars.$accent;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+  cursor: pointer;
+
+  &:hover {
+    background: vars.$accent-soft;
+    color: vars.$accent-dark;
+  }
+
+  &--disabled {
+    color: vars.$muted;
+    cursor: default;
+    pointer-events: none;
+
+    &:hover { background: none; }
+  }
+}
+
+.link-badge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: vars.$border;
+  color: vars.$muted;
+  padding: 2px 6px;
+  border-radius: vars.$radius-pill;
+  flex-shrink: 0;
+}

@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { TestCase, TestCaseStats } from '../models/testsuite';
+import { TestCase, TestCasePlanStats } from '../models/testsuite';
 
 @Injectable({ providedIn: 'root' })
 export class TestCaseService {
@@ -39,13 +39,18 @@ export class TestCaseService {
   }
 
 
-  getTestCaseStats(projectKey: string, testCaseIdentifier: number): Observable<TestCaseStats> {
+  getTestCaseStats(
+    projectKey: string,
+    testPlanId: string,       // new parameter
+    testCaseIdentifier: number
+  ): Observable<TestCasePlanStats> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId)   // include plan id
       .set('testCaseIdentifier', testCaseIdentifier.toString());
-    return this.http.get<TestCaseStats>(`${this.apiUrl}testcases/view/stats`, {
+    return this.http.get<TestCasePlanStats>(`${this.apiUrl}testcases/view/stats/testplan`, {
       withCredentials: true,
-      params
+      params,
     });
   }
 }

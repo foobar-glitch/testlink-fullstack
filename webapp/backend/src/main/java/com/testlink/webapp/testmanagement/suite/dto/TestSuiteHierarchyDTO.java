@@ -1,5 +1,6 @@
 package com.testlink.webapp.testmanagement.suite.dto;
 
+import com.testlink.webapp.testmanagement.testcase.dto.TestCaseDTO;
 import lombok.Builder;
 
 import java.util.List;
@@ -8,6 +9,6 @@ import java.util.List;
 public record TestSuiteHierarchyDTO(
         TestSuiteItemDTO current,
         TestSuiteItemDTO parent,
-        List<TestSuiteItemDTO> children
-        )
-{}
+        List<TestSuiteHierarchyDTO> children,
+        List<TestCaseDTO> testCases
+) {}

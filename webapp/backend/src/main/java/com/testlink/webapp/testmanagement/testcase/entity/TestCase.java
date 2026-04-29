@@ -6,6 +6,8 @@ import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -46,4 +48,16 @@ public class TestCase extends UserCreatedTimeStampedEntity {
     @Column(name = "status", nullable = false)
     private TestCaseStatus status = TestCaseStatus.ACTIVE;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "priority", nullable = false)
+    private TestCaseVersionPriority priority = TestCaseVersionPriority.MEDIUM;
+
+    @Builder.Default
+    @OneToMany(
+            mappedBy = "testCase",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private Set<TestCaseVersion> versions = new HashSet<>();
 }
