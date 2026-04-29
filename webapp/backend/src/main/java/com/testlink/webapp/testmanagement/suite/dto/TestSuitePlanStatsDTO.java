@@ -3,11 +3,10 @@ package com.testlink.webapp.testmanagement.suite.dto;
 import com.testlink.webapp.testmanagement.plan.entity.TestRunStatus;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-public record TestSuiteStatsDTO(
-        UUID testSuiteId,
-        UUID planId,
+public record TestSuitePlanStatsDTO(
+        String testSuiteId,
+        String testPlanId,
         Integer totalChildSuites,
         Integer totalTestCases,
         Integer totalExecutions,

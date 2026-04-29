@@ -14,8 +14,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 import { PriorityBadgeComponent } from '../../../../shared/components/priority-badge/priority-badge.component';
 import { TestRunStatusBadgeComponent } from '../../../../shared/components/test-run-status-badge/test-run-status-badge.component';
 
-import { TestCasePriority, TestCaseVersionContent } from '../../../../core/models/testsuite';
-import { TestCaseVersionStats } from '../../../../core/models/testsuite';
+import { TestCasePriority, TestCaseVersionContent, TestCaseVersionPlanStats } from '../../../../core/models/testsuite';
 import { TestCaseVersionStep } from '../../../../core/models/testexecution';
 
 @Component({
@@ -49,11 +48,13 @@ export class TestCaseVersionContentComponent implements OnInit {
   content$!: Observable<TestCaseVersionContent>;
   testCaseTitle$!: Observable<string>;
   steps$!: Observable<TestCaseVersionStep[]>;
-  stats$!: Observable<TestCaseVersionStats>;
+  stats$!: Observable<TestCaseVersionPlanStats>;
   errorMessage = '';
   testCasePriority$!: Observable<TestCasePriority>;
 
-  private readonly EMPTY_STATS: TestCaseVersionStats = {
+  private readonly EMPTY_STATS: TestCaseVersionPlanStats = {
+    testCaseVersionId: '',
+    testPlanId: '',
     totalExecutions: 0,
     lastExecutionStatus: null,
     lastExecutedAt: null,
@@ -61,7 +62,7 @@ export class TestCaseVersionContentComponent implements OnInit {
     failedCount: 0,
     blockedCount: 0,
     notRunCount: 0,
-    avgExecutionTimeMs: null,
+    statsUpdatedAt: '',
   };
 
   ngOnInit(): void {
@@ -124,13 +125,14 @@ export class TestCaseVersionContentComponent implements OnInit {
     this.stats$ = this.route.queryParams.pipe(
       switchMap((params) => {
         const project = params['project'];
+        const plan = params['plan'];        // plan id
         const testcase = params['testcase'];
         const version = params['version'];
-        if (!project || !testcase || !version) {
+        if (!project || !plan || !testcase || !version) {
           return of(this.EMPTY_STATS);
         }
         return this.versionService
-          .getVersionStats(project, +testcase, +version)
+          .getVersionStats(project, plan, +testcase, +version)  // pass plan
           .pipe(catchError(() => of(this.EMPTY_STATS)));
       }),
     );
@@ -141,7 +143,7 @@ export class TestCaseVersionContentComponent implements OnInit {
     return Math.round((n / total) * 100);
   }
 
-  barTitle(stats: TestCaseVersionStats): string {
+  barTitle(stats: TestCaseVersionPlanStats): string {
     return `Passed: ${stats.passedCount} · Failed: ${stats.failedCount} · Blocked: ${stats.blockedCount} · Not Run: ${stats.notRunCount}`;
   }
 

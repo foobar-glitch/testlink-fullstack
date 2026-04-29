@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { TestCaseVersion, TestCaseVersionStats } from '../models/testsuite';
+import { TestCaseVersion, TestCaseVersionPlanStats } from '../models/testsuite';
 import { TestPlanRunItem } from '../models/testexecution';
 
 @Injectable({ providedIn: 'root' })
@@ -52,14 +52,16 @@ export class TestCaseVersionService {
    */
   getVersionStats(
     projectKey: string,
+    testPlanId: string,       // new parameter
     testCaseIdentifier: number,
     versionNumber: number,
-  ): Observable<TestCaseVersionStats> {
+  ): Observable<TestCaseVersionPlanStats> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId)   // include plan id
       .set('testCaseIdentifier', testCaseIdentifier.toString())
       .set('versionNumber', versionNumber.toString());
-    return this.http.get<TestCaseVersionStats>(`${this.apiUrl}test-case-versions/view/stats`, {
+    return this.http.get<TestCaseVersionPlanStats>(`${this.apiUrl}test-case-versions/view/stats/testplan`, {
       withCredentials: true,
       params,
     });

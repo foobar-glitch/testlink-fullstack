@@ -1,7 +1,6 @@
 package com.testlink.webapp.testmanagement.suite.repository;
 
 import com.testlink.webapp.testmanagement.plan.entity.TestPlan;
-import com.testlink.webapp.testmanagement.suite.dto.TestSuiteStatsProjection;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuitePlanStats;
 import org.springframework.data.jpa.repository.JpaRepository;

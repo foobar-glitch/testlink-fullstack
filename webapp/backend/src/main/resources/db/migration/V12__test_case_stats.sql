@@ -1,15 +1,17 @@
 -- =============================================================================
--- V12__test_case_stats.sql
--- Statistics table and triggers for test cases.
--- Aggregates over all versions of a test case.
+-- V12__test_case_plan_stats.sql
+-- Statistics table and triggers for test cases, scoped per test plan.
+-- Replaces the global test_case_stats with plan-dependent stats,
+-- analogous to test_suite_plan_stats.
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
--- 1. Stats table (one-to-one with test_cases)
+-- 2. New plan-scoped table
 -- -----------------------------------------------------------------------------
-CREATE TABLE test_case_stats (
-    test_case_id BIGINT PRIMARY KEY,
-    total_versions INT NOT NULL DEFAULT 0,
+CREATE TABLE test_case_plan_stats (
+    test_case_id UUID NOT NULL,
+    test_plan_id UUID NOT NULL,
+
     total_executions INT NOT NULL DEFAULT 0,
     last_execution_status VARCHAR(20),
     last_executed_at TIMESTAMPTZ,
@@ -19,166 +21,156 @@ CREATE TABLE test_case_stats (
     not_run_count INT NOT NULL DEFAULT 0,
     stats_updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_case_stats_case
-        FOREIGN KEY (test_case_id) REFERENCES test_cases(test_case_id) ON DELETE CASCADE,
-    CONSTRAINT chk_case_last_execution_status
+    PRIMARY KEY (test_case_id, test_plan_id),
+
+    CONSTRAINT fk_tcps_case
+        FOREIGN KEY (test_case_id) REFERENCES test_cases(public_uuid) ON DELETE CASCADE,
+    CONSTRAINT fk_tcps_plan
+        FOREIGN KEY (test_plan_id) REFERENCES test_plans(public_uuid) ON DELETE CASCADE,
+    CONSTRAINT chk_tcps_status
         CHECK (last_execution_status IN ('NOT_RUN', 'PASSED', 'FAILED', 'BLOCKED', 'SKIPPED'))
 );
 
-CREATE INDEX idx_case_stats_status ON test_case_stats(last_execution_status);
-CREATE INDEX idx_case_stats_updated ON test_case_stats(stats_updated_at);
+CREATE INDEX idx_tcps_case ON test_case_plan_stats(test_case_id);
+CREATE INDEX idx_tcps_plan ON test_case_plan_stats(test_plan_id);
 
 -- -----------------------------------------------------------------------------
--- 2. Trigger: create an empty stats row when a new test case is inserted
+-- 3. Recalculation function for a single (test_case, test_plan) pair
 -- -----------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION create_test_case_stats()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    INSERT INTO test_case_stats (test_case_id)
-    VALUES (NEW.test_case_id);
-    RETURN NEW;
-END;
-$$;
-
-CREATE TRIGGER trg_create_case_stats
-    AFTER INSERT ON test_cases
-    FOR EACH ROW
-    EXECUTE FUNCTION create_test_case_stats();
-
--- -----------------------------------------------------------------------------
--- 3. Function: recalculate test case stats from all versions
--- -----------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION recalculate_test_case_stats(p_case_id BIGINT)
+CREATE OR REPLACE FUNCTION recalc_test_case_plan_stats(
+    p_case_uuid UUID,
+    p_plan_uuid UUID
+)
 RETURNS VOID
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_total_versions INT;
-    v_total_executions INT;
-    v_last_status VARCHAR(20);
-    v_last_executed_at TIMESTAMPTZ;
+    v_total INT;
     v_passed INT;
     v_failed INT;
     v_blocked INT;
     v_not_run INT;
+    v_last_status VARCHAR(20);
+    v_last_exec_at TIMESTAMPTZ;
 BEGIN
-    -- Count versions
-    SELECT COUNT(*) INTO v_total_versions
-    FROM test_case_versions
-    WHERE test_case_id = p_case_id;
-
-    -- Aggregate from version stats
+    -- Aggregate all run items for this test case within the given plan
     SELECT
-        COALESCE(SUM(tcvs.total_executions), 0),
-        COALESCE(SUM(tcvs.passed_count), 0),
-        COALESCE(SUM(tcvs.failed_count), 0),
-        COALESCE(SUM(tcvs.blocked_count), 0),
-        COALESCE(SUM(tcvs.not_run_count), 0)
+        COUNT(*),
+        COUNT(*) FILTER (WHERE tri.status = 'PASSED'),
+        COUNT(*) FILTER (WHERE tri.status = 'FAILED'),
+        COUNT(*) FILTER (WHERE tri.status = 'BLOCKED'),
+        COUNT(*) FILTER (WHERE tri.status = 'NOT_RUN')
     INTO
-        v_total_executions,
+        v_total,
         v_passed,
         v_failed,
         v_blocked,
         v_not_run
-    FROM test_case_version_stats tcvs
-    INNER JOIN test_case_versions tcv ON tcvs.test_case_version_id = tcv.test_case_version_id
-    WHERE tcv.test_case_id = p_case_id;
-
-    -- Latest execution across all versions
-    SELECT tri.status, tri.executed_at
-    INTO v_last_status, v_last_executed_at
     FROM test_run_items tri
-    INNER JOIN test_case_versions tcv ON tri.test_case_version_id = tcv.test_case_version_id
-    WHERE tcv.test_case_id = p_case_id
+    JOIN test_plan_runs tpr ON tri.test_run_id = tpr.test_plan_run_id
+    JOIN test_plans tp ON tpr.test_plan_id = tp.test_plan_id
+    JOIN test_case_versions tcv ON tri.test_case_version_id = tcv.test_case_version_id
+    JOIN test_cases tc ON tcv.test_case_id = tc.test_case_id
+    WHERE tp.public_uuid = p_plan_uuid
+      AND tc.public_uuid = p_case_uuid;
+
+    -- Latest execution (if any)
+    SELECT tri.status, tri.executed_at
+    INTO v_last_status, v_last_exec_at
+    FROM test_run_items tri
+    JOIN test_plan_runs tpr ON tri.test_run_id = tpr.test_plan_run_id
+    JOIN test_plans tp ON tpr.test_plan_id = tp.test_plan_id
+    JOIN test_case_versions tcv ON tri.test_case_version_id = tcv.test_case_version_id
+    JOIN test_cases tc ON tcv.test_case_id = tc.test_case_id
+    WHERE tp.public_uuid = p_plan_uuid
+      AND tc.public_uuid = p_case_uuid
       AND tri.executed_at IS NOT NULL
     ORDER BY tri.executed_at DESC
     LIMIT 1;
 
-    UPDATE test_case_stats
-    SET
-        total_versions = v_total_versions,
-        total_executions = v_total_executions,
-        passed_count = v_passed,
-        failed_count = v_failed,
-        blocked_count = v_blocked,
-        not_run_count = v_not_run,
-        last_execution_status = v_last_status,
-        last_executed_at = v_last_executed_at,
-        stats_updated_at = CURRENT_TIMESTAMP
-    WHERE test_case_id = p_case_id;
+    INSERT INTO test_case_plan_stats AS t (
+        test_case_id, test_plan_id,
+        total_executions, passed_count, failed_count, blocked_count, not_run_count,
+        last_execution_status, last_executed_at, stats_updated_at
+    )
+    VALUES (
+        p_case_uuid, p_plan_uuid,
+        v_total, v_passed, v_failed, v_blocked, v_not_run,
+        v_last_status, v_last_exec_at, CURRENT_TIMESTAMP
+    )
+    ON CONFLICT (test_case_id, test_plan_id)
+    DO UPDATE SET
+        total_executions = EXCLUDED.total_executions,
+        passed_count = EXCLUDED.passed_count,
+        failed_count = EXCLUDED.failed_count,
+        blocked_count = EXCLUDED.blocked_count,
+        not_run_count = EXCLUDED.not_run_count,
+        last_execution_status = EXCLUDED.last_execution_status,
+        last_executed_at = EXCLUDED.last_executed_at,
+        stats_updated_at = EXCLUDED.stats_updated_at;
 END;
 $$;
 
 -- -----------------------------------------------------------------------------
--- 4. Trigger: update test case stats when version stats change
+-- 4. Trigger on test_run_items to keep plan-scoped stats up to date
 -- -----------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION update_case_stats_on_version_stats_change()
+CREATE OR REPLACE FUNCTION update_test_case_plan_stats_on_run_item()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_case_id BIGINT;
-BEGIN
-    SELECT tcv.test_case_id INTO v_case_id
-    FROM test_case_versions tcv
-    WHERE tcv.test_case_version_id = NEW.test_case_version_id;
-
-    IF v_case_id IS NOT NULL THEN
-        PERFORM recalculate_test_case_stats(v_case_id);
-    END IF;
-
-    RETURN NULL;
-END;
-$$;
-
-CREATE TRIGGER trg_update_case_stats_on_version_stats
-    AFTER UPDATE OF total_executions, passed_count, failed_count, blocked_count,
-                  not_run_count, last_execution_status, last_executed_at
-    ON test_case_version_stats
-    FOR EACH ROW
-    EXECUTE FUNCTION update_case_stats_on_version_stats_change();
-
--- -----------------------------------------------------------------------------
--- 5. Trigger: update test case stats when a new version is created or deleted
--- -----------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION update_case_stats_on_version_change()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    v_case_id BIGINT;
+    v_case_uuid UUID;
+    v_plan_uuid UUID;
 BEGIN
     IF (TG_OP = 'DELETE') THEN
-        v_case_id := OLD.test_case_id;
+        SELECT tc.public_uuid, tp.public_uuid
+        INTO v_case_uuid, v_plan_uuid
+        FROM test_run_items tri
+        JOIN test_case_versions tcv ON tri.test_case_version_id = tcv.test_case_version_id
+        JOIN test_cases tc ON tcv.test_case_id = tc.test_case_id
+        JOIN test_plan_runs tpr ON tri.test_run_id = tpr.test_plan_run_id
+        JOIN test_plans tp ON tpr.test_plan_id = tp.test_plan_id
+        WHERE tri.test_run_item_id = OLD.test_run_item_id;
     ELSE
-        v_case_id := NEW.test_case_id;
+        SELECT tc.public_uuid, tp.public_uuid
+        INTO v_case_uuid, v_plan_uuid
+        FROM test_run_items tri
+        JOIN test_case_versions tcv ON tri.test_case_version_id = tcv.test_case_version_id
+        JOIN test_cases tc ON tcv.test_case_id = tc.test_case_id
+        JOIN test_plan_runs tpr ON tri.test_run_id = tpr.test_plan_run_id
+        JOIN test_plans tp ON tpr.test_plan_id = tp.test_plan_id
+        WHERE tri.test_run_item_id = NEW.test_run_item_id;
     END IF;
 
-    PERFORM recalculate_test_case_stats(v_case_id);
+    IF v_case_uuid IS NOT NULL AND v_plan_uuid IS NOT NULL THEN
+        PERFORM recalc_test_case_plan_stats(v_case_uuid, v_plan_uuid);
+    END IF;
+
     RETURN NULL;
 END;
 $$;
 
-CREATE TRIGGER trg_update_case_stats_on_version
-    AFTER INSERT OR DELETE
-    ON test_case_versions
+CREATE TRIGGER trg_update_test_case_plan_stats
+    AFTER INSERT OR UPDATE OF status, executed_at OR DELETE
+    ON test_run_items
     FOR EACH ROW
-    EXECUTE FUNCTION update_case_stats_on_version_change();
+    EXECUTE FUNCTION update_test_case_plan_stats_on_run_item();
 
 -- -----------------------------------------------------------------------------
--- 6. Initialize stats for existing test cases
+-- 5. Initialise stats for all existing test cases and plans
 -- -----------------------------------------------------------------------------
 DO $$
 DECLARE
-    r RECORD;
+    rec RECORD;
 BEGIN
-    FOR r IN SELECT test_case_id FROM test_cases LOOP
-        INSERT INTO test_case_stats (test_case_id)
-        VALUES (r.test_case_id)
-        ON CONFLICT (test_case_id) DO NOTHING;
-
-        PERFORM recalculate_test_case_stats(r.test_case_id);
+    FOR rec IN
+        SELECT DISTINCT tc.public_uuid AS case_uuid, tp.public_uuid AS plan_uuid
+        FROM test_run_items tri
+        JOIN test_case_versions tcv ON tri.test_case_version_id = tcv.test_case_version_id
+        JOIN test_cases tc ON tcv.test_case_id = tc.test_case_id
+        JOIN test_plan_runs tpr ON tri.test_run_id = tpr.test_plan_run_id
+        JOIN test_plans tp ON tpr.test_plan_id = tp.test_plan_id
+    LOOP
+        PERFORM recalc_test_case_plan_stats(rec.case_uuid, rec.plan_uuid);
     END LOOP;
 END $$;

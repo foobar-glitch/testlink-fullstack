@@ -32,7 +32,7 @@ import { TestCaseVersionRunsComponent } from '../details/test-case-version-runs/
 import { TestCaseVersionRunDetailComponent } from '../details/test-case-version-run-detail/test-case-version-run-detail.component';
 import { TestStepResultListComponent } from '../details/test-step-result-list/test-step-result-list.component';
 import { TestStepResultDetailComponent } from '../details/test-step-result-detail/test-step-result-detail.component';
-import { TestCase, TestSuiteStats } from '../../../core/models/testsuite';
+import { TestCase, TestSuitePlanStats } from '../../../core/models/testsuite';
 import { TestCaseService } from '../../../core/services/test-case.service';
 
 type ExplorerTab =
@@ -83,7 +83,7 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
   private projectService = inject(ProjectService);
 
   testCasesForSuite$: Observable<TestCase[]> = of([]);
-  suiteStats$: Observable<TestSuiteStats | null> = of(null);
+  suiteStats$: Observable<TestSuitePlanStats | null> = of(null);
   planStats$: Observable<TestPlanStats | null> = of(null);
 
   // State derived from query parameters (READ ONLY)
@@ -176,7 +176,16 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       combineLatest([this.projectKey$, this.planId$, this.suiteId$]).subscribe(([projectKey, planId, suiteId]) => {
         if (projectKey && suiteId) {
           this.loadTestCasesForSuite(projectKey, suiteId);
-          this.loadSuiteStats(projectKey, planId, suiteId);
+          this.suiteStats$ = combineLatest([this.projectKey$, this.planId$, this.suiteId$]).pipe(
+            switchMap(([projectKey, planId, suiteId]) => {
+              if (projectKey && planId && suiteId) {
+                return this.suitesSvc.getTestSuiteStats(projectKey, planId, suiteId).pipe(
+                  catchError(() => of(null))
+                );
+              }
+              return of(null);
+            })
+          );
         } else {
           this.testCasesForSuite$ = of([]);
           this.suiteStats$ = of(null);
@@ -306,14 +315,6 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
     this.testCasesForSuite$ = this.casesSvc
       .getTestCases(projectKey, suiteId)
       .pipe(catchError(() => of([])));
-  }
-
-  private loadSuiteStats(projectKey: string, planId: string, suiteId: string): void {
-    this.suiteStats$ = this.suitesSvc
-      .getTestSuiteStats(projectKey, planId, suiteId)
-      .pipe(
-        catchError(() => of(null))
-      );
   }
 
   private loadPlanStats(projectKey: string, planId: string): void {

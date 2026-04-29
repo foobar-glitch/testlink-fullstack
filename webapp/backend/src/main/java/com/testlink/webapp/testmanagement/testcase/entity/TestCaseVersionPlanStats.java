@@ -1,27 +1,45 @@
 package com.testlink.webapp.testmanagement.testcase.entity;
 
 
+import com.testlink.webapp.testmanagement.plan.entity.TestPlan;
 import com.testlink.webapp.testmanagement.plan.entity.TestRunStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
+
 @Entity
-@Table(name = "test_case_version_stats")
+@Table(name = "test_case_version_plan_stats")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TestCaseVersionStats {
+public class TestCaseVersionPlanStats {
 
-    @Id
-    private Long testCaseVersionId;   // shared PK with TestCaseVersion
+    @EmbeddedId
+    private TestCaseVersionPlanStatsId id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "test_case_version_id")
+    @MapsId("testCaseVersionId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "test_case_version_id",
+            referencedColumnName = "public_uuid",
+            insertable = false,
+            updatable = false
+    )
     private TestCaseVersion testCaseVersion;
+
+    @MapsId("testPlanId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "test_plan_id",
+            referencedColumnName = "public_uuid",
+            insertable = false,
+            updatable = false
+    )
+    private TestPlan testPlan;
 
     @Column(name = "total_executions", nullable = false)
     private Integer totalExecutions = 0;
@@ -45,9 +63,6 @@ public class TestCaseVersionStats {
     @Column(name = "not_run_count", nullable = false)
     private Integer notRunCount = 0;
 
-    //@Column(name = "avg_execution_time_ms")
-    //private Long avgExecutionTimeMs;
-
     @Column(name = "stats_updated_at", nullable = false)
-    private LocalDateTime startsUpdatedAt;
+    private LocalDateTime statsUpdatedAt;
 }

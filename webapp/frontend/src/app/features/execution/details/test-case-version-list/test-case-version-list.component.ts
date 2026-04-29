@@ -14,8 +14,7 @@ import { TestRunStatusBadgeComponent } from '../../../../shared/components/test-
 
 import {
   TestCasePriority,
-  TestCaseVersion,
-  TestCaseVersionStats,
+  TestCaseVersion, TestCaseVersionPlanStats,
 } from '../../../../core/models/testsuite';
 
 @Component({
@@ -48,9 +47,11 @@ export class TestCaseVersionListComponent implements OnInit {
   testCaseTitle$!: Observable<string>;
   errorMessage = '';
 
-  private statsCache = new Map<number, Observable<TestCaseVersionStats>>();
+  private statsCache = new Map<number, Observable<TestCaseVersionPlanStats>>();
 
-  private readonly EMPTY_STATS: TestCaseVersionStats = {
+  private readonly EMPTY_STATS: TestCaseVersionPlanStats = {
+    testCaseVersionId: '',
+    testPlanId: '',
     totalExecutions: 0,
     lastExecutionStatus: null,
     lastExecutedAt: null,
@@ -58,7 +59,7 @@ export class TestCaseVersionListComponent implements OnInit {
     failedCount: 0,
     blockedCount: 0,
     notRunCount: 0,
-    avgExecutionTimeMs: null,
+    statsUpdatedAt: '',
   };
 
   ngOnInit(): void {
@@ -105,10 +106,13 @@ export class TestCaseVersionListComponent implements OnInit {
     );
   }
 
-  getStats(version: TestCaseVersion): Observable<TestCaseVersionStats> {
+  getStats(version: TestCaseVersion): Observable<TestCaseVersionPlanStats> {
+    const plan = this.route.snapshot.queryParams['plan'];   // get plan from URL
+    if (!plan) return of(this.EMPTY_STATS);
+
     if (!this.statsCache.has(version.versionNumber)) {
       const stats$ = this.versionService
-        .getVersionStats(this.projectKey, this.testCaseIdentifier, version.versionNumber)
+        .getVersionStats(this.projectKey, plan, this.testCaseIdentifier, version.versionNumber)
         .pipe(catchError(() => of(this.EMPTY_STATS)));
       this.statsCache.set(version.versionNumber, stats$);
     }
@@ -125,7 +129,7 @@ export class TestCaseVersionListComponent implements OnInit {
     return Math.round((n / total) * 100);
   }
 
-  barTitle(stats: TestCaseVersionStats): string {
+  barTitle(stats: TestCaseVersionPlanStats): string {
     return [
       `Passed: ${stats.passedCount}`,
       `Failed: ${stats.failedCount}`,

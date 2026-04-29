@@ -1,12 +1,14 @@
 package com.testlink.webapp.testmanagement.testcase.dto;
 
 import com.testlink.webapp.testmanagement.plan.entity.TestRunStatus;
-import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-@Builder
-public record TestCaseVersionStatsDTO(
+public record TestCasePlanStatsDTO(
+        String testCaseId,
+        String testPlanId,
+        Integer totalVersions,
         Integer totalExecutions,
         TestRunStatus lastExecutionStatus,
         LocalDateTime lastExecutedAt,
@@ -14,6 +16,5 @@ public record TestCaseVersionStatsDTO(
         Integer failedCount,
         Integer blockedCount,
         Integer notRunCount,
-        //Integer avgExecutionTimeMs
-        LocalDateTime startsUpdatedAtd
+        LocalDateTime statsUpdatedAt
 ) {}

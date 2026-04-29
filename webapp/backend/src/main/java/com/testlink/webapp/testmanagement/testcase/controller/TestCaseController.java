@@ -4,12 +4,14 @@ import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
+import com.testlink.webapp.testmanagement.plan.entity.TestPlan;
+import com.testlink.webapp.testmanagement.plan.service.TestPlanService;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.testcase.dto.TestCaseDTO;
-import com.testlink.webapp.testmanagement.testcase.dto.TestCaseStatsDTO;
+import com.testlink.webapp.testmanagement.testcase.dto.TestCasePlanStatsDTO;
 import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
 import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseMapper;
-import com.testlink.webapp.testmanagement.testcase.mapper.TestCaseStatsMapper;
+import com.testlink.webapp.testmanagement.testcase.mapper.TestCasePlanStatsMapper;
 import com.testlink.webapp.testmanagement.testcase.service.TestCaseService;
 import com.testlink.webapp.testmanagement.testcase.service.ValidatePathService;
 import com.testlink.webapp.user.entity.CustomUserDetails;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.testlink.webapp.shared.util.IdUtil.fromBase62;
+
 @RestController
 @RequestMapping("/testcases")
 @RequiredArgsConstructor
@@ -29,9 +33,10 @@ public class TestCaseController {
     private final ProjectAccessService projectAccessService;
     private final TestCaseService testCaseService;
     private final TestCaseMapper testCaseMapper;
-    private final TestCaseStatsMapper testCaseStatsMapper;
+    private final TestCasePlanStatsMapper testCasePlanStatsMapper;
 
     private final ValidatePathService validatePathService;
+    private final TestPlanService testPlanService;
 
 
     @GetMapping("")
@@ -65,18 +70,22 @@ public class TestCaseController {
         );
     }
 
-    @GetMapping("/view/stats")
-    public ResponseEntity<TestCaseStatsDTO> getTestCaseStats(
+    @GetMapping("/view/stats/testplan")
+    public ResponseEntity<TestCasePlanStatsDTO> getTestCaseStats(
             @RequestParam String projectKey,
+            @RequestParam String testPlanId,
             @RequestParam Long testCaseIdentifier,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         projectAccessService.checkAccessOfUserInProject(
                 projectKey, customUserDetails.getUser(), ProjectRole.VIEWER);
-        TestCase testCase = validatePathService.getTestCase(projectKey, testCaseIdentifier);
+        Project project = projectService.getProjectByKey(projectKey);
+        TestCase testCase = testCaseService.findByProjectAndIdentifierNumber(project, testCaseIdentifier);
+        TestPlan testPlan = testPlanService.findByTestPlanId(fromBase62(testPlanId), project);
+
 
         return ResponseEntity.ok(
-                testCaseStatsMapper.toDto(testCaseService.findTestCaseStatsByTestCase(testCase))
+                testCasePlanStatsMapper.toDto(testCaseService.findTestCaseStatsByTestCaseAndTestPlan(testCase, testPlan))
         );
     }
 

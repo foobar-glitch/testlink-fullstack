@@ -7,7 +7,7 @@ import { TestCaseService } from '../../../../core/services/test-case.service';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
-import { TestCase, TestCaseStats } from '../../../../core/models/testsuite';
+import { TestCase, TestCasePlanStats } from '../../../../core/models/testsuite';
 import {
   TestRunStatusBadgeComponent
 } from '../../../../shared/components/test-run-status-badge/test-run-status-badge.component';
@@ -33,7 +33,7 @@ export class TestCaseDetailComponent implements OnInit {
   private readonly testCaseService = inject(TestCaseService);
 
   testCase$!: Observable<TestCase | null>;
-  caseStats$!: Observable<TestCaseStats | null>;
+  caseStats$!: Observable<TestCasePlanStats | null>;
   errorMessage = '';
 
   projectKey!: string;
@@ -54,15 +54,18 @@ export class TestCaseDetailComponent implements OnInit {
       }),
     );
 
+    // Inside ngOnInit:
     this.caseStats$ = this.route.queryParams.pipe(
       switchMap((params) => {
         const project = params['project'];
+        const plan = params['plan'];
         const testcase = params['testcase'];
-        if (!project || !testcase) return of(null);
+        if (!project || !plan || !testcase) return of(null);
         return this.testCaseService
-          .getTestCaseStats(project, +testcase)
+          .getTestCaseStats(project, plan, +testcase)
           .pipe(catchError(() => of(null)));
       }),
     );
+
   }
 }

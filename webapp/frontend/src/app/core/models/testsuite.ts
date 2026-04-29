@@ -72,8 +72,9 @@ export interface TestCaseFilter {
   priority: PriorityFilter;
 }
 
-export interface TestCaseStats {
-  totalVersions: number;
+export interface TestCasePlanStats {
+  testCaseId: string;          // UUID as string
+  testPlanId: string;          // UUID as string
   totalExecutions: number;
   lastExecutionStatus: TestRunStatus | null;
   lastExecutedAt: string | null;
@@ -86,7 +87,9 @@ export interface TestCaseStats {
 
 export type TestCaseVersionStatus = 'draft' | 'active' | 'deprecated';
 
-export interface TestCaseVersionStats {
+export interface TestCaseVersionPlanStats {
+  testCaseVersionId: string;   // UUID as string
+  testPlanId: string;          // UUID as string
   totalExecutions: number;
   lastExecutionStatus: TestRunStatus | null;
   lastExecutedAt: string | null;
@@ -94,7 +97,7 @@ export interface TestCaseVersionStats {
   failedCount: number;
   blockedCount: number;
   notRunCount: number;
-  avgExecutionTimeMs: number | null;
+  statsUpdatedAt: string;
 }
 
 export interface TestCaseVersion {
@@ -129,8 +132,9 @@ export interface TestCaseFormData {
   suiteId: number;
 }
 
-export interface TestSuiteStats {
-  testSuiteId: number;
+export interface TestSuitePlanStats {
+  testSuiteId: string,
+  testPlanId: string,
   totalChildSuites: number;
   totalTestCases: number;
   totalExecutions: number;

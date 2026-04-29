@@ -8,7 +8,7 @@ import com.testlink.webapp.shared.util.IdUtil;
 import com.testlink.webapp.testmanagement.plan.entity.TestPlan;
 import com.testlink.webapp.testmanagement.plan.service.TestPlanService;
 import com.testlink.webapp.testmanagement.suite.dto.TestSuiteHierarchyDTO;
-import com.testlink.webapp.testmanagement.suite.dto.TestSuiteStatsDTO;
+import com.testlink.webapp.testmanagement.suite.dto.TestSuitePlanStatsDTO;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import com.testlink.webapp.testmanagement.suite.mapper.TestSuiteMapper;
 import com.testlink.webapp.testmanagement.suite.mapper.TestSuitePlanStatsMapper;
@@ -120,7 +120,7 @@ public class TestSuiteController {
     }
 
     @GetMapping("/view/stats/all")
-    public ResponseEntity<TestSuiteStatsDTO> getTestSuiteStats(
+    public ResponseEntity<TestSuitePlanStatsDTO> getTestSuiteStats(
             @RequestParam String projectKey,
             @RequestParam String suiteId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
@@ -137,7 +137,7 @@ public class TestSuiteController {
     }
 
     @GetMapping("/view/stats/testplan")
-    public ResponseEntity<TestSuiteStatsDTO> getTestSuiteStatsOfTestPlan(
+    public ResponseEntity<TestSuitePlanStatsDTO> getTestSuiteStatsOfTestPlan(
             @RequestParam String projectKey,
             @RequestParam String testPlanId,
             @RequestParam String suiteId,
@@ -156,7 +156,7 @@ public class TestSuiteController {
     }
 
     @GetMapping("/view/stats/testplan/tree")
-    public ResponseEntity<List<TestSuiteStatsDTO>> getTestSuiteStatsTree(
+    public ResponseEntity<List<TestSuitePlanStatsDTO>> getTestSuiteStatsTree(
             @RequestParam String projectKey,
             @RequestParam String testPlanId,
             @RequestParam List<String> suiteIds,

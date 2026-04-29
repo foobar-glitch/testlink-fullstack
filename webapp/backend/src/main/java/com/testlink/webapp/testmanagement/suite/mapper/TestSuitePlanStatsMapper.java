@@ -1,18 +1,19 @@
 package com.testlink.webapp.testmanagement.suite.mapper;
 
-import com.testlink.webapp.testmanagement.suite.dto.TestSuiteStatsDTO;
+import com.testlink.webapp.shared.mapper.IdMapper;
+import com.testlink.webapp.testmanagement.suite.dto.TestSuitePlanStatsDTO;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuitePlanStats;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { IdMapper.class })
 public interface TestSuitePlanStatsMapper {
 
     @Mapping(source = "id.testSuiteId", target = "testSuiteId")
-    @Mapping(source = "id.testPlanId", target = "planId")
-    TestSuiteStatsDTO toDto(TestSuitePlanStats stats);
+    @Mapping(source = "id.testPlanId", target = "testPlanId")
+    TestSuitePlanStatsDTO toDto(TestSuitePlanStats stats);
 
-    List<TestSuiteStatsDTO> toDtoList(List<TestSuitePlanStats> statsList);
+    List<TestSuitePlanStatsDTO> toDtoList(List<TestSuitePlanStats> statsList);
 }

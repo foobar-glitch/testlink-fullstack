@@ -1,32 +1,46 @@
 package com.testlink.webapp.testmanagement.testcase.entity;
 
+import com.testlink.webapp.testmanagement.plan.entity.TestPlan;
 import com.testlink.webapp.testmanagement.plan.entity.TestRunStatus;
-import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
+
 @Entity
-@Table(name = "test_case_stats")
+@Table(name = "test_case_plan_stats")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TestCaseStats {
-    @Id
-    private Long TestCase;
+public class TestCasePlanStats {
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "test_case_id")
+    @EmbeddedId
+    private TestCasePlanStatsId id;
+
+    @MapsId("testCaseId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "test_case_id",
+            referencedColumnName = "public_uuid",
+            insertable = false,
+            updatable = false
+    )
     private TestCase testCase;
 
-    @Column(name = "total_versions", nullable = false)
-    private Integer totalVersions = 0;
+    @MapsId("testPlanId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "test_plan_id",
+            referencedColumnName = "public_uuid",
+            insertable = false,
+            updatable = false
+    )
+    private TestPlan testPlan;
 
-    @Column(name = "total_executions",nullable = false)
+    @Column(name = "total_executions", nullable = false)
     private Integer totalExecutions = 0;
 
     @Enumerated(EnumType.STRING)
@@ -48,9 +62,6 @@ public class TestCaseStats {
     @Column(name = "not_run_count", nullable = false)
     private Integer notRunCount = 0;
 
-    //@Column(name = "avg_execution_time_ms")
-    //private Long avgExecutionTimeMs;
-
     @Column(name = "stats_updated_at", nullable = false)
-    private LocalDateTime startsUpdatedAt;
+    private LocalDateTime statsUpdatedAt;
 }
