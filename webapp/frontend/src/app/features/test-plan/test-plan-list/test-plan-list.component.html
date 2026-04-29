@@ -1,0 +1,50 @@
+<div class="test-plan-list-container">
+  <header class="header">
+    <div class="title-section">
+      <h2>Test Plans</h2>
+      <span *ngIf="projectName$ | async as projectName" class="project-name">
+        {{ projectName }}
+      </span>
+    </div>
+    <button class="back-btn" [routerLink]="['/projects']">
+      ← Back to Project
+    </button>
+  </header>
+
+  <div *ngIf="errorMessage" class="error-state">
+    <app-error-banner [message]="errorMessage" (dismissed)="errorMessage = ''"></app-error-banner>
+  </div>
+
+  <ng-container *ngIf="testPlans$ | async as plans; else loading">
+    <div *ngIf="plans.length > 0; else empty" class="plans-grid">
+      <div
+        *ngFor="let plan of plans"
+        class="plan-card"
+        (click)="selectTestPlan(plan)"
+      >
+        <h3>{{ plan.name }}</h3>
+        <p class="description">{{ plan.description }}</p>
+        <div class="meta">
+          <span class="created-by">
+            Created by {{ plan.stamp.createdBy.username }}
+          </span>
+          <span class="created-at">
+            {{ plan.stamp.timeStamp.createdAt | date: 'mediumDate' }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <ng-template #empty>
+      <div class="empty-state">
+        <p>No test plans found for this project.</p>
+        <button class="create-btn">+ Create First Test Plan</button>
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="loading-state">
+      <app-spinner label="Loading test plans..."></app-spinner>
+    </div>
+  </ng-template>
+</div>
