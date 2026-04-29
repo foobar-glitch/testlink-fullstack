@@ -1,10 +1,12 @@
 package com.testlink.webapp.testmanagement.suite.controller;
 
 import com.testlink.webapp.projects.entity.Project;
-import com.testlink.webapp.projects.entity.ProjectMembership;
 import com.testlink.webapp.projects.entity.ProjectRole;
 import com.testlink.webapp.projects.service.ProjectAccessService;
 import com.testlink.webapp.projects.service.ProjectService;
+import com.testlink.webapp.shared.util.IdUtil;
+import com.testlink.webapp.testmanagement.plan.entity.TestPlan;
+import com.testlink.webapp.testmanagement.plan.service.TestPlanService;
 import com.testlink.webapp.testmanagement.suite.dto.TestSuiteHierarchyDTO;
 import com.testlink.webapp.testmanagement.suite.dto.TestSuiteStatsDTO;
 import com.testlink.webapp.testmanagement.suite.entity.TestSuite;
@@ -16,9 +18,11 @@ import com.testlink.webapp.user.entity.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +33,7 @@ import static com.testlink.webapp.shared.util.IdUtil.fromBase62;
 @RequestMapping("/test-suites")
 @RequiredArgsConstructor
 public class TestSuiteController {
+    private final TestPlanService testPlanService;
     private final TestSuiteService testSuiteService;
     private final TestSuiteMapper testSuiteMapper;
     private final TestSuiteHierarchyService testSuiteHierarchyService;
@@ -114,7 +119,7 @@ public class TestSuiteController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/view/stats")
+    @GetMapping("/view/stats/all")
     public ResponseEntity<TestSuiteStatsDTO> getTestSuiteStats(
             @RequestParam String projectKey,
             @RequestParam String suiteId,
@@ -129,6 +134,43 @@ public class TestSuiteController {
         return ResponseEntity.ok(
                 testSuiteStatsMapper.toDto(testSuiteService.findTestSuiteStatsByTestSuite(testSuite))
         );
+    }
+
+    @GetMapping("/view/stats/testplan")
+    public ResponseEntity<TestSuiteStatsDTO> getTestSuiteStatsOfTestPlan(
+            @RequestParam String projectKey,
+            @RequestParam String testPlanId,
+            @RequestParam String suiteId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        Project project = projectService.getProjectByKey(projectKey);
+        projectAccessService.checkAccessOfUserInProject(
+                project, customUserDetails.getUser(), ProjectRole.VIEWER
+        );
+        //List<TestSuite> testSuite = testSuiteService.findBySuiteId(fromBase62(suiteId));
+        TestPlan testPlan = testPlanService.findByTestPlanId(fromBase62(testPlanId), project);
+        TestSuite testSuite = testSuiteService.findBySuiteId(fromBase62(suiteId));
+
+        return ResponseEntity.ok(testSuiteService.findSuiteStatsByTestPlanAndSuite(testPlan, testSuite));
+    }
+
+    @GetMapping("/view/stats/testplan/tree")
+    public ResponseEntity<List<TestSuiteStatsDTO>> getTestSuiteStatsTree(
+            @RequestParam String projectKey,
+            @RequestParam String testPlanId,
+            @RequestParam List<String> suiteIds,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        Project project = projectService.getProjectByKey(projectKey);
+        projectAccessService.checkAccessOfUserInProject(
+                project, customUserDetails.getUser(), ProjectRole.VIEWER
+        );
+        //List<TestSuite> testSuite = testSuiteService.findBySuiteId(fromBase62(suiteId));
+        TestPlan testPlan = testPlanService.findByTestPlanId(fromBase62(testPlanId), project);
+        List<TestSuite> testSuites = suiteIds.stream().map(IdUtil::fromBase62).map(testSuiteService::findBySuiteId).toList();
+
+
+        return ResponseEntity.ok(testSuiteService.findSuiteStatsByTestPlanAndSuites(testPlan, testSuites));
     }
 
 }

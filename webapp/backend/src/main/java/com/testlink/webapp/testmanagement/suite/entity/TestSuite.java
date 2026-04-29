@@ -2,9 +2,13 @@ package com.testlink.webapp.testmanagement.suite.entity;
 
 import com.testlink.webapp.projects.entity.Project;
 import com.testlink.webapp.shared.entity.UserCreatedTimeStampedEntity;
+import com.testlink.webapp.testmanagement.testcase.entity.TestCase;
+import com.testlink.webapp.testmanagement.testcase.entity.TestCaseVersion;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -35,4 +39,14 @@ public class TestSuite extends UserCreatedTimeStampedEntity {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @OneToMany(
+            mappedBy = "testSuite",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @Builder.Default
+    private Set<TestCase> testCases = new HashSet<>();
+
 }

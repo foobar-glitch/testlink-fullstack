@@ -173,10 +173,10 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
 
     // (C) Load suite data (test cases & suite stats) when suite changes
     this.subs.add(
-      combineLatest([this.projectKey$, this.suiteId$]).subscribe(([projectKey, suiteId]) => {
+      combineLatest([this.projectKey$, this.planId$, this.suiteId$]).subscribe(([projectKey, planId, suiteId]) => {
         if (projectKey && suiteId) {
           this.loadTestCasesForSuite(projectKey, suiteId);
-          this.loadSuiteStats(projectKey, suiteId);
+          this.loadSuiteStats(projectKey, planId, suiteId);
         } else {
           this.testCasesForSuite$ = of([]);
           this.suiteStats$ = of(null);
@@ -308,10 +308,12 @@ export class ExecutionViewComponent implements OnInit, OnDestroy {
       .pipe(catchError(() => of([])));
   }
 
-  private loadSuiteStats(projectKey: string, suiteId: string): void {
+  private loadSuiteStats(projectKey: string, planId: string, suiteId: string): void {
     this.suiteStats$ = this.suitesSvc
-      .getTestSuiteStats(projectKey, suiteId)
-      .pipe(catchError(() => of(null)));
+      .getTestSuiteStats(projectKey, planId, suiteId)
+      .pipe(
+        catchError(() => of(null))
+      );
   }
 
   private loadPlanStats(projectKey: string, planId: string): void {

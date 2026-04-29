@@ -130,6 +130,8 @@ export interface TestCaseFormData {
 }
 
 export interface TestSuiteStats {
+  testSuiteId: number;
+  totalChildSuites: number;
   totalTestCases: number;
   totalExecutions: number;
   lastExecutionStatus: TestRunStatus | null;
@@ -140,3 +142,4 @@ export interface TestSuiteStats {
   notRunCount: number;
   startsUpdatedAt: string;  // ISO date string
 }
+

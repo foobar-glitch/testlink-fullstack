@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { TestCase, TestSuite, TestSuiteHierarchy, TestSuiteHierarchyDTO, TestSuiteItem, TestSuiteStats } from '../models/testsuite';
+import { TestSuite, TestSuiteHierarchyDTO, TestSuiteStats } from '../models/testsuite';
 
 @Injectable({ providedIn: 'root' })
 export class TestSuiteService {
@@ -46,14 +46,31 @@ export class TestSuiteService {
    * Get statistics for a specific test suite.
    * Endpoint: GET /projects/view/stats?projectKey={projectKey}&suiteId={suiteId}
    */
-  getTestSuiteStats(projectKey: string, suiteId: string): Observable<TestSuiteStats> {
+  getTestSuiteTreeStats(projectKey: string, testPlanId: string, suiteIds: string[]): Observable<TestSuiteStats[]> {
+    let params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId);
+
+    // Append each suite ID individually so the backend receives a list
+    suiteIds.forEach(id => {
+      params = params.append('suiteIds', id);
+    });
+
+    return this.http.get<TestSuiteStats[]>(`${this.apiUrl}test-suites/view/stats/testplan/tree`, {
+      withCredentials: true,
+      params,
+    });
+  }
+
+  getTestSuiteStats(projectKey: string, testPlanId: string, suiteId: string): Observable<TestSuiteStats> {
     const params = new HttpParams()
       .set('projectKey', projectKey)
+      .set('testPlanId', testPlanId)
       .set('suiteId', suiteId);
 
-    return this.http.get<TestSuiteStats>(`${this.apiUrl}test-suites/view/stats`, {
+    return this.http.get<TestSuiteStats>(`${this.apiUrl}test-suites/view/stats/testplan`, {
       withCredentials: true,
-      params
+      params,
     });
   }
 }
