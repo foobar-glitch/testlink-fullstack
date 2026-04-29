@@ -161,7 +161,17 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
   onPlanChange(event: Event): void {
     const id = (event.target as HTMLSelectElement).value;
     this.router.navigate([], {
-      queryParams: { plan: id, testRunId: null },
+      queryParams: {
+        plan: id,
+        testRunId: null,
+        suite: null,   
+        testcase: null,
+        version: null,
+        runItemId: null,
+        stepId: null,
+        actionId: null,
+        tab: 'overview',     // optionally reset the tab to a safe default
+      },
       queryParamsHandling: 'merge',
       replaceUrl: true,
       preserveFragment: true,
@@ -175,7 +185,6 @@ export class ExecutionSidebarComponent implements OnInit, OnDestroy {
       .pipe(catchError(() => of([])))
       .subscribe((plans) => {
         this._testPlans$.next(plans);
-        // Option C: auto‑select the first plan if none is active
         if (!this.planId && plans.length > 0) {
           this.router.navigate([], {
             queryParams: { plan: plans[0].testPlanId },
