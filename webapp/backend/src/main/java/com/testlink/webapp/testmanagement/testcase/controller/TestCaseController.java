@@ -43,15 +43,20 @@ public class TestCaseController {
     public ResponseEntity<List<TestCaseDTO>> getTestCasesOfSuite(
             @RequestParam String projectKey,
             @RequestParam String suiteId,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
-    ) {
+            @RequestParam(defaultValue = "false") boolean recursive,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
         TestSuite testSuite = validatePathService.getTestSuite(projectKey, suiteId);
         Project project = projectService.getProjectByKey(projectKey);
         User user = customUserDetails.getUser();
-        projectAccessService.checkAccessOfUserInProject(
-                project, user, ProjectRole.VIEWER);
-        List<TestCase> testCases = testCaseService.findAllTestCasesOfProjectAndSuite(
-                project, testSuite);
+        projectAccessService.checkAccessOfUserInProject(project, user, ProjectRole.VIEWER);
+
+        List<TestCase> testCases;
+        if (recursive) {
+            testCases = testCaseService.findAllTestCasesOfSuiteRecursive(project, testSuite);
+        } else {
+            testCases = testCaseService.findAllTestCasesOfProjectAndSuite(project, testSuite);
+        }
         return ResponseEntity.ok(testCaseMapper.toDtoList(testCases));
     }
 

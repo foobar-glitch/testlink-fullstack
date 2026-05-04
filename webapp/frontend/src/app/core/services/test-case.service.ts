@@ -13,13 +13,15 @@ export class TestCaseService {
    * Get all test cases belonging to a specific test suite.
    * Endpoint: GET /testcases?projectKey={projectKey}&suiteId={suiteId}
    */
-  getTestCases(projectKey: string, suiteId: string): Observable<TestCase[]> {
-    const params = new HttpParams().set('projectKey', projectKey).set('suiteId', suiteId);
-    return this.http.get<TestCase[]>(`${this.apiUrl}testcases`, {
-      withCredentials: true,
-      params,
-    });
+  getTestCases(projectKey: string, suiteId: string, recursive?: boolean): Observable<TestCase[]> {
+    let params = new HttpParams().set('projectKey', projectKey).set('suiteId', suiteId);
+    if (recursive) {
+      params = params.set('recursive', 'true');
+    }
+    return this.http.get<TestCase[]>(`${this.apiUrl}testcases`, { withCredentials: true, params });
   }
+
+
 
   /**
    * Get a single test case by its identifier.

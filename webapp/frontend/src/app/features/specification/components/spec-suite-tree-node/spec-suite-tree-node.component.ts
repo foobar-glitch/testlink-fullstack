@@ -136,7 +136,7 @@ export class SpecSuiteTreeNodeComponent implements OnInit, OnDestroy {
 
     this.casesLoaded = true;
     this.testCases$ = this.casesSvc
-      .getTestCases(projectKey, this.suite.testSuiteId)
+      .getTestCases(projectKey, this.suite.testSuiteId, true)  // <-- add true
       .pipe(catchError(() => of([])));
     this.cdr.markForCheck();
   }

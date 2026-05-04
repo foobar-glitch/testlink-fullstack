@@ -82,7 +82,7 @@ export class SpecificationViewComponent implements OnInit, OnDestroy {
       ).subscribe(({ projectKey, suiteId }) => {
         if (projectKey && suiteId) {
           this.testCasesForSuite$ = this.casesSvc
-            .getTestCases(projectKey, suiteId)
+            .getTestCases(projectKey, suiteId, true)
             .pipe(catchError(() => of([])));
 
           this.suiteName$ = this.suitesSvc.getTestSuiteHierarchy(projectKey, suiteId).pipe(
