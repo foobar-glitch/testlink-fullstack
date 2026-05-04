@@ -20,6 +20,7 @@ import { TestCaseTableComponent } from '../../execution/components/test‑case�
 import { TestCaseDetailComponent } from '../../execution/details/test-case-detail/test-case-detail.component';
 import { TestCaseVersionContentComponent } from '../../execution/details/test-case-version-content/test-case-version-content.component';
 import { TestCaseVersionListComponent } from '../../execution/details/test-case-version-list/test-case-version-list.component';
+import { TestCaseVersionService } from '../../../core/services/test-case-version.service';
 
 type SpecTab = 'details' | 'steps' | 'versions';
 
@@ -45,6 +46,7 @@ export class SpecificationViewComponent implements OnInit, OnDestroy {
   private readonly casesSvc = inject(TestCaseService);
   private readonly suitesSvc = inject(TestSuiteService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly versionSvc = inject(TestCaseVersionService);
 
   // URL-derived streams (READ ONLY)
   readonly projectKey$ = this.route.queryParams.pipe(
@@ -103,8 +105,38 @@ export class SpecificationViewComponent implements OnInit, OnDestroy {
   }
 
   setTab(tab: SpecTab): void {
+    if (tab === 'steps') {
+      const project = this.route.snapshot.queryParams['project'];
+      const testcase = this.route.snapshot.queryParams['testcase'];
+      if (project && testcase) {
+        this.versionSvc.getVersionsByTestCase(project, +testcase)
+          .pipe(
+            catchError(() => of([]))
+          )
+          .subscribe(versions => {
+            if (versions.length) {
+              const latest = Math.max(...versions.map(v => v.versionNumber));
+              this.router.navigate([], {
+                queryParams: { version: latest, tab: 'steps' },
+                queryParamsHandling: 'merge',
+                preserveFragment: true,
+              });
+            } else {
+              // No versions exist – fall back to Versions tab
+              this.router.navigate([], {
+                queryParams: { tab: 'versions' },
+                queryParamsHandling: 'merge',
+                preserveFragment: true,
+              });
+            }
+          });
+        return;
+      }
+    }
+
+    // For other tabs (details, versions), just set the tab
     this.router.navigate([], {
-      queryParams: { tab },
+      queryParams: { tab, version: null },
       queryParamsHandling: 'merge',
       preserveFragment: true,
     });
