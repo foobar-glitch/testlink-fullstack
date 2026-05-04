@@ -81,7 +81,7 @@ export class SpecificationShellComponent implements OnInit, OnDestroy {
         return of([]);
       }))
       .subscribe((dtos: TestSuiteHierarchyDTO[]) => {
-        this.rootSuites = this.buildTree(dtos);
+        this.rootSuites = this.suitesSvc.buildSuiteTree(dtos);   // <-- use the service
         this.loading = false;
         this.cdr.markForCheck();
       });

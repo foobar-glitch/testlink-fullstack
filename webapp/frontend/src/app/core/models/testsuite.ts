@@ -27,7 +27,7 @@ export interface TestSuiteItem {
 export interface TestSuiteHierarchyDTO {
   current: TestSuiteItem;
   parent: TestSuiteItem | null;
-  children: TestSuiteItem[];
+  children: TestSuiteHierarchyDTO[];
   testCases: TestCase[];          // <-- add this
 }
 
@@ -42,15 +42,6 @@ export interface TestSuite extends TestSuiteItem {
   testCases?: TestCase[];
 }
 
-/**
- * TestSuiteHierarchy is the enriched client-side version used by detail views.
- * All three fields use the full TestSuite tree node type.
- */
-export interface TestSuiteHierarchy {
-  current: TestSuite;
-  parent: TestSuite | null;
-  children: TestSuite[];
-}
 
 export type TestCaseStatus = 'draft' | 'active' | 'deprecated';
 export type TestCasePriority = 'low' | 'medium' | 'high';

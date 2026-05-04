@@ -36,9 +36,10 @@ export class TestSuiteService {
     };
   }
 
-  private buildSuiteTree(dtos: TestSuiteHierarchyDTO[]): TestSuite[] {
+  public buildSuiteTree(dtos: TestSuiteHierarchyDTO[]): TestSuite[] {
     return dtos.map(dto => this.normalizeSuite(dto));
   }
+
 
 
 
