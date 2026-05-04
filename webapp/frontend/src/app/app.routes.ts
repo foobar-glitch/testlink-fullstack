@@ -28,11 +28,19 @@ export const routes: Routes = [
         loadComponent: () => import('./features/not-implemented/not-implemented.component').then(m => m.NotImplementedComponent),
         data: { label: 'Requirements' },
       },
+      // ── Test Specification ───────────────────────────────────────────────────
       {
         path: 'specification',
-        loadComponent: () => import('./features/not-implemented/not-implemented.component').then(m => m.NotImplementedComponent),
-        data: { label: 'Test Specification' },
+        loadComponent: () => import('./features/specification/specification-shell/specification-shell.component').then(m => m.SpecificationShellComponent),
+        canActivate: [authGuard],
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/specification/specification-view/specification-view.component').then(m => m.SpecificationViewComponent),
+          },
+        ],
       },
+      // ────────────────────────────────────────────────────────────────────────
       {
         path: 'reports',
         loadComponent: () => import('./features/not-implemented/not-implemented.component').then(m => m.NotImplementedComponent),

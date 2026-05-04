@@ -1,0 +1,132 @@
+// ─── specification-view.component.scss ───────────────────────────────────────
+@use 'app/shared/styles/variables' as vars;
+@use 'app/shared/styles/mixins' as mix;
+
+:host { display: block; }
+
+// ── Welcome / empty state ─────────────────────────────────────────────────────
+.welcome-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  text-align: center;
+  gap: vars.$spacing-md;
+
+  h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: vars.$text;
+    margin: 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: vars.$muted;
+    max-width: 320px;
+  }
+}
+
+.welcome-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: vars.$accent-soft;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: vars.$accent;
+}
+
+// ── Page header ───────────────────────────────────────────────────────────────
+.page-header {
+  margin-bottom: vars.$spacing-lg;
+
+  h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: vars.$text;
+    margin: 0;
+  }
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: vars.$muted;
+  margin-bottom: 6px;
+
+  .bc-project {
+    font-family: 'Fira Code', monospace;
+    font-weight: 700;
+    color: vars.$accent;
+    font-size: 11px;
+    background: vars.$accent-soft;
+    padding: 1px 7px;
+    border-radius: vars.$radius-pill;
+  }
+
+  .bc-sep {
+    color: vars.$border;
+    font-size: 14px;
+  }
+
+  .bc-suite {
+    font-weight: 600;
+    color: vars.$muted;
+  }
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+.tabs {
+  display: flex;
+  border-bottom: 2px solid vars.$border;
+  margin-bottom: vars.$spacing-md;
+  gap: 0;
+}
+
+.tab {
+  padding: 10px 18px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: vars.$font;
+  color: vars.$muted;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: vars.$transition;
+  white-space: nowrap;
+
+  &:hover { color: vars.$text; }
+  &.active { color: vars.$accent; border-bottom-color: vars.$accent; }
+}
+
+// ── Loading / empty ───────────────────────────────────────────────────────────
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: vars.$spacing-md;
+  color: vars.$muted;
+
+  svg { opacity: 0.4; }
+
+  p {
+    font-size: 14px;
+    color: vars.$muted;
+  }
+}

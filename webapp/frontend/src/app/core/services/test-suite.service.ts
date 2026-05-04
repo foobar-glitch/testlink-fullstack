@@ -73,4 +73,35 @@ export class TestSuiteService {
       params,
     });
   }
+
+  // ── NEW: Full suite tree for a project (no plan filter) ───────
+  /**
+   * Get the complete test suite tree for a project.
+   * Endpoint: GET /test-suites?projectKey={projectKey}
+   */
+  getTestSuiteTree(projectKey: string): Observable<TestSuiteHierarchyDTO[]> {
+    const params = new HttpParams().set('projectKey', projectKey);
+    return this.http.get<TestSuiteHierarchyDTO[]>(`${this.apiUrl}test-suites`, {
+      withCredentials: true,
+      params,
+    });
+  }
+
+  // ── NEW: Single suite hierarchy ────────────────────────────────
+  /**
+   * Get the hierarchy (parent, children, test cases) for a specific suite.
+   * Endpoint: GET /test-suites/hierarchy?projectKey={projectKey}&suiteId={suiteId}
+   */
+  getTestSuiteHierarchy(
+    projectKey: string,
+    suiteId: string,
+  ): Observable<TestSuiteHierarchyDTO> {
+    const params = new HttpParams()
+      .set('projectKey', projectKey)
+      .set('suiteId', suiteId);
+    return this.http.get<TestSuiteHierarchyDTO>(
+      `${this.apiUrl}test-suites/hierarchy`,
+      { withCredentials: true, params },
+    );
+  }
 }
