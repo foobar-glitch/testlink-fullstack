@@ -38,6 +38,22 @@ export const routes: Routes = [
         loadComponent: () => import('./features/not-implemented/not-implemented.component').then(m => m.NotImplementedComponent),
         data: { label: 'Test Reports' },
       },
+      {
+        path: 'test-plans',
+        loadComponent: () => import('./features/test-plan/test-plan-list/test-plan-list.component').then(m => m.TestPlanListComponent),
+        canActivate: [authGuard],
+        data: { label: 'Test Plans' },
+      },
+      {
+        path: 'test-plans/detail',
+        loadComponent: () => import('./features/test-plan/test-plan-detail/test-plan-detail.component').then(m => m.TestPlanDetailComponent),
+        canActivate: [authGuard],
+      },
+      {
+        path: 'test-plans/run-items',
+        loadComponent: () => import('./features/test-plan/test-plan-run-items/test-plan-run-items.component').then(m => m.TestPlanRunItemsComponent),
+        canActivate: [authGuard],
+      },
     ],
   },
   { path: '**', redirectTo: '' },

@@ -1,0 +1,113 @@
+@use '../../../shared/styles/variables' as vars;
+@use '../../../shared/styles/mixins' as mix;
+
+.run-item-list-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: vars.$spacing-xl vars.$spacing-lg;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: vars.$spacing-xl;
+  border-bottom: 2px solid vars.$border;
+  padding-bottom: vars.$spacing-sm;
+
+  .title-section {
+    display: flex;
+    align-items: baseline;
+    gap: vars.$spacing-sm;
+
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: vars.$text;
+    }
+
+    .run-name {
+      color: vars.$accent;
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+}
+
+.back-btn {
+  @include mix.btn-ghost;
+}
+
+.items-table {
+  background: vars.$white;
+  border: 1px solid vars.$border;
+  border-radius: vars.$radius-md;
+  overflow: auto;
+  box-shadow: vars.$shadow-sm;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+
+    th,
+    td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid vars.$border;
+    }
+
+    th {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: vars.$muted;
+      background: vars.$gray-light;
+    }
+
+    td {
+      color: vars.$text;
+    }
+
+    .identifier {
+      font-family: 'Fira Code', monospace;
+      background: rgba(vars.$accent, 0.1);
+      color: vars.$accent;
+      padding: 2px 8px;
+      border-radius: vars.$radius-sm;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-weight: 500;
+    }
+  }
+
+  .clickable-row {
+    cursor: pointer;
+    transition: vars.$transition;
+
+    &:hover {
+      background: vars.$accent-soft;
+    }
+  }
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.empty-state {
+  color: vars.$muted;
+  font-size: 15px;
+}
